@@ -1,0 +1,29 @@
+<resources>
+    <string name="app_name">Paleta</string>
+    <string name="login_title">Вход</string>
+    <string name="login_hint">Логин или email</string>
+    <string name="password_hint">Пароль</string>
+    <string name="login_button">Войти</string>
+    <string name="go_register">Нет аккаунта? Зарегистрироваться</string>
+    <string name="register_title">Регистрация</string>
+    <string name="username_hint">Имя пользователя</string>
+    <string name="email_hint">Email</string>
+    <string name="register_button">Зарегистрироваться</string>
+    <string name="go_login">Уже есть аккаунт? Войти</string>
+    <string name="palettes_title">Мои палитры</string>
+    <string name="new_palette">Новая палитра</string>
+    <string name="edit">Редактировать</string>
+    <string name="delete">Удалить</string>
+    <string name="settings">Настройки</string>
+    <string name="logout">Выйти</string>
+    <string name="palette_name_hint">Название палитры</string>
+    <string name="palette_colors_hint">HEX цвета через запятую, например #112233,#AABBCC,#FFFFFF</string>
+    <string name="save">Сохранить</string>
+    <string name="cancel">Отмена</string>
+    <string name="palette_editor_title">Редактор палитры</string>
+    <string name="create_palette">Создать палитру</string>
+    <string name="rename_palette">Переименовать палитру</string>
+    <string name="delete_palette">Удалить палитру</string>
+    <string name="empty_palettes">Пока нет палитр</string>
+    <string name="loading">Загрузка...</string>
+</resources>

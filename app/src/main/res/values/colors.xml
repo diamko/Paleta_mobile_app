@@ -1,0 +1,10 @@
+<resources>
+    <color name="primary">#FF5A2F</color>
+    <color name="onPrimary">#FFFFFFFF</color>
+    <color name="primaryContainer">#FFFFDAD0</color>
+    <color name="onPrimaryContainer">#FF3A0C00</color>
+    <color name="background">#FFFFF8F5</color>
+    <color name="onBackground">#FF251915</color>
+    <color name="surface">#FFFFF8F5</color>
+    <color name="onSurface">#FF251915</color>
+</resources>
