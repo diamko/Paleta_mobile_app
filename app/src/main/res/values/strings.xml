@@ -26,4 +26,15 @@
     <string name="delete_palette">Удалить палитру</string>
     <string name="empty_palettes">Пока нет палитр</string>
     <string name="loading">Загрузка...</string>
+    <string name="generate_palette_title">Генератор</string>
+    <string name="generate_random">Случайная</string>
+    <string name="pick_image">Из изображения</string>
+    <string name="color_count_hint">Количество цветов (3-15)</string>
+    <string name="export_file">Экспорт</string>
+    <string name="save_palette">Сохранить</string>
+    <string name="back">Назад</string>
+    <string name="search_palettes">Поиск по палитрам</string>
+    <string name="sort_newest">Сначала новые</string>
+    <string name="sort_oldest">Сначала старые</string>
+    <string name="sort_name">По имени</string>
 </resources>

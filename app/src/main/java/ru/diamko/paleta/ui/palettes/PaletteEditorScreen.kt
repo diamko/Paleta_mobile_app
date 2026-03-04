@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import ru.diamko.paleta.R
+import ru.diamko.paleta.core.palette.HexColors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -92,7 +93,7 @@ fun PaletteEditorScreen(
                 Button(
                     modifier = Modifier.fillMaxWidth(),
                     onClick = {
-                        val parsed = parseHexColors(colorsInput)
+                        val parsed = HexColors.parse(colorsInput)
                         if (parsed == null) {
                             localError = "Введите от 3 до 15 корректных HEX-цветов"
                             return@Button
@@ -140,23 +141,4 @@ fun PaletteEditorScreen(
             }
         }
     }
-}
-
-private fun parseHexColors(raw: String): List<String>? {
-    val colors = raw
-        .split(",")
-        .map { it.trim() }
-        .filter { it.isNotEmpty() }
-        .map { it.uppercase() }
-
-    if (colors.size !in 3..15) {
-        return null
-    }
-
-    val regex = Regex("^#[0-9A-F]{6}$")
-    if (colors.any { !regex.matches(it) }) {
-        return null
-    }
-
-    return colors
 }

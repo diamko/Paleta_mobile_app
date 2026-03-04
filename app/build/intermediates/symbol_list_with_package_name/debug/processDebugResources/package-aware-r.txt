@@ -3725,6 +3725,7 @@ string abc_toolbar_collapse_description
 string androidx_startup
 string app_name
 string appbar_scrolling_view_behavior
+string back
 string bottom_sheet_behavior
 string bottomsheet_action_collapse
 string bottomsheet_action_expand
@@ -3745,6 +3746,7 @@ string character_counter_pattern
 string clear_text_end_icon_content_description
 string close_drawer
 string close_sheet
+string color_count_hint
 string create_palette
 string default_error_message
 string default_popup_window_title
@@ -3756,9 +3758,12 @@ string email_hint
 string empty_palettes
 string error_a11y_label
 string error_icon_content_description
+string export_file
 string exposed_dropdown_menu_content_description
 string fab_transformation_scrim_behavior
 string fab_transformation_sheet_behavior
+string generate_palette_title
+string generate_random
 string go_login
 string go_register
 string hide_bottom_view_on_scroll_behavior
@@ -3941,13 +3946,16 @@ string path_password_eye
 string path_password_eye_mask_strike_through
 string path_password_eye_mask_visible
 string path_password_strike_through
+string pick_image
 string range_end
 string range_start
 string register_button
 string register_title
 string rename_palette
 string save
+string save_palette
 string search_menu_title
+string search_palettes
 string searchbar_scrolling_view_behavior
 string searchview_clear_text_content_description
 string searchview_navigation_content_description
@@ -3955,6 +3963,9 @@ string selected
 string settings
 string side_sheet_accessibility_pane_title
 string side_sheet_behavior
+string sort_name
+string sort_newest
+string sort_oldest
 string state_empty
 string state_off
 string state_on

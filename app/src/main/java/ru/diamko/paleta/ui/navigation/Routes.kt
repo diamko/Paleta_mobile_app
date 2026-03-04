@@ -5,6 +5,7 @@ object Routes {
     const val LOGIN = "login"
     const val REGISTER = "register"
     const val PALETTES = "palettes"
+    const val GENERATE = "generate"
     const val SETTINGS = "settings"
     const val PALETTE_EDITOR = "palette_editor/{paletteId}"
 

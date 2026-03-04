@@ -24,6 +24,7 @@ import ru.diamko.paleta.ui.auth.AuthViewModel
 import ru.diamko.paleta.ui.auth.LoginScreen
 import ru.diamko.paleta.ui.auth.RegisterScreen
 import ru.diamko.paleta.ui.palettes.PaletteEditorScreen
+import ru.diamko.paleta.ui.palettes.PaletteGenerateScreen
 import ru.diamko.paleta.ui.palettes.PaletteListScreen
 import ru.diamko.paleta.ui.palettes.PaletteViewModel
 import ru.diamko.paleta.ui.settings.SettingsScreen
@@ -91,9 +92,17 @@ fun PaletaApp(
                 state = paletteState,
                 onReload = paletteViewModel::loadPalettes,
                 onCreateClick = { navController.navigate(Routes.paletteEditor("new")) },
+                onOpenGenerator = { navController.navigate(Routes.GENERATE) },
                 onEditClick = { id -> navController.navigate(Routes.paletteEditor(id.toString())) },
                 onDeleteClick = { id -> paletteViewModel.deletePalette(id) },
                 onOpenSettings = { navController.navigate(Routes.SETTINGS) },
+            )
+        }
+
+        composable(Routes.GENERATE) {
+            PaletteGenerateScreen(
+                paletteViewModel = paletteViewModel,
+                onBack = { navController.popBackStack() },
             )
         }
 

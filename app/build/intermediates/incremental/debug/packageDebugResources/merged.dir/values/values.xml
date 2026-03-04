@@ -9,13 +9,18 @@
     <color name="primaryContainer">#FFFFDAD0</color>
     <color name="surface">#FFFFF8F5</color>
     <string name="app_name">Paleta</string>
+    <string name="back">Назад</string>
     <string name="cancel">Отмена</string>
+    <string name="color_count_hint">Количество цветов (3-15)</string>
     <string name="create_palette">Создать палитру</string>
     <string name="delete">Удалить</string>
     <string name="delete_palette">Удалить палитру</string>
     <string name="edit">Редактировать</string>
     <string name="email_hint">Email</string>
     <string name="empty_palettes">Пока нет палитр</string>
+    <string name="export_file">Экспорт</string>
+    <string name="generate_palette_title">Генератор</string>
+    <string name="generate_random">Случайная</string>
     <string name="go_login">Уже есть аккаунт? Войти</string>
     <string name="go_register">Нет аккаунта? Зарегистрироваться</string>
     <string name="loading">Загрузка...</string>
@@ -29,11 +34,17 @@
     <string name="palette_name_hint">Название палитры</string>
     <string name="palettes_title">Мои палитры</string>
     <string name="password_hint">Пароль</string>
+    <string name="pick_image">Из изображения</string>
     <string name="register_button">Зарегистрироваться</string>
     <string name="register_title">Регистрация</string>
     <string name="rename_palette">Переименовать палитру</string>
     <string name="save">Сохранить</string>
+    <string name="save_palette">Сохранить</string>
+    <string name="search_palettes">Поиск по палитрам</string>
     <string name="settings">Настройки</string>
+    <string name="sort_name">По имени</string>
+    <string name="sort_newest">Сначала новые</string>
+    <string name="sort_oldest">Сначала старые</string>
     <string name="username_hint">Имя пользователя</string>
     <style name="Theme.Paleta" parent="Theme.Material3.Light.NoActionBar">
         <item name="android:statusBarColor" ns1:targetApi="l">@android:color/transparent</item>

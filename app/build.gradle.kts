@@ -18,8 +18,8 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        buildConfigField("String", "REPOSITORY_MODE", "\"fake\"")
-        buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:5000/\"")
+        buildConfigField("String", "REPOSITORY_MODE", "\"remote\"")
+        buildConfigField("String", "API_BASE_URL", "\"http://192.168.0.104:5000/\"")
     }
 
     buildTypes {

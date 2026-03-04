@@ -17,12 +17,18 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -31,18 +37,46 @@ import androidx.compose.ui.unit.dp
 import ru.diamko.paleta.R
 import ru.diamko.paleta.domain.model.Palette
 
+private enum class PaletteSortMode {
+    NEWEST,
+    OLDEST,
+    NAME,
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PaletteListScreen(
     state: PaletteUiState,
     onReload: () -> Unit,
     onCreateClick: () -> Unit,
+    onOpenGenerator: () -> Unit,
     onEditClick: (Long) -> Unit,
     onDeleteClick: (Long) -> Unit,
     onOpenSettings: () -> Unit,
 ) {
+    var query by rememberSaveable { mutableStateOf("") }
+    var sortMode by rememberSaveable { mutableStateOf(PaletteSortMode.NEWEST.name) }
+
     LaunchedEffect(Unit) {
         onReload()
+    }
+
+    val visiblePalettes = remember(state.palettes, query, sortMode) {
+        val filtered = if (query.isBlank()) {
+            state.palettes
+        } else {
+            val q = query.trim().lowercase()
+            state.palettes.filter { palette ->
+                palette.name.lowercase().contains(q) ||
+                    palette.colors.any { it.lowercase().contains(q) }
+            }
+        }
+
+        when (PaletteSortMode.valueOf(sortMode)) {
+            PaletteSortMode.NEWEST -> filtered.sortedByDescending { it.createdAtIso }
+            PaletteSortMode.OLDEST -> filtered.sortedBy { it.createdAtIso }
+            PaletteSortMode.NAME -> filtered.sortedBy { it.name.lowercase() }
+        }
     }
 
     Scaffold(
@@ -57,8 +91,13 @@ fun PaletteListScreen(
             )
         },
         floatingActionButton = {
-            Button(onClick = onCreateClick) {
-                Text(text = stringResource(id = R.string.new_palette))
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Button(onClick = onOpenGenerator) {
+                    Text(text = stringResource(id = R.string.generate_palette_title))
+                }
+                Button(onClick = onCreateClick) {
+                    Text(text = stringResource(id = R.string.new_palette))
+                }
             }
         },
     ) { paddingValues ->
@@ -88,11 +127,37 @@ fun PaletteListScreen(
                 )
             }
 
-            if (state.palettes.isEmpty()) {
+            OutlinedTextField(
+                value = query,
+                onValueChange = { query = it },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                label = { Text(stringResource(id = R.string.search_palettes)) },
+            )
+
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                SortButton(
+                    title = stringResource(id = R.string.sort_newest),
+                    selected = sortMode == PaletteSortMode.NEWEST.name,
+                    onClick = { sortMode = PaletteSortMode.NEWEST.name },
+                )
+                SortButton(
+                    title = stringResource(id = R.string.sort_oldest),
+                    selected = sortMode == PaletteSortMode.OLDEST.name,
+                    onClick = { sortMode = PaletteSortMode.OLDEST.name },
+                )
+                SortButton(
+                    title = stringResource(id = R.string.sort_name),
+                    selected = sortMode == PaletteSortMode.NAME.name,
+                    onClick = { sortMode = PaletteSortMode.NAME.name },
+                )
+            }
+
+            if (visiblePalettes.isEmpty()) {
                 Text(text = stringResource(id = R.string.empty_palettes))
             } else {
                 LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    items(state.palettes, key = { it.id }) { palette ->
+                    items(visiblePalettes, key = { it.id }) { palette ->
                         PaletteCard(
                             palette = palette,
                             onEditClick = onEditClick,
@@ -102,6 +167,18 @@ fun PaletteListScreen(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun SortButton(
+    title: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+) {
+    TextButton(onClick = onClick) {
+        val value = if (selected) "[$title]" else title
+        Text(text = value)
     }
 }
 
