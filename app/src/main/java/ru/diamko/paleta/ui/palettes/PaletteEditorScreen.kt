@@ -1,13 +1,20 @@
 package ru.diamko.paleta.ui.palettes
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -25,6 +32,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import ru.diamko.paleta.R
+import ru.diamko.paleta.core.palette.ColorTools
 import ru.diamko.paleta.core.palette.HexColors
 import ru.diamko.paleta.ui.components.PaletaCard
 import ru.diamko.paleta.ui.components.PaletaGhostButton
@@ -34,7 +42,7 @@ import ru.diamko.paleta.ui.components.PaletaPrimaryButton
 import ru.diamko.paleta.ui.components.PaletaSectionTitle
 import ru.diamko.paleta.ui.components.paletaTextFieldColors
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun PaletteEditorScreen(
     paletteId: Long?,
@@ -93,6 +101,29 @@ fun PaletteEditorScreen(
                         shape = RoundedCornerShape(14.dp),
                         colors = paletaTextFieldColors(),
                     )
+
+                    val parsedColors = remember(colorsInput) { HexColors.parse(colorsInput) }
+                    if (!parsedColors.isNullOrEmpty()) {
+                        FlowRow(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            parsedColors.forEachIndexed { index, hex ->
+                                val color = ColorTools.hexToColorInt(hex)?.let(::Color) ?: Color.Gray
+                                Box(
+                                    modifier = Modifier
+                                        .size(34.dp)
+                                        .background(color, CircleShape)
+                                        .border(
+                                            width = 1.dp,
+                                            color = Color.White.copy(alpha = 0.8f),
+                                            shape = CircleShape,
+                                        ),
+                                )
+                            }
+                        }
+                    }
 
                     OutlinedTextField(
                         modifier = Modifier.fillMaxWidth(),

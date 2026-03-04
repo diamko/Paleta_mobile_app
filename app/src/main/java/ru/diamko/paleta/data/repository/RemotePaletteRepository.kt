@@ -10,6 +10,7 @@ import ru.diamko.paleta.data.remote.api.PaletteApi
 import ru.diamko.paleta.data.remote.dto.ApiEnvelope
 import ru.diamko.paleta.data.remote.dto.CreatePaletteRequestDto
 import ru.diamko.paleta.data.remote.dto.ExportPaletteRequestDto
+import ru.diamko.paleta.data.remote.dto.LegacyUploadImageResponseDto
 import ru.diamko.paleta.data.remote.dto.PaletteDto
 import ru.diamko.paleta.data.remote.dto.PaletteListDataDto
 import ru.diamko.paleta.data.remote.dto.RenamePaletteRequestDto
@@ -17,6 +18,7 @@ import ru.diamko.paleta.data.remote.dto.UploadImageDataDto
 import ru.diamko.paleta.domain.model.Palette
 import ru.diamko.paleta.domain.model.PaletteExportFile
 import ru.diamko.paleta.domain.repository.PaletteRepository
+import retrofit2.HttpException
 
 class RemotePaletteRepository(
     private val paletteApi: PaletteApi,
@@ -67,11 +69,23 @@ class RemotePaletteRepository(
         )
         val colorCountBody = colorCount.toString().toRequestBody("text/plain".toMediaType())
 
-        val envelope = paletteApi.uploadImage(
+        try {
+            val envelope = paletteApi.uploadImage(
+                image = imagePart,
+                colorCount = colorCountBody,
+            )
+            return@withContext envelope.unwrapUpload("Не удалось извлечь палитру из изображения").palette
+        } catch (error: HttpException) {
+            if (error.code() != 404) {
+                throw NetworkError("Не удалось извлечь палитру из изображения (${error.code()})")
+            }
+        }
+
+        val legacy = paletteApi.uploadImageLegacy(
             image = imagePart,
             colorCount = colorCountBody,
         )
-        envelope.unwrapUpload("Не удалось извлечь палитру из изображения").palette
+        legacy.unwrapLegacyUpload("Не удалось извлечь палитру из изображения")
     }
 
     override suspend fun exportPalette(
@@ -122,6 +136,13 @@ class RemotePaletteRepository(
             return data
         }
         throw NetworkError(error?.message ?: defaultMessage)
+    }
+
+    private fun LegacyUploadImageResponseDto.unwrapLegacyUpload(defaultMessage: String): List<String> {
+        if (success && !palette.isNullOrEmpty()) {
+            return palette
+        }
+        throw NetworkError(error ?: defaultMessage)
     }
 
     private fun PaletteDto.toDomain(): Palette {

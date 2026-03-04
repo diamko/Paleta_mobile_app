@@ -37,6 +37,14 @@ data class UploadImageDataDto(
 )
 
 @Serializable
+data class LegacyUploadImageResponseDto(
+    val success: Boolean,
+    val filename: String? = null,
+    val palette: List<String>? = null,
+    val error: String? = null,
+)
+
+@Serializable
 data class ExportPaletteRequestDto(
     val colors: List<String>,
 )

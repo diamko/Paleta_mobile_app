@@ -17,6 +17,7 @@ import retrofit2.http.Streaming
 import ru.diamko.paleta.data.remote.dto.ApiEnvelope
 import ru.diamko.paleta.data.remote.dto.CreatePaletteRequestDto
 import ru.diamko.paleta.data.remote.dto.ExportPaletteRequestDto
+import ru.diamko.paleta.data.remote.dto.LegacyUploadImageResponseDto
 import ru.diamko.paleta.data.remote.dto.PaletteDto
 import ru.diamko.paleta.data.remote.dto.PaletteListDataDto
 import ru.diamko.paleta.data.remote.dto.RenamePaletteRequestDto
@@ -52,6 +53,13 @@ interface PaletteApi {
         @Part image: MultipartBody.Part,
         @Part("color_count") colorCount: RequestBody,
     ): ApiEnvelope<UploadImageDataDto>
+
+    @Multipart
+    @POST("api/upload")
+    suspend fun uploadImageLegacy(
+        @Part image: MultipartBody.Part,
+        @Part("color_count") colorCount: RequestBody,
+    ): LegacyUploadImageResponseDto
 
     @Streaming
     @POST("api/mobile/v1/export")

@@ -8,10 +8,13 @@ import android.net.Uri
 import android.provider.OpenableColumns
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -52,16 +55,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -81,8 +89,6 @@ import ru.diamko.paleta.ui.components.paletaTextFieldColors
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
-import androidx.compose.foundation.Image
-import androidx.compose.ui.platform.LocalClipboardManager
 
 private data class ImageFitMetrics(
     val left: Float,
@@ -95,6 +101,8 @@ private data class SampledPoint(
     val hex: String,
     val xNorm: Float,
     val yNorm: Float,
+    val pixelX: Int,
+    val pixelY: Int,
 )
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -115,6 +123,9 @@ fun PaletteGenerateScreen(
     var paletteColors by remember { mutableStateOf<List<String>>(emptyList()) }
     var selectedColorIndex by remember { mutableStateOf(0) }
     var markerPositions by remember { mutableStateOf<List<Offset?>>(emptyList()) }
+    var isDraggingPipette by remember { mutableStateOf(false) }
+    var loupeTouchPosition by remember { mutableStateOf<Offset?>(null) }
+    var loupeSample by remember { mutableStateOf<SampledPoint?>(null) }
 
     var localError by remember { mutableStateOf<String?>(null) }
     var statusMessage by remember { mutableStateOf<String?>(null) }
@@ -130,7 +141,7 @@ fun PaletteGenerateScreen(
         }
         paletteColors = normalized
         selectedColorIndex = selectedColorIndex.coerceIn(0, normalized.lastIndex)
-        markerPositions = List(normalized.size) { index -> markerPositions.getOrNull(index) }
+        markerPositions = List(normalized.size) { idx -> markerPositions.getOrNull(idx) }
         statusMessage = message
         localError = null
     }
@@ -151,7 +162,12 @@ fun PaletteGenerateScreen(
         scope.launch {
             isBusy = true
             localError = null
-            statusMessage = null
+            statusMessage = "Извлечение цветов..."
+            paletteColors = emptyList()
+            markerPositions = emptyList()
+            selectedColorIndex = 0
+            loupeTouchPosition = null
+            loupeSample = null
 
             val data = withContext(Dispatchers.IO) {
                 val bytes = context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
@@ -179,6 +195,7 @@ fun PaletteGenerateScreen(
                         return@generateFromImage
                     }
                     applyPalette(colors, "Извлечено цветов: ${colors.size}")
+                    markerPositions = estimateInitialMarkerPositions(bitmap, colors)
                 },
                 onError = { error ->
                     isBusy = false
@@ -241,14 +258,32 @@ fun PaletteGenerateScreen(
         }
     }
 
+    fun updateColorFromImagePoint(position: Offset) {
+        val currentBitmap = bitmap ?: return
+        val metrics = fitMetrics ?: return
+        val sampled = sampleColorAtPosition(
+            bitmap = currentBitmap,
+            position = position,
+            metrics = metrics,
+        )
+        updateColorAt(safeSelectedIndex, sampled.hex)
+        val updatedMarkers = markerPositions.toMutableList()
+        while (updatedMarkers.size < paletteColors.size) {
+            updatedMarkers.add(null)
+        }
+        updatedMarkers[safeSelectedIndex] = Offset(sampled.xNorm, sampled.yNorm)
+        markerPositions = updatedMarkers
+        loupeTouchPosition = position
+        loupeSample = sampled
+        localError = null
+    }
+
     PaletaGradientBackground(modifier = Modifier.fillMaxSize()) {
         Scaffold(
             containerColor = Color.Transparent,
             topBar = {
                 TopAppBar(
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = Color.Transparent,
-                    ),
+                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
                     title = { Text(stringResource(id = R.string.generate_palette_title)) },
                     actions = {
                         PaletaGhostButton(
@@ -268,12 +303,8 @@ fun PaletteGenerateScreen(
                     .padding(horizontal = 16.dp, vertical = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                localError?.let { message ->
-                    PaletaMessageBanner(message = message, isError = true)
-                }
-                statusMessage?.let { message ->
-                    PaletaMessageBanner(message = message, isError = false)
-                }
+                localError?.let { PaletaMessageBanner(message = it, isError = true) }
+                statusMessage?.let { PaletaMessageBanner(message = it, isError = false) }
 
                 PaletaCard(modifier = Modifier.fillMaxWidth()) {
                     PaletaSectionTitle(
@@ -336,7 +367,7 @@ fun PaletteGenerateScreen(
                     PaletaCard(modifier = Modifier.fillMaxWidth()) {
                         PaletaSectionTitle(
                             title = "Пипетка по изображению",
-                            subtitle = "Выберите цвет ниже и тапните по нужной точке на фото",
+                            subtitle = "Выберите цвет ниже и ведите пальцем по фото",
                         )
 
                         Box(
@@ -347,25 +378,29 @@ fun PaletteGenerateScreen(
                                 .background(MaterialTheme.colorScheme.surfaceVariant)
                                 .onSizeChanged { imageBoxSize = it }
                                 .pointerInput(bitmap, safeSelectedIndex, paletteColors, fitMetrics) {
-                                    detectTapGestures { tapOffset ->
-                                        val metrics = fitMetrics ?: return@detectTapGestures
-                                        val sampled = sampleColorAtTap(
-                                            bitmap = bitmap,
-                                            tapOffset = tapOffset,
-                                            metrics = metrics,
-                                        ) ?: run {
-                                            localError = "Тапните по области изображения"
-                                            return@detectTapGestures
+                                    awaitEachGesture {
+                                        val down = awaitFirstDown(requireUnconsumed = false)
+                                        isDraggingPipette = true
+                                        updateColorFromImagePoint(down.position)
+                                        var pointerId = down.id
+
+                                        while (true) {
+                                            val event = awaitPointerEvent()
+                                            val change = event.changes.firstOrNull { it.id == pointerId }
+                                                ?: event.changes.firstOrNull()
+                                                ?: break
+                                            pointerId = change.id
+                                            if (!change.pressed) {
+                                                break
+                                            }
+                                            updateColorFromImagePoint(change.position)
+                                            change.consume()
                                         }
-                                        updateColorAt(safeSelectedIndex, sampled.hex)
-                                        val updatedMarkers = markerPositions.toMutableList()
-                                        while (updatedMarkers.size < paletteColors.size) {
-                                            updatedMarkers.add(null)
-                                        }
-                                        updatedMarkers[safeSelectedIndex] = Offset(sampled.xNorm, sampled.yNorm)
-                                        markerPositions = updatedMarkers
-                                        localError = null
+
+                                        isDraggingPipette = false
                                         statusMessage = "Цвет ${safeSelectedIndex + 1} обновлен из изображения"
+                                        loupeTouchPosition = null
+                                        loupeSample = null
                                     }
                                 },
                         ) {
@@ -380,38 +415,64 @@ fun PaletteGenerateScreen(
                             if (metrics != null) {
                                 markerPositions.forEachIndexed { index, marker ->
                                     if (marker == null) return@forEachIndexed
+                                    if (isDraggingPipette && index == safeSelectedIndex) {
+                                        return@forEachIndexed
+                                    }
                                     val markerX = metrics.left + marker.x * metrics.width
                                     val markerY = metrics.top + marker.y * metrics.height
-                                    val color = paletteColors.getOrNull(index)?.let {
+                                    val markerColor = paletteColors.getOrNull(index)?.let {
                                         ColorTools.hexToColorInt(it)?.let(::Color)
                                     } ?: Color.Gray
+
                                     Box(
                                         modifier = Modifier
                                             .offset {
                                                 IntOffset(
-                                                    x = (markerX - 13f).roundToInt(),
-                                                    y = (markerY - 13f).roundToInt(),
+                                                    x = (markerX - 12f).roundToInt(),
+                                                    y = (markerY - 34f).roundToInt(),
                                                 )
                                             }
-                                            .size(26.dp)
-                                            .clip(CircleShape)
-                                            .background(color)
-                                            .border(
-                                                width = if (index == safeSelectedIndex) 3.dp else 2.dp,
-                                                color = if (index == safeSelectedIndex) {
-                                                    MaterialTheme.colorScheme.primary
-                                                } else {
-                                                    Color.White
-                                                },
-                                                shape = CircleShape,
-                                            ),
-                                    )
+                                            .size(24.dp, 34.dp)
+                                            .clickable {
+                                                selectedColorIndex = index
+                                                statusMessage = "Выбрана пипетка: Цвет ${index + 1}"
+                                                localError = null
+                                            },
+                                    ) {
+                                        PipetteMarker(
+                                            color = markerColor,
+                                            selected = index == safeSelectedIndex,
+                                            dragging = isDraggingPipette && index == safeSelectedIndex,
+                                        )
+                                    }
                                 }
+                            }
+
+                            if (isDraggingPipette && loupeTouchPosition != null && loupeSample != null) {
+                                val touch = loupeTouchPosition ?: Offset.Zero
+                                val sample = loupeSample ?: SampledPoint(
+                                    hex = "#000000",
+                                    xNorm = 0f,
+                                    yNorm = 0f,
+                                    pixelX = 0,
+                                    pixelY = 0,
+                                )
+                                ColorLoupe(
+                                    modifier = Modifier
+                                        .offset {
+                                            calculateLoupeOffset(
+                                                anchor = touch,
+                                                containerSize = imageBoxSize,
+                                            )
+                                        },
+                                    bitmap = bitmap,
+                                    sample = sample,
+                                )
                             }
                         }
 
                         Text(
-                            text = "Подсказка: сначала нажмите на карточку цвета, затем выберите точку на фото",
+                            text = "Пипетки появляются сразу после извлечения. Лупа показывается только при выборе и движении активной пипетки.",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -421,7 +482,7 @@ fun PaletteGenerateScreen(
                 PaletaCard(modifier = Modifier.fillMaxWidth()) {
                     PaletaSectionTitle(
                         title = "Цвета палитры",
-                        subtitle = "Карточки как в веб-версии: каждый цвет редактируется отдельно",
+                        subtitle = "Максимум 3 карточки в ряд, редактирование каждого цвета отдельно",
                     )
 
                     if (!hasPalette) {
@@ -431,7 +492,9 @@ fun PaletteGenerateScreen(
                         )
                     } else {
                         FlowRow(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier = Modifier.fillMaxWidth(),
+                            maxItemsInEachRow = 3,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
                             verticalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
                             paletteColors.forEachIndexed { index, hex ->
@@ -439,7 +502,7 @@ fun PaletteGenerateScreen(
                                 val selected = index == safeSelectedIndex
                                 Column(
                                     modifier = Modifier
-                                        .width(104.dp)
+                                        .width(92.dp)
                                         .clip(RoundedCornerShape(14.dp))
                                         .background(
                                             if (selected) {
@@ -458,7 +521,11 @@ fun PaletteGenerateScreen(
                                             .size(50.dp)
                                             .clip(RoundedCornerShape(12.dp))
                                             .background(color)
-                                            .border(1.dp, Color.White.copy(alpha = 0.8f), RoundedCornerShape(12.dp)),
+                                            .border(
+                                                width = 1.dp,
+                                                color = Color.White.copy(alpha = 0.8f),
+                                                shape = RoundedCornerShape(12.dp),
+                                            ),
                                     )
                                     Text(
                                         text = "Цвет ${index + 1}",
@@ -469,10 +536,7 @@ fun PaletteGenerateScreen(
                                             MaterialTheme.colorScheme.onSurfaceVariant
                                         },
                                     )
-                                    Text(
-                                        text = hex,
-                                        style = MaterialTheme.typography.labelSmall,
-                                    )
+                                    Text(text = hex, style = MaterialTheme.typography.labelSmall)
                                 }
                             }
                         }
@@ -657,6 +721,126 @@ private fun ColorChannelSlider(
     }
 }
 
+@Composable
+private fun PipetteMarker(
+    color: Color,
+    selected: Boolean,
+    dragging: Boolean,
+) {
+    val accent = if (selected) MaterialTheme.colorScheme.primary else Color.White
+    Box(modifier = Modifier.fillMaxSize()) {
+        Box(
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .size(if (dragging) 22.dp else 20.dp)
+                .clip(CircleShape)
+                .background(color)
+                .border(
+                    width = if (selected) 3.dp else 2.dp,
+                    color = accent,
+                    shape = CircleShape,
+                ),
+        )
+        Canvas(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .size(10.dp, 12.dp),
+        ) {
+            val triangle = Path().apply {
+                moveTo(size.width / 2f, size.height)
+                lineTo(0f, 1f)
+                lineTo(size.width, 1f)
+                close()
+            }
+            drawPath(triangle, color = accent)
+        }
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .size(4.dp)
+                .clip(CircleShape)
+                .background(accent),
+        )
+    }
+}
+
+@Composable
+private fun ColorLoupe(
+    modifier: Modifier = Modifier,
+    bitmap: Bitmap,
+    sample: SampledPoint,
+) {
+    val imageBitmap = remember(bitmap) { bitmap.asImageBitmap() }
+    Column(
+        modifier = modifier
+            .width(72.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .background(Color(0xDD10141E))
+            .border(1.dp, Color.White.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
+            .padding(5.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(3.dp),
+    ) {
+        Canvas(
+            modifier = Modifier
+                .size(56.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .border(1.dp, Color.White.copy(alpha = 0.35f), RoundedCornerShape(8.dp)),
+        ) {
+            val zoomRadius = 8
+            val srcSize = zoomRadius * 2 + 1
+            val srcLeft = (sample.pixelX - zoomRadius).coerceIn(0, bitmap.width - srcSize)
+            val srcTop = (sample.pixelY - zoomRadius).coerceIn(0, bitmap.height - srcSize)
+
+            drawImage(
+                image = imageBitmap,
+                srcOffset = IntOffset(srcLeft, srcTop),
+                srcSize = IntSize(srcSize, srcSize),
+                dstOffset = IntOffset.Zero,
+                dstSize = IntSize(size.width.roundToInt(), size.height.roundToInt()),
+            )
+
+            val cx = size.width / 2f
+            val cy = size.height / 2f
+            drawLine(
+                color = Color.White.copy(alpha = 0.85f),
+                start = Offset(cx, 0f),
+                end = Offset(cx, size.height),
+                strokeWidth = 1.4f,
+            )
+            drawLine(
+                color = Color.White.copy(alpha = 0.85f),
+                start = Offset(0f, cy),
+                end = Offset(size.width, cy),
+                strokeWidth = 1.4f,
+            )
+            drawCircle(
+                color = Color.White.copy(alpha = 0.92f),
+                radius = 4f,
+                center = Offset(cx, cy),
+                style = Stroke(width = 1.4f),
+            )
+        }
+
+        Text(
+            text = sample.hex,
+            color = Color.White,
+            style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp),
+            textAlign = TextAlign.Center,
+        )
+
+        Canvas(modifier = Modifier.size(10.dp, 8.dp)) {
+            val tail = Path().apply {
+                moveTo(size.width / 2f, size.height)
+                lineTo(0f, 0f)
+                lineTo(size.width, 0f)
+                close()
+            }
+            drawPath(tail, color = Color.White.copy(alpha = 0.9f))
+        }
+    }
+}
+
 private fun normalizeSingleHex(raw: String): String? {
     val trimmed = raw.trim().uppercase()
     val withHash = if (trimmed.startsWith("#")) trimmed else "#$trimmed"
@@ -683,16 +867,13 @@ private fun calculateImageFitMetrics(
     return ImageFitMetrics(left = left, top = top, width = drawWidth, height = drawHeight)
 }
 
-private fun sampleColorAtTap(
+private fun sampleColorAtPosition(
     bitmap: Bitmap,
-    tapOffset: Offset,
+    position: Offset,
     metrics: ImageFitMetrics,
-): SampledPoint? {
-    if (tapOffset.x < metrics.left || tapOffset.y < metrics.top) return null
-    if (tapOffset.x > metrics.left + metrics.width || tapOffset.y > metrics.top + metrics.height) return null
-
-    val xNorm = ((tapOffset.x - metrics.left) / metrics.width).coerceIn(0f, 1f)
-    val yNorm = ((tapOffset.y - metrics.top) / metrics.height).coerceIn(0f, 1f)
+): SampledPoint {
+    val xNorm = ((position.x - metrics.left) / metrics.width).coerceIn(0f, 1f)
+    val yNorm = ((position.y - metrics.top) / metrics.height).coerceIn(0f, 1f)
 
     val x = (xNorm * (bitmap.width - 1)).roundToInt().coerceIn(0, bitmap.width - 1)
     val y = (yNorm * (bitmap.height - 1)).roundToInt().coerceIn(0, bitmap.height - 1)
@@ -701,7 +882,142 @@ private fun sampleColorAtTap(
         hex = ColorTools.colorIntToHex(colorInt),
         xNorm = xNorm,
         yNorm = yNorm,
+        pixelX = x,
+        pixelY = y,
     )
+}
+
+private fun calculateLoupeOffset(
+    anchor: Offset,
+    containerSize: IntSize,
+): IntOffset {
+    val loupeWidth = 72
+    val loupeHeight = 86
+    val margin = 18
+
+    var x = anchor.x.roundToInt() + margin
+    var y = anchor.y.roundToInt() - loupeHeight - margin
+
+    if (x + loupeWidth > containerSize.width) {
+        x = anchor.x.roundToInt() - loupeWidth - margin
+    }
+    if (y < 0) {
+        y = anchor.y.roundToInt() + margin
+    }
+
+    val maxX = (containerSize.width - loupeWidth).coerceAtLeast(0)
+    val maxY = (containerSize.height - loupeHeight).coerceAtLeast(0)
+
+    return IntOffset(
+        x = x.coerceIn(0, maxX),
+        y = y.coerceIn(0, maxY),
+    )
+}
+
+private fun estimateInitialMarkerPositions(
+    bitmap: Bitmap,
+    colors: List<String>,
+): List<Offset?> {
+    if (colors.isEmpty() || bitmap.width <= 0 || bitmap.height <= 0) {
+        return emptyList()
+    }
+
+    data class SamplePoint(
+        val x: Int,
+        val y: Int,
+        val r: Int,
+        val g: Int,
+        val b: Int,
+    )
+
+    val stepX = max(1, bitmap.width / 160)
+    val stepY = max(1, bitmap.height / 160)
+    val samples = ArrayList<SamplePoint>()
+
+    var y = 0
+    while (y < bitmap.height) {
+        var x = 0
+        while (x < bitmap.width) {
+            val color = bitmap.getPixel(x, y)
+            samples.add(
+                SamplePoint(
+                    x = x,
+                    y = y,
+                    r = AndroidColor.red(color),
+                    g = AndroidColor.green(color),
+                    b = AndroidColor.blue(color),
+                ),
+            )
+            x += stepX
+        }
+        y += stepY
+    }
+
+    if (samples.isEmpty()) {
+        val centerX = bitmap.width / 2
+        val centerY = bitmap.height / 2
+        val c = bitmap.getPixel(centerX, centerY)
+        samples.add(
+            SamplePoint(
+                x = centerX,
+                y = centerY,
+                r = AndroidColor.red(c),
+                g = AndroidColor.green(c),
+                b = AndroidColor.blue(c),
+            ),
+        )
+    }
+
+    val usedPoints = mutableListOf<Offset>()
+    val minDistancePx = max(10f, min(bitmap.width, bitmap.height) * 0.045f)
+    val minDistanceSq = minDistancePx * minDistancePx
+
+    return colors.map { hex ->
+        val targetColor = ColorTools.hexToColorInt(hex) ?: return@map null
+        val tr = AndroidColor.red(targetColor)
+        val tg = AndroidColor.green(targetColor)
+        val tb = AndroidColor.blue(targetColor)
+
+        var best: SamplePoint? = null
+        var bestScore = Long.MAX_VALUE
+
+        for (sample in samples) {
+            val dr = sample.r - tr
+            val dg = sample.g - tg
+            val db = sample.b - tb
+            var score = (dr * dr + dg * dg + db * db).toLong()
+
+            for (used in usedPoints) {
+                val dx = sample.x.toFloat() - used.x
+                val dy = sample.y.toFloat() - used.y
+                val d2 = dx * dx + dy * dy
+                if (d2 < minDistanceSq) {
+                    score += ((minDistanceSq - d2) * 8f).toLong()
+                }
+            }
+
+            if (score < bestScore) {
+                bestScore = score
+                best = sample
+            }
+        }
+
+        val chosen = best ?: return@map null
+        usedPoints.add(Offset(chosen.x.toFloat(), chosen.y.toFloat()))
+
+        val xNorm = if (bitmap.width > 1) {
+            chosen.x.toFloat() / (bitmap.width - 1).toFloat()
+        } else {
+            0f
+        }
+        val yNorm = if (bitmap.height > 1) {
+            chosen.y.toFloat() / (bitmap.height - 1).toFloat()
+        } else {
+            0f
+        }
+
+        Offset(xNorm, yNorm)
+    }
 }
 
 private fun resolveFileName(context: Context, uri: Uri): String {

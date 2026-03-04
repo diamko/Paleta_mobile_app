@@ -52,7 +52,15 @@ class PaletteViewModel(
     fun createPalette(name: String, colors: List<String>, onDone: () -> Unit = {}) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
-            runCatching { createPaletteUseCase(name, colors) }
+            runCatching {
+                val existingPalettes = runCatching { getPalettesUseCase() }
+                    .getOrElse { _uiState.value.palettes }
+                val uniqueName = createUniquePaletteName(
+                    requestedName = name,
+                    existingNames = existingPalettes.map { it.name },
+                )
+                createPaletteUseCase(uniqueName, colors)
+            }
                 .onSuccess {
                     loadPalettes()
                     onDone()
@@ -137,6 +145,28 @@ class PaletteViewModel(
 
     fun paletteById(id: Long): Palette? {
         return _uiState.value.palettes.firstOrNull { it.id == id }
+    }
+
+    private fun createUniquePaletteName(
+        requestedName: String,
+        existingNames: List<String>,
+    ): String {
+        val base = requestedName.trim().ifBlank { "Моя палитра" }
+        if (existingNames.none { it.equals(base, ignoreCase = true) }) {
+            return base
+        }
+
+        val pattern = Regex("^${Regex.escape(base)}(?:\\s(\\d+))?$", RegexOption.IGNORE_CASE)
+        val usedNumbers = existingNames.mapNotNull { name ->
+            val match = pattern.matchEntire(name.trim()) ?: return@mapNotNull null
+            match.groupValues.getOrNull(1)?.toIntOrNull() ?: 0
+        }.toSet()
+
+        var next = 1
+        while (usedNumbers.contains(next)) {
+            next += 1
+        }
+        return "$base $next"
     }
 
     companion object {
