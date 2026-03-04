@@ -29,3 +29,14 @@ data class CreatePaletteRequestDto(
 data class RenamePaletteRequestDto(
     val name: String,
 )
+
+@Serializable
+data class UploadImageDataDto(
+    val filename: String,
+    val palette: List<String>,
+)
+
+@Serializable
+data class ExportPaletteRequestDto(
+    val colors: List<String>,
+)

@@ -10,8 +10,11 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import ru.diamko.paleta.core.di.AppContainer
 import ru.diamko.paleta.domain.model.Palette
+import ru.diamko.paleta.domain.model.PaletteExportFile
 import ru.diamko.paleta.domain.usecase.CreatePaletteUseCase
 import ru.diamko.paleta.domain.usecase.DeletePaletteUseCase
+import ru.diamko.paleta.domain.usecase.ExportPaletteUseCase
+import ru.diamko.paleta.domain.usecase.GeneratePaletteFromImageUseCase
 import ru.diamko.paleta.domain.usecase.GetPalettesUseCase
 import ru.diamko.paleta.domain.usecase.RenamePaletteUseCase
 
@@ -26,6 +29,8 @@ class PaletteViewModel(
     private val createPaletteUseCase: CreatePaletteUseCase,
     private val renamePaletteUseCase: RenamePaletteUseCase,
     private val deletePaletteUseCase: DeletePaletteUseCase,
+    private val generatePaletteFromImageUseCase: GeneratePaletteFromImageUseCase,
+    private val exportPaletteUseCase: ExportPaletteUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(PaletteUiState())
@@ -86,6 +91,46 @@ class PaletteViewModel(
         }
     }
 
+    fun generateFromImage(
+        fileName: String,
+        imageBytes: ByteArray,
+        colorCount: Int,
+        onDone: (List<String>) -> Unit,
+        onError: (String) -> Unit,
+    ) {
+        viewModelScope.launch {
+            runCatching {
+                generatePaletteFromImageUseCase(
+                    fileName = fileName,
+                    imageBytes = imageBytes,
+                    colorCount = colorCount,
+                )
+            }.onSuccess { colors ->
+                onDone(colors)
+            }.onFailure { error ->
+                onError(error.message ?: "Ошибка генерации палитры")
+            }
+        }
+    }
+
+    fun exportPalette(
+        name: String,
+        colors: List<String>,
+        format: String,
+        onDone: (PaletteExportFile) -> Unit,
+        onError: (String) -> Unit,
+    ) {
+        viewModelScope.launch {
+            runCatching { exportPaletteUseCase(name = name, colors = colors, format = format) }
+                .onSuccess { payload ->
+                    onDone(payload)
+                }
+                .onFailure { error ->
+                    onError(error.message ?: "Ошибка экспорта")
+                }
+        }
+    }
+
     fun clearError() {
         _uiState.update { it.copy(error = null) }
     }
@@ -104,6 +149,8 @@ class PaletteViewModel(
                         createPaletteUseCase = CreatePaletteUseCase(container.paletteRepository),
                         renamePaletteUseCase = RenamePaletteUseCase(container.paletteRepository),
                         deletePaletteUseCase = DeletePaletteUseCase(container.paletteRepository),
+                        generatePaletteFromImageUseCase = GeneratePaletteFromImageUseCase(container.paletteRepository),
+                        exportPaletteUseCase = ExportPaletteUseCase(container.paletteRepository),
                     ) as T
                 }
             }

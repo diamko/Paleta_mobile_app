@@ -1,6 +1,7 @@
 package ru.diamko.paleta.ui.palettes
 
 import android.net.Uri
+import android.provider.OpenableColumns
 import android.widget.ImageView
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -42,13 +43,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ru.diamko.paleta.R
-import ru.diamko.paleta.core.palette.BitmapPaletteExtractor
 import ru.diamko.paleta.core.palette.ColorTools
 import ru.diamko.paleta.core.palette.HexColors
 import ru.diamko.paleta.core.palette.PaletteExportFormat
-import ru.diamko.paleta.core.palette.PaletteExportFormatter
-import ru.diamko.paleta.core.palette.PaletteExportPayload
 import ru.diamko.paleta.core.palette.RandomPaletteGenerator
+import ru.diamko.paleta.domain.model.PaletteExportFile
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -67,7 +66,7 @@ fun PaletteGenerateScreen(
     var statusMessage by remember { mutableStateOf<String?>(null) }
     var isBusy by remember { mutableStateOf(false) }
     var selectedFormat by remember { mutableStateOf(PaletteExportFormat.JSON) }
-    var pendingExport by remember { mutableStateOf<PaletteExportPayload?>(null) }
+    var pendingExport by remember { mutableStateOf<PaletteExportFile?>(null) }
 
     val createDocumentLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("*/*"),
@@ -108,17 +107,34 @@ fun PaletteGenerateScreen(
             isBusy = true
             localError = null
             statusMessage = null
-            val size = paletteSize()
-            val colors = withContext(Dispatchers.Default) {
-                BitmapPaletteExtractor.extractFromUri(context.contentResolver, uri, size)
+            val bytes = withContext(Dispatchers.IO) {
+                context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
             }
-            isBusy = false
-            if (colors.isEmpty()) {
-                localError = "Не удалось извлечь цвета из изображения"
+            if (bytes == null || bytes.isEmpty()) {
+                isBusy = false
+                localError = "Не удалось прочитать изображение"
                 return@launch
             }
-            colorsInput = colors.joinToString(",")
-            statusMessage = "Извлечено цветов: ${colors.size}"
+            val fileName = resolveFileName(context, uri)
+            paletteViewModel.generateFromImage(
+                fileName = fileName,
+                imageBytes = bytes,
+                colorCount = paletteSize(),
+                onDone = { colors ->
+                    isBusy = false
+                    if (colors.isEmpty()) {
+                        localError = "Не удалось извлечь цвета из изображения"
+                        return@generateFromImage
+                    }
+                    colorsInput = colors.joinToString(",")
+                    statusMessage = "Извлечено цветов: ${colors.size}"
+                    localError = null
+                },
+                onError = { error ->
+                    isBusy = false
+                    localError = error
+                },
+            )
         }
     }
 
@@ -259,13 +275,21 @@ fun PaletteGenerateScreen(
                             localError = "Введите от 3 до 15 корректных HEX-цветов"
                             return@Button
                         }
-                        val payload = PaletteExportFormatter.format(
+                        isBusy = true
+                        paletteViewModel.exportPalette(
                             name = paletteName,
                             colors = colors,
-                            format = selectedFormat,
+                            format = selectedFormat.ext,
+                            onDone = { payload ->
+                                isBusy = false
+                                pendingExport = payload
+                                createDocumentLauncher.launch(payload.fileName)
+                            },
+                            onError = { error ->
+                                isBusy = false
+                                localError = error
+                            },
                         )
-                        pendingExport = payload
-                        createDocumentLauncher.launch(payload.fileName)
                     },
                 ) {
                     Text(stringResource(id = R.string.export_file))
@@ -317,4 +341,16 @@ fun PaletteGenerateScreen(
             }
         }
     }
+}
+
+private fun resolveFileName(context: android.content.Context, uri: Uri): String {
+    val resolver = context.contentResolver
+    resolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use { cursor ->
+        val index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+        if (index >= 0 && cursor.moveToFirst()) {
+            val name = cursor.getString(index)?.trim()
+            if (!name.isNullOrBlank()) return name
+        }
+    }
+    return "upload.jpg"
 }
