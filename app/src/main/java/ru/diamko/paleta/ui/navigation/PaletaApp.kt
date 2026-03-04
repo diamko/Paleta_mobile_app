@@ -23,6 +23,7 @@ import ru.diamko.paleta.core.di.AppContainer
 import ru.diamko.paleta.ui.auth.AuthViewModel
 import ru.diamko.paleta.ui.auth.LoginScreen
 import ru.diamko.paleta.ui.auth.RegisterScreen
+import ru.diamko.paleta.ui.components.PaletaGradientBackground
 import ru.diamko.paleta.ui.palettes.PaletteEditorScreen
 import ru.diamko.paleta.ui.palettes.PaletteGenerateScreen
 import ru.diamko.paleta.ui.palettes.PaletteListScreen
@@ -54,13 +55,15 @@ fun PaletaApp(
     }
 
     if (authState.isCheckingSession) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            CircularProgressIndicator()
-            Text(text = stringResource(id = R.string.loading))
+        PaletaGradientBackground(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                CircularProgressIndicator()
+                Text(text = stringResource(id = R.string.loading))
+            }
         }
         return
     }
