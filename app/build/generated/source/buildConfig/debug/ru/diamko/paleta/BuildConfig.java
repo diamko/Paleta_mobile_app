@@ -10,7 +10,7 @@ public final class BuildConfig {
   public static final int VERSION_CODE = 1;
   public static final String VERSION_NAME = "1.0.0";
   // Field from default config.
-  public static final String API_BASE_URL = "http://10.0.2.2:5000/";
+  public static final String API_BASE_URL = "http://192.168.0.110:5000/";
   // Field from default config.
-  public static final String REPOSITORY_MODE = "fake";
+  public static final String REPOSITORY_MODE = "remote";
 }
