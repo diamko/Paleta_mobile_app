@@ -11,25 +11,31 @@ import kotlinx.coroutines.launch
 import ru.diamko.paleta.core.di.AppContainer
 import ru.diamko.paleta.domain.model.Palette
 import ru.diamko.paleta.domain.model.PaletteExportFile
+import ru.diamko.paleta.domain.model.RecentUpload
 import ru.diamko.paleta.domain.usecase.CreatePaletteUseCase
 import ru.diamko.paleta.domain.usecase.DeletePaletteUseCase
 import ru.diamko.paleta.domain.usecase.ExportPaletteUseCase
+import ru.diamko.paleta.domain.usecase.GeneratePaletteFromImageUrlUseCase
 import ru.diamko.paleta.domain.usecase.GeneratePaletteFromImageUseCase
 import ru.diamko.paleta.domain.usecase.GetPalettesUseCase
+import ru.diamko.paleta.domain.usecase.GetRecentUploadsUseCase
 import ru.diamko.paleta.domain.usecase.RenamePaletteUseCase
 
 data class PaletteUiState(
     val isLoading: Boolean = false,
     val palettes: List<Palette> = emptyList(),
+    val recentUploads: List<RecentUpload> = emptyList(),
     val error: String? = null,
 )
 
 class PaletteViewModel(
     private val getPalettesUseCase: GetPalettesUseCase,
+    private val getRecentUploadsUseCase: GetRecentUploadsUseCase,
     private val createPaletteUseCase: CreatePaletteUseCase,
     private val renamePaletteUseCase: RenamePaletteUseCase,
     private val deletePaletteUseCase: DeletePaletteUseCase,
     private val generatePaletteFromImageUseCase: GeneratePaletteFromImageUseCase,
+    private val generatePaletteFromImageUrlUseCase: GeneratePaletteFromImageUrlUseCase,
     private val exportPaletteUseCase: ExportPaletteUseCase,
 ) : ViewModel() {
 
@@ -45,6 +51,19 @@ class PaletteViewModel(
                 }
                 .onFailure { error ->
                     _uiState.update { it.copy(isLoading = false, error = error.message ?: "Ошибка загрузки") }
+                }
+        }
+    }
+
+    fun loadRecentUploads(days: Int = 7, onDone: (() -> Unit)? = null) {
+        viewModelScope.launch {
+            runCatching { getRecentUploadsUseCase(days) }
+                .onSuccess { uploads ->
+                    _uiState.update { it.copy(recentUploads = uploads, error = null) }
+                    onDone?.invoke()
+                }
+                .onFailure {
+                    // Keep UX non-blocking: recent uploads are optional in flow.
                 }
         }
     }
@@ -121,6 +140,26 @@ class PaletteViewModel(
         }
     }
 
+    fun generateFromRecentUpload(
+        imageUrl: String,
+        colorCount: Int,
+        onDone: (List<String>) -> Unit,
+        onError: (String) -> Unit,
+    ) {
+        viewModelScope.launch {
+            runCatching {
+                generatePaletteFromImageUrlUseCase(
+                    imageUrl = imageUrl,
+                    colorCount = colorCount,
+                )
+            }.onSuccess { colors ->
+                onDone(colors)
+            }.onFailure { error ->
+                onError(error.message ?: "Ошибка генерации из недавнего изображения")
+            }
+        }
+    }
+
     fun exportPalette(
         name: String,
         colors: List<String>,
@@ -176,10 +215,12 @@ class PaletteViewModel(
                 override fun <T : ViewModel> create(modelClass: Class<T>): T {
                     return PaletteViewModel(
                         getPalettesUseCase = GetPalettesUseCase(container.paletteRepository),
+                        getRecentUploadsUseCase = GetRecentUploadsUseCase(container.paletteRepository),
                         createPaletteUseCase = CreatePaletteUseCase(container.paletteRepository),
                         renamePaletteUseCase = RenamePaletteUseCase(container.paletteRepository),
                         deletePaletteUseCase = DeletePaletteUseCase(container.paletteRepository),
                         generatePaletteFromImageUseCase = GeneratePaletteFromImageUseCase(container.paletteRepository),
+                        generatePaletteFromImageUrlUseCase = GeneratePaletteFromImageUrlUseCase(container.paletteRepository),
                         exportPaletteUseCase = ExportPaletteUseCase(container.paletteRepository),
                     ) as T
                 }

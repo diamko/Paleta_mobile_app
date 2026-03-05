@@ -1,5 +1,7 @@
 package ru.diamko.paleta.ui.palettes
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,12 +11,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -29,6 +29,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import ru.diamko.paleta.R
@@ -49,6 +50,7 @@ fun PaletteEditorScreen(
     paletteViewModel: PaletteViewModel,
     onBack: () -> Unit,
 ) {
+    val context = LocalContext.current
     val existing = paletteId?.let { paletteViewModel.paletteById(it) }
 
     var name by remember(existing?.id) { mutableStateOf(existing?.name.orEmpty()) }
@@ -86,7 +88,7 @@ fun PaletteEditorScreen(
                         } else {
                             stringResource(id = R.string.rename_palette)
                         },
-                        subtitle = "Введите название и HEX цвета через запятую",
+                        subtitle = stringResource(id = R.string.palette_editor_subtitle),
                     )
 
                     OutlinedTextField(
@@ -109,7 +111,7 @@ fun PaletteEditorScreen(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             verticalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
-                            parsedColors.forEachIndexed { index, hex ->
+                            parsedColors.forEach { hex ->
                                 val color = ColorTools.hexToColorInt(hex)?.let(::Color) ?: Color.Gray
                                 Box(
                                     modifier = Modifier
@@ -151,7 +153,7 @@ fun PaletteEditorScreen(
                             onClick = {
                                 val parsed = HexColors.parse(colorsInput)
                                 if (parsed == null) {
-                                    localError = "Введите от 3 до 15 корректных HEX-цветов"
+                                    localError = context.getString(R.string.palette_invalid_hex_count)
                                     return@PaletaPrimaryButton
                                 }
                                 paletteViewModel.createPalette(name = name, colors = parsed) {
@@ -165,7 +167,7 @@ fun PaletteEditorScreen(
                             text = stringResource(id = R.string.rename_palette),
                             onClick = {
                                 if (name.isBlank()) {
-                                    localError = "Название палитры не может быть пустым"
+                                    localError = context.getString(R.string.palette_name_required)
                                     return@PaletaPrimaryButton
                                 }
                                 paletteViewModel.renamePalette(existing.id, name) {

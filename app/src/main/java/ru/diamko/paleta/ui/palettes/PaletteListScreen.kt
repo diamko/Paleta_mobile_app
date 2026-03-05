@@ -35,10 +35,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
@@ -47,10 +49,8 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import kotlinx.coroutines.launch
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.draw.clip
+import kotlinx.coroutines.withContext
 import ru.diamko.paleta.R
 import ru.diamko.paleta.core.palette.PaletteExportFormat
 import ru.diamko.paleta.domain.model.Palette
@@ -111,7 +111,7 @@ fun PaletteListScreen(
     ) { outputUri ->
         val payload = pendingExport ?: return@rememberLauncherForActivityResult
         if (outputUri == null) {
-            statusMessage = "Экспорт отменён"
+            statusMessage = context.getString(R.string.export_canceled)
             pendingExport = null
             return@rememberLauncherForActivityResult
         }
@@ -120,16 +120,16 @@ fun PaletteListScreen(
             runCatching {
                 context.contentResolver.openOutputStream(outputUri)?.use { stream ->
                     stream.write(payload.bytes)
-                } ?: error("Не удалось открыть файл для записи")
+                } ?: error(context.getString(R.string.open_file_write_error))
             }.onSuccess {
                 withContext(Dispatchers.Main) {
-                    statusMessage = "Файл сохранён: ${payload.fileName}"
+                    statusMessage = context.getString(R.string.file_saved, payload.fileName)
                     localError = null
                     pendingExport = null
                 }
             }.onFailure { error ->
                 withContext(Dispatchers.Main) {
-                    localError = error.message ?: "Ошибка экспорта"
+                    localError = error.message ?: context.getString(R.string.export_error_generic)
                     pendingExport = null
                 }
             }
@@ -220,8 +220,8 @@ fun PaletteListScreen(
                 item {
                     PaletaCard(modifier = Modifier.fillMaxWidth()) {
                         PaletaSectionTitle(
-                            title = "Paleta Mobile",
-                            subtitle = "Создавайте, генерируйте, копируйте и экспортируйте палитры",
+                            title = stringResource(id = R.string.home_title),
+                            subtitle = stringResource(id = R.string.home_subtitle),
                         )
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -278,7 +278,7 @@ fun PaletteListScreen(
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
                         shape = RoundedCornerShape(14.dp),
-                        label = { Text("Фильтр: ровно N цветов (3-15, опц.)") },
+                        label = { Text(stringResource(id = R.string.filter_exact_colors)) },
                         colors = paletaTextFieldColors(),
                     )
                 }
@@ -288,12 +288,12 @@ fun PaletteListScreen(
                         modifier = Modifier.horizontalScroll(rememberScrollState()),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        SortChip("Новые", sortMode == PaletteSortMode.NEWEST.name) { sortMode = PaletteSortMode.NEWEST.name }
-                        SortChip("Старые", sortMode == PaletteSortMode.OLDEST.name) { sortMode = PaletteSortMode.OLDEST.name }
-                        SortChip("Имя А-Я", sortMode == PaletteSortMode.NAME_ASC.name) { sortMode = PaletteSortMode.NAME_ASC.name }
-                        SortChip("Имя Я-А", sortMode == PaletteSortMode.NAME_DESC.name) { sortMode = PaletteSortMode.NAME_DESC.name }
-                        SortChip("Цветов ↑", sortMode == PaletteSortMode.COLORS_ASC.name) { sortMode = PaletteSortMode.COLORS_ASC.name }
-                        SortChip("Цветов ↓", sortMode == PaletteSortMode.COLORS_DESC.name) { sortMode = PaletteSortMode.COLORS_DESC.name }
+                        SortChip(stringResource(id = R.string.sort_newest), sortMode == PaletteSortMode.NEWEST.name) { sortMode = PaletteSortMode.NEWEST.name }
+                        SortChip(stringResource(id = R.string.sort_oldest), sortMode == PaletteSortMode.OLDEST.name) { sortMode = PaletteSortMode.OLDEST.name }
+                        SortChip(stringResource(id = R.string.sort_name), sortMode == PaletteSortMode.NAME_ASC.name) { sortMode = PaletteSortMode.NAME_ASC.name }
+                        SortChip(stringResource(id = R.string.sort_name_desc), sortMode == PaletteSortMode.NAME_DESC.name) { sortMode = PaletteSortMode.NAME_DESC.name }
+                        SortChip(stringResource(id = R.string.sort_colors_asc), sortMode == PaletteSortMode.COLORS_ASC.name) { sortMode = PaletteSortMode.COLORS_ASC.name }
+                        SortChip(stringResource(id = R.string.sort_colors_desc), sortMode == PaletteSortMode.COLORS_DESC.name) { sortMode = PaletteSortMode.COLORS_DESC.name }
                     }
                 }
 
@@ -317,7 +317,7 @@ fun PaletteListScreen(
                         PaletaCard(modifier = Modifier.fillMaxWidth()) {
                             PaletaSectionTitle(
                                 title = stringResource(id = R.string.empty_palettes),
-                                subtitle = "Создайте палитру вручную или сгенерируйте из изображения",
+                                subtitle = stringResource(id = R.string.empty_palettes_subtitle),
                             )
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
@@ -344,7 +344,7 @@ fun PaletteListScreen(
                             onDeleteClick = { pendingDelete = palette },
                             onCopyClick = {
                                 clipboard.setText(AnnotatedString(palette.colors.joinToString("\n")))
-                                statusMessage = "Палитра скопирована в буфер"
+                                statusMessage = context.getString(R.string.copy_palette_success)
                                 localError = null
                             },
                             onExportClick = {
@@ -375,11 +375,11 @@ fun PaletteListScreen(
         val deleting = pendingDelete!!
         AlertDialog(
             onDismissRequest = { pendingDelete = null },
-            title = { Text("Удалить палитру") },
-            text = { Text("Вы уверены, что хотите удалить «${deleting.name}»?") },
+            title = { Text(stringResource(id = R.string.delete_palette_confirm_title)) },
+            text = { Text(stringResource(id = R.string.delete_palette_confirm_message, deleting.name)) },
             confirmButton = {
                 PaletaPrimaryButton(
-                    text = "Удалить",
+                    text = stringResource(id = R.string.delete),
                     onClick = {
                         onDeleteClick(deleting.id)
                         pendingDelete = null
@@ -388,7 +388,7 @@ fun PaletteListScreen(
             },
             dismissButton = {
                 PaletaGhostButton(
-                    text = "Отмена",
+                    text = stringResource(id = R.string.cancel),
                     onClick = { pendingDelete = null },
                 )
             },
@@ -438,7 +438,7 @@ private fun PaletteCard(
         )
 
         Text(
-            text = "Создано: ${palette.createdAtIso.replace("T", " ").take(16)}",
+            text = stringResource(id = R.string.created_at, palette.createdAtIso.replace("T", " ").take(16)),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -463,12 +463,12 @@ private fun PaletteCard(
         ) {
             PaletaGhostButton(
                 modifier = Modifier.weight(1f),
-                text = "Copy",
+                text = stringResource(id = R.string.copy_action),
                 onClick = onCopyClick,
             )
             PaletaGhostButton(
                 modifier = Modifier.weight(1f),
-                text = "Export",
+                text = stringResource(id = R.string.export_action),
                 onClick = onExportClick,
             )
         }

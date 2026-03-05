@@ -16,8 +16,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import ru.diamko.paleta.R
 import ru.diamko.paleta.ui.components.PaletaCard
 import ru.diamko.paleta.ui.components.PaletaGhostButton
 import ru.diamko.paleta.ui.components.PaletaGradientBackground
@@ -49,8 +51,8 @@ fun ResetPasswordScreen(
         ) {
             PaletaCard(modifier = Modifier.fillMaxWidth()) {
                 PaletaSectionTitle(
-                    title = "Сброс пароля",
-                    subtitle = "Введите email, код и новый пароль",
+                    title = stringResource(id = R.string.reset_password_title),
+                    subtitle = stringResource(id = R.string.reset_password_subtitle),
                 )
 
                 OutlinedTextField(
@@ -62,7 +64,7 @@ fun ResetPasswordScreen(
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     shape = RoundedCornerShape(14.dp),
-                    label = { Text("Email") },
+                    label = { Text(stringResource(id = R.string.email_hint)) },
                     colors = paletaTextFieldColors(),
                 )
 
@@ -75,7 +77,7 @@ fun ResetPasswordScreen(
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     shape = RoundedCornerShape(14.dp),
-                    label = { Text("Код (6 цифр)") },
+                    label = { Text(stringResource(id = R.string.code_6_digits)) },
                     colors = paletaTextFieldColors(),
                 )
 
@@ -88,7 +90,7 @@ fun ResetPasswordScreen(
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     shape = RoundedCornerShape(14.dp),
-                    label = { Text("Новый пароль") },
+                    label = { Text(stringResource(id = R.string.new_password)) },
                     visualTransformation = PasswordVisualTransformation(),
                     colors = paletaTextFieldColors(),
                 )
@@ -102,7 +104,7 @@ fun ResetPasswordScreen(
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     shape = RoundedCornerShape(14.dp),
-                    label = { Text("Повторите пароль") },
+                    label = { Text(stringResource(id = R.string.confirm_password)) },
                     visualTransformation = PasswordVisualTransformation(),
                     colors = paletaTextFieldColors(),
                 )
@@ -112,7 +114,7 @@ fun ResetPasswordScreen(
 
                 PaletaPrimaryButton(
                     modifier = Modifier.fillMaxWidth(),
-                    text = "Обновить пароль",
+                    text = stringResource(id = R.string.update_password),
                     onClick = { onResetPassword(email, code, newPassword, confirmPassword) },
                     enabled = !state.isLoading,
                     isLoading = state.isLoading,
@@ -120,7 +122,7 @@ fun ResetPasswordScreen(
 
                 PaletaGhostButton(
                     modifier = Modifier.fillMaxWidth(),
-                    text = "Назад",
+                    text = stringResource(id = R.string.back),
                     onClick = onBack,
                 )
             }

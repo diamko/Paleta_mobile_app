@@ -67,7 +67,7 @@ fun RegisterScreen(
             PaletaCard(modifier = Modifier.fillMaxWidth()) {
                 PaletaSectionTitle(
                     title = stringResource(id = R.string.register_title),
-                    subtitle = "Создайте аккаунт, чтобы хранить палитры и экспортировать их",
+                    subtitle = stringResource(id = R.string.register_subtitle),
                 )
 
                 OutlinedTextField(
@@ -134,7 +134,7 @@ fun RegisterScreen(
             }
 
             Text(
-                text = "После регистрации вы сразу попадете в раздел «Мои палитры»",
+                text = stringResource(id = R.string.register_footer),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

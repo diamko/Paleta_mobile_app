@@ -20,6 +20,7 @@ import ru.diamko.paleta.data.remote.dto.ExportPaletteRequestDto
 import ru.diamko.paleta.data.remote.dto.LegacyUploadImageResponseDto
 import ru.diamko.paleta.data.remote.dto.PaletteDto
 import ru.diamko.paleta.data.remote.dto.PaletteListDataDto
+import ru.diamko.paleta.data.remote.dto.RecentUploadsDataDto
 import ru.diamko.paleta.data.remote.dto.RenamePaletteRequestDto
 import ru.diamko.paleta.data.remote.dto.UploadImageDataDto
 
@@ -30,6 +31,11 @@ interface PaletteApi {
         @Query("offset") offset: Int = 0,
         @Query("sort") sort: String = "created_desc",
     ): ApiEnvelope<PaletteListDataDto>
+
+    @GET("api/mobile/v1/uploads/recent")
+    suspend fun getRecentUploads(
+        @Query("days") days: Int = 7,
+    ): ApiEnvelope<RecentUploadsDataDto>
 
     @POST("api/mobile/v1/palettes")
     suspend fun createPalette(

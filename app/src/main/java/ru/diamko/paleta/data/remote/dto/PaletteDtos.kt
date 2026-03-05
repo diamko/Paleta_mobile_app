@@ -37,6 +37,20 @@ data class UploadImageDataDto(
 )
 
 @Serializable
+data class RecentUploadDto(
+    val id: Long,
+    val filename: String,
+    val created_at: String,
+    val url: String,
+)
+
+@Serializable
+data class RecentUploadsDataDto(
+    val items: List<RecentUploadDto>,
+    val days: Int,
+)
+
+@Serializable
 data class LegacyUploadImageResponseDto(
     val success: Boolean,
     val filename: String? = null,

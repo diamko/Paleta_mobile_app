@@ -2,10 +2,13 @@ package ru.diamko.paleta.ui.settings
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -28,6 +31,8 @@ import ru.diamko.paleta.ui.components.PaletaSectionTitle
 @Composable
 fun SettingsScreen(
     authState: AuthUiState,
+    currentLanguageTag: String,
+    onChangeLanguage: (String) -> Unit,
     onOpenProfile: () -> Unit,
     onOpenPasswordChange: () -> Unit,
     onOpenFaq: () -> Unit,
@@ -53,8 +58,8 @@ fun SettingsScreen(
             ) {
                 PaletaCard(modifier = Modifier.fillMaxWidth()) {
                     PaletaSectionTitle(
-                        title = "Профиль",
-                        subtitle = "Текущая сессия пользователя",
+                        title = stringResource(id = R.string.profile_title),
+                        subtitle = stringResource(id = R.string.profile_session_subtitle),
                     )
                     Text(
                         text = authState.user?.username ?: "-",
@@ -62,19 +67,45 @@ fun SettingsScreen(
                     )
                     Text(text = authState.user?.email ?: "-")
 
+                    PaletaSectionTitle(
+                        title = stringResource(id = R.string.language_title),
+                        subtitle = stringResource(id = R.string.language_subtitle),
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        FilterChip(
+                            selected = currentLanguageTag == "ru",
+                            onClick = { onChangeLanguage("ru") },
+                            label = { Text(stringResource(id = R.string.language_ru)) },
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = Color(0x1A1976D2),
+                            ),
+                        )
+                        FilterChip(
+                            selected = currentLanguageTag == "en",
+                            onClick = { onChangeLanguage("en") },
+                            label = { Text(stringResource(id = R.string.language_en)) },
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = Color(0x1A1976D2),
+                            ),
+                        )
+                    }
+
                     PaletaGhostButton(
                         modifier = Modifier.fillMaxWidth(),
-                        text = "Редактировать профиль",
+                        text = stringResource(id = R.string.edit_profile),
                         onClick = onOpenProfile,
                     )
                     PaletaGhostButton(
                         modifier = Modifier.fillMaxWidth(),
-                        text = "Смена пароля",
+                        text = stringResource(id = R.string.password_change_title),
                         onClick = onOpenPasswordChange,
                     )
                     PaletaGhostButton(
                         modifier = Modifier.fillMaxWidth(),
-                        text = "FAQ",
+                        text = stringResource(id = R.string.faq),
                         onClick = onOpenFaq,
                     )
                     PaletaPrimaryButton(

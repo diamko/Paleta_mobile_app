@@ -1,10 +1,13 @@
 package ru.diamko.paleta.data.repository
 
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.MultipartBody
-import okhttp3.RequestBody.Companion.toRequestBody
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.MultipartBody
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
+import retrofit2.HttpException
 import ru.diamko.paleta.core.network.NetworkError
 import ru.diamko.paleta.data.remote.api.PaletteApi
 import ru.diamko.paleta.data.remote.dto.ApiEnvelope
@@ -13,20 +16,30 @@ import ru.diamko.paleta.data.remote.dto.ExportPaletteRequestDto
 import ru.diamko.paleta.data.remote.dto.LegacyUploadImageResponseDto
 import ru.diamko.paleta.data.remote.dto.PaletteDto
 import ru.diamko.paleta.data.remote.dto.PaletteListDataDto
+import ru.diamko.paleta.data.remote.dto.RecentUploadDto
+import ru.diamko.paleta.data.remote.dto.RecentUploadsDataDto
 import ru.diamko.paleta.data.remote.dto.RenamePaletteRequestDto
 import ru.diamko.paleta.data.remote.dto.UploadImageDataDto
 import ru.diamko.paleta.domain.model.Palette
 import ru.diamko.paleta.domain.model.PaletteExportFile
+import ru.diamko.paleta.domain.model.RecentUpload
 import ru.diamko.paleta.domain.repository.PaletteRepository
-import retrofit2.HttpException
 
 class RemotePaletteRepository(
     private val paletteApi: PaletteApi,
 ) : PaletteRepository {
+    private val rawHttpClient = OkHttpClient()
 
     override suspend fun getPalettes(): List<Palette> = withContext(Dispatchers.IO) {
         val envelope = paletteApi.getPalettes()
         envelope.unwrapList("Не удалось получить список палитр")
+            .items
+            .map { it.toDomain() }
+    }
+
+    override suspend fun getRecentUploads(days: Int): List<RecentUpload> = withContext(Dispatchers.IO) {
+        val envelope = paletteApi.getRecentUploads(days = days.coerceIn(1, 30))
+        envelope.unwrapRecentUploads("Не удалось загрузить недавние изображения")
             .items
             .map { it.toDomain() }
     }
@@ -88,6 +101,20 @@ class RemotePaletteRepository(
         legacy.unwrapLegacyUpload("Не удалось извлечь палитру из изображения")
     }
 
+    override suspend fun generateFromImageUrl(imageUrl: String, colorCount: Int): List<String> = withContext(Dispatchers.IO) {
+        val request = Request.Builder()
+            .url(imageUrl)
+            .get()
+            .build()
+        val response = rawHttpClient.newCall(request).execute()
+        if (!response.isSuccessful) {
+            throw NetworkError("Не удалось загрузить изображение (${response.code})")
+        }
+        val bytes = response.body?.bytes() ?: throw NetworkError("Пустой ответ сервера при загрузке изображения")
+        val fileName = imageUrl.substringAfterLast('/').ifBlank { "upload.jpg" }
+        generateFromImage(fileName = fileName, imageBytes = bytes, colorCount = colorCount)
+    }
+
     override suspend fun exportPalette(
         name: String,
         colors: List<String>,
@@ -124,6 +151,13 @@ class RemotePaletteRepository(
         throw NetworkError(error?.message ?: defaultMessage)
     }
 
+    private fun ApiEnvelope<RecentUploadsDataDto>.unwrapRecentUploads(defaultMessage: String): RecentUploadsDataDto {
+        if (success && data != null) {
+            return data
+        }
+        throw NetworkError(error?.message ?: defaultMessage)
+    }
+
     private fun ApiEnvelope<PaletteDto>.unwrapOne(defaultMessage: String): PaletteDto {
         if (success && data != null) {
             return data
@@ -151,6 +185,15 @@ class RemotePaletteRepository(
             name = name,
             colors = colors,
             createdAtIso = created_at,
+        )
+    }
+
+    private fun RecentUploadDto.toDomain(): RecentUpload {
+        return RecentUpload(
+            id = id,
+            filename = filename,
+            createdAtIso = created_at,
+            url = url,
         )
     }
 

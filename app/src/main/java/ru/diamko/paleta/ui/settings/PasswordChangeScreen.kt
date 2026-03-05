@@ -16,8 +16,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import ru.diamko.paleta.R
 import ru.diamko.paleta.ui.auth.AuthUiState
 import ru.diamko.paleta.ui.components.PaletaCard
 import ru.diamko.paleta.ui.components.PaletaGhostButton
@@ -49,13 +51,13 @@ fun PasswordChangeScreen(
         ) {
             PaletaCard(modifier = Modifier.fillMaxWidth()) {
                 PaletaSectionTitle(
-                    title = "Смена пароля",
-                    subtitle = "Отправьте код на email, затем подтвердите смену",
+                    title = stringResource(id = R.string.password_change_title),
+                    subtitle = stringResource(id = R.string.password_change_subtitle),
                 )
 
                 PaletaGhostButton(
                     modifier = Modifier.fillMaxWidth(),
-                    text = "Отправить код на email",
+                    text = stringResource(id = R.string.send_code_email),
                     onClick = onSendCode,
                     enabled = !authState.isLoading,
                 )
@@ -69,7 +71,7 @@ fun PasswordChangeScreen(
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     shape = RoundedCornerShape(14.dp),
-                    label = { Text("Код (6 цифр)") },
+                    label = { Text(stringResource(id = R.string.code_6_digits)) },
                     colors = paletaTextFieldColors(),
                 )
 
@@ -82,7 +84,7 @@ fun PasswordChangeScreen(
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     shape = RoundedCornerShape(14.dp),
-                    label = { Text("Новый пароль") },
+                    label = { Text(stringResource(id = R.string.new_password)) },
                     visualTransformation = PasswordVisualTransformation(),
                     colors = paletaTextFieldColors(),
                 )
@@ -96,7 +98,7 @@ fun PasswordChangeScreen(
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     shape = RoundedCornerShape(14.dp),
-                    label = { Text("Повторите пароль") },
+                    label = { Text(stringResource(id = R.string.confirm_password)) },
                     visualTransformation = PasswordVisualTransformation(),
                     colors = paletaTextFieldColors(),
                 )
@@ -106,7 +108,7 @@ fun PasswordChangeScreen(
 
                 PaletaPrimaryButton(
                     modifier = Modifier.fillMaxWidth(),
-                    text = "Изменить пароль",
+                    text = stringResource(id = R.string.change_password),
                     onClick = { onChangePassword(code, newPassword, confirmPassword) },
                     enabled = !authState.isLoading,
                     isLoading = authState.isLoading,
@@ -114,7 +116,7 @@ fun PasswordChangeScreen(
 
                 PaletaGhostButton(
                     modifier = Modifier.fillMaxWidth(),
-                    text = "Назад",
+                    text = stringResource(id = R.string.back),
                     onClick = onBack,
                 )
             }

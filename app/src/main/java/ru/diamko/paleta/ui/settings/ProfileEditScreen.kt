@@ -16,8 +16,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import ru.diamko.paleta.R
 import ru.diamko.paleta.ui.auth.AuthUiState
 import ru.diamko.paleta.ui.components.PaletaCard
 import ru.diamko.paleta.ui.components.PaletaGhostButton
@@ -48,8 +50,8 @@ fun ProfileEditScreen(
         ) {
             PaletaCard(modifier = Modifier.fillMaxWidth()) {
                 PaletaSectionTitle(
-                    title = "Профиль",
-                    subtitle = "Изменение имени и email",
+                    title = stringResource(id = R.string.profile_title),
+                    subtitle = stringResource(id = R.string.profile_subtitle),
                 )
 
                 OutlinedTextField(
@@ -61,7 +63,7 @@ fun ProfileEditScreen(
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     shape = RoundedCornerShape(14.dp),
-                    label = { Text("Имя пользователя") },
+                    label = { Text(stringResource(id = R.string.username_hint)) },
                     colors = paletaTextFieldColors(),
                 )
 
@@ -74,7 +76,7 @@ fun ProfileEditScreen(
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     shape = RoundedCornerShape(14.dp),
-                    label = { Text("Email") },
+                    label = { Text(stringResource(id = R.string.email_hint)) },
                     colors = paletaTextFieldColors(),
                 )
 
@@ -87,7 +89,7 @@ fun ProfileEditScreen(
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     shape = RoundedCornerShape(14.dp),
-                    label = { Text("Текущий пароль") },
+                    label = { Text(stringResource(id = R.string.current_password)) },
                     visualTransformation = PasswordVisualTransformation(),
                     colors = paletaTextFieldColors(),
                 )
@@ -97,7 +99,7 @@ fun ProfileEditScreen(
 
                 PaletaPrimaryButton(
                     modifier = Modifier.fillMaxWidth(),
-                    text = "Сохранить профиль",
+                    text = stringResource(id = R.string.save_profile),
                     onClick = { onSave(username, email, currentPassword) },
                     enabled = !authState.isLoading,
                     isLoading = authState.isLoading,
@@ -105,7 +107,7 @@ fun ProfileEditScreen(
 
                 PaletaGhostButton(
                     modifier = Modifier.fillMaxWidth(),
-                    text = "Назад",
+                    text = stringResource(id = R.string.back),
                     onClick = onBack,
                 )
             }

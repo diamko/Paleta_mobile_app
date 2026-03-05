@@ -6,9 +6,11 @@ import kotlinx.coroutines.withContext
 import ru.diamko.paleta.core.palette.BitmapPaletteExtractor
 import ru.diamko.paleta.core.palette.PaletteExportFormat
 import ru.diamko.paleta.core.palette.PaletteExportFormatter
+import ru.diamko.paleta.core.palette.RandomPaletteGenerator
 import ru.diamko.paleta.core.storage.TokenStore
 import ru.diamko.paleta.domain.model.Palette
 import ru.diamko.paleta.domain.model.PaletteExportFile
+import ru.diamko.paleta.domain.model.RecentUpload
 import ru.diamko.paleta.domain.repository.PaletteRepository
 
 class FakePaletteRepository(
@@ -18,6 +20,10 @@ class FakePaletteRepository(
     override suspend fun getPalettes(): List<Palette> = withContext(Dispatchers.IO) {
         val token = requireAccessToken()
         FakeBackend.palettesForUser(token)
+    }
+
+    override suspend fun getRecentUploads(days: Int): List<RecentUpload> = withContext(Dispatchers.IO) {
+        emptyList()
     }
 
     override suspend fun createPalette(name: String, colors: List<String>): Palette = withContext(Dispatchers.IO) {
@@ -43,6 +49,10 @@ class FakePaletteRepository(
         val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
             ?: throw IllegalArgumentException("Не удалось прочитать изображение")
         BitmapPaletteExtractor.extractFromBitmap(bitmap, colorCount)
+    }
+
+    override suspend fun generateFromImageUrl(imageUrl: String, colorCount: Int): List<String> = withContext(Dispatchers.Default) {
+        RandomPaletteGenerator.generate(colorCount.coerceIn(3, 15))
     }
 
     override suspend fun exportPalette(

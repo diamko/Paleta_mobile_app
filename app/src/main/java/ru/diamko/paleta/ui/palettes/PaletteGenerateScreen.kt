@@ -47,6 +47,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -72,6 +73,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -134,6 +136,11 @@ fun PaletteGenerateScreen(
     var isBusy by remember { mutableStateOf(false) }
     var selectedFormat by remember { mutableStateOf(PaletteExportFormat.JSON) }
     var pendingExport by remember { mutableStateOf<PaletteExportFile?>(null) }
+    val paletteState by paletteViewModel.uiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(Unit) {
+        paletteViewModel.loadRecentUploads()
+    }
 
     fun applyPalette(colors: List<String>, message: String) {
         val normalized = HexColors.normalize(colors)
@@ -198,6 +205,37 @@ fun PaletteGenerateScreen(
                     }
                     applyPalette(colors, "Извлечено цветов: ${colors.size}")
                     markerPositions = estimateInitialMarkerPositions(bitmap, colors)
+                },
+                onError = { error ->
+                    isBusy = false
+                    localError = error
+                },
+            )
+        }
+    }
+
+    fun useRecentUpload(imageUrl: String, fileName: String) {
+        scope.launch {
+            isBusy = true
+            localError = null
+            statusMessage = "Извлечение цветов..."
+            paletteColors = emptyList()
+            markerPositions = emptyList()
+            selectedColorIndex = 0
+            loupeTouchPosition = null
+            loupeSample = null
+            imageBitmap = null
+
+            paletteViewModel.generateFromRecentUpload(
+                imageUrl = imageUrl,
+                colorCount = paletteSize(),
+                onDone = { colors ->
+                    isBusy = false
+                    if (colors.isEmpty()) {
+                        localError = "Не удалось извлечь цвета из изображения"
+                        return@generateFromRecentUpload
+                    }
+                    applyPalette(colors, "Извлечено цветов: ${colors.size} ($fileName)")
                 },
                 onError = { error ->
                     isBusy = false
@@ -372,6 +410,33 @@ fun PaletteGenerateScreen(
                             onClick = { pickImageLauncher.launch("image/*") },
                             enabled = !isBusy,
                         )
+                    }
+                }
+
+                if (paletteState.recentUploads.isNotEmpty()) {
+                    PaletaCard(modifier = Modifier.fillMaxWidth()) {
+                        PaletaSectionTitle(
+                            title = "Недавние изображения",
+                            subtitle = "Повторно использовать загрузки за последние дни",
+                        )
+                        paletteState.recentUploads.take(8).forEach { upload ->
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            ) {
+                                Text(
+                                    text = upload.filename,
+                                    modifier = Modifier.weight(1f),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                )
+                                PaletaGhostButton(
+                                    modifier = Modifier.width(116.dp),
+                                    text = "Использовать",
+                                    onClick = { useRecentUpload(upload.url, upload.filename) },
+                                    enabled = !isBusy,
+                                )
+                            }
+                        }
                     }
                 }
 

@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -14,6 +15,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.os.LocaleListCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
@@ -21,6 +24,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import kotlinx.coroutines.launch
 import ru.diamko.paleta.R
 import ru.diamko.paleta.core.di.AppContainer
 import ru.diamko.paleta.ui.auth.AuthViewModel
@@ -43,6 +47,7 @@ fun PaletaApp(
     container: AppContainer,
 ) {
     val navController = rememberNavController()
+    val scope = rememberCoroutineScope()
 
     val authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.factory(container))
     val paletteViewModel: PaletteViewModel = viewModel(factory = PaletteViewModel.factory(container))
@@ -50,6 +55,16 @@ fun PaletaApp(
     val authState by authViewModel.uiState.collectAsStateWithLifecycle()
     val paletteState by paletteViewModel.uiState.collectAsStateWithLifecycle()
     var resetEmailPrefill by rememberSaveable { mutableStateOf("") }
+    var currentLanguageTag by rememberSaveable { mutableStateOf("ru") }
+
+    LaunchedEffect(Unit) {
+        val stored = container.localeStore.readLanguageTag()
+        val tag = stored
+            ?.takeIf { it == "ru" || it == "en" }
+            ?: "ru"
+        currentLanguageTag = tag
+        AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(tag))
+    }
 
     LaunchedEffect(authState.isCheckingSession, authState.user?.id) {
         if (authState.isCheckingSession) {
@@ -188,6 +203,15 @@ fun PaletaApp(
         composable(Routes.SETTINGS) {
             SettingsScreen(
                 authState = authState,
+                currentLanguageTag = currentLanguageTag,
+                onChangeLanguage = { languageTag ->
+                    val safeTag = if (languageTag == "en") "en" else "ru"
+                    currentLanguageTag = safeTag
+                    scope.launch {
+                        container.localeStore.saveLanguageTag(safeTag)
+                    }
+                    AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(safeTag))
+                },
                 onOpenProfile = { navController.navigate(Routes.PROFILE_EDIT) },
                 onOpenPasswordChange = { navController.navigate(Routes.PASSWORD_CHANGE) },
                 onOpenFaq = { navController.navigate(Routes.FAQ) },

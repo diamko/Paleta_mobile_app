@@ -10,8 +10,10 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import ru.diamko.paleta.R
 import ru.diamko.paleta.ui.components.PaletaCard
 import ru.diamko.paleta.ui.components.PaletaGhostButton
 import ru.diamko.paleta.ui.components.PaletaGradientBackground
@@ -31,25 +33,25 @@ fun FaqScreen(
         ) {
             PaletaCard(modifier = Modifier.fillMaxWidth()) {
                 PaletaSectionTitle(
-                    title = "FAQ",
-                    subtitle = "Краткие ответы по работе с Paleta",
+                    title = stringResource(id = R.string.faq_title),
+                    subtitle = stringResource(id = R.string.faq_subtitle),
                 )
 
-                Text("1. Как создать палитру?", fontWeight = FontWeight.SemiBold)
-                Text("Откройте Генератор, выберите случайную палитру или изображение, затем нажмите «Сохранить».")
+                Text(stringResource(id = R.string.faq_q1_title), fontWeight = FontWeight.SemiBold)
+                Text(stringResource(id = R.string.faq_q1_body))
 
-                Text("2. Как экспортировать палитру?", fontWeight = FontWeight.SemiBold)
-                Text("На экране «Мои палитры» выберите «Экспорт» и нужный формат.")
+                Text(stringResource(id = R.string.faq_q2_title), fontWeight = FontWeight.SemiBold)
+                Text(stringResource(id = R.string.faq_q2_body))
 
-                Text("3. Как восстановить пароль?", fontWeight = FontWeight.SemiBold)
-                Text("На экране входа нажмите «Забыли пароль», получите код на email и задайте новый пароль.")
+                Text(stringResource(id = R.string.faq_q3_title), fontWeight = FontWeight.SemiBold)
+                Text(stringResource(id = R.string.faq_q3_body))
 
-                Text("4. Как изменить профиль?", fontWeight = FontWeight.SemiBold)
-                Text("Откройте Настройки -> Профиль, внесите изменения и подтвердите текущим паролем.")
+                Text(stringResource(id = R.string.faq_q4_title), fontWeight = FontWeight.SemiBold)
+                Text(stringResource(id = R.string.faq_q4_body))
 
                 PaletaGhostButton(
                     modifier = Modifier.fillMaxWidth(),
-                    text = "Назад",
+                    text = stringResource(id = R.string.back),
                     onClick = onBack,
                 )
             }

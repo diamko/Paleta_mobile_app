@@ -3,7 +3,9 @@ package ru.diamko.paleta.core.di
 import android.content.Context
 import ru.diamko.paleta.BuildConfig
 import ru.diamko.paleta.core.network.NetworkModule
+import ru.diamko.paleta.core.storage.DataStoreLocaleStore
 import ru.diamko.paleta.core.storage.DataStoreTokenStore
+import ru.diamko.paleta.core.storage.LocaleStore
 import ru.diamko.paleta.core.storage.TokenStore
 import ru.diamko.paleta.data.repository.FakeAuthRepository
 import ru.diamko.paleta.data.repository.FakePaletteRepository
@@ -20,6 +22,10 @@ class AppContainer(
 
     val tokenStore: TokenStore by lazy {
         DataStoreTokenStore(appContext)
+    }
+
+    val localeStore: LocaleStore by lazy {
+        DataStoreLocaleStore(appContext)
     }
 
     private val mode: RepositoryMode by lazy {

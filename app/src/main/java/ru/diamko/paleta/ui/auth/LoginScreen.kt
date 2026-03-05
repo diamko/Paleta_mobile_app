@@ -67,7 +67,7 @@ fun LoginScreen(
             PaletaCard(modifier = Modifier.fillMaxWidth()) {
                 PaletaSectionTitle(
                     title = stringResource(id = R.string.login_title),
-                    subtitle = "Доступ к генерации, сохранению и экспорту палитр",
+                    subtitle = stringResource(id = R.string.login_subtitle),
                 )
 
                 OutlinedTextField(
@@ -121,14 +121,14 @@ fun LoginScreen(
 
                 PaletaGhostButton(
                     modifier = Modifier.fillMaxWidth(),
-                    text = "Забыли пароль?",
+                    text = stringResource(id = R.string.forgot_password_link),
                     onClick = onGoForgotPasswordClick,
                     enabled = !state.isLoading,
                 )
             }
 
             Text(
-                text = "Рекомендуется тестировать на одном Wi-Fi с backend сервером",
+                text = stringResource(id = R.string.wifi_hint),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

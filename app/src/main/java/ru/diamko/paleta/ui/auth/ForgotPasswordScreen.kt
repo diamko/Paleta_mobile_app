@@ -16,7 +16,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import ru.diamko.paleta.R
 import ru.diamko.paleta.ui.components.PaletaCard
 import ru.diamko.paleta.ui.components.PaletaGhostButton
 import ru.diamko.paleta.ui.components.PaletaGradientBackground
@@ -45,8 +47,8 @@ fun ForgotPasswordScreen(
         ) {
             PaletaCard(modifier = Modifier.fillMaxWidth()) {
                 PaletaSectionTitle(
-                    title = "Восстановление пароля",
-                    subtitle = "Введите email, чтобы получить код подтверждения",
+                    title = stringResource(id = R.string.forgot_password_title),
+                    subtitle = stringResource(id = R.string.forgot_password_subtitle),
                 )
 
                 OutlinedTextField(
@@ -58,7 +60,7 @@ fun ForgotPasswordScreen(
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     shape = RoundedCornerShape(14.dp),
-                    label = { Text("Email") },
+                    label = { Text(stringResource(id = R.string.email_hint)) },
                     colors = paletaTextFieldColors(),
                 )
 
@@ -67,7 +69,7 @@ fun ForgotPasswordScreen(
 
                 PaletaPrimaryButton(
                     modifier = Modifier.fillMaxWidth(),
-                    text = "Отправить код",
+                    text = stringResource(id = R.string.send_code),
                     onClick = { onRequestCode(email) },
                     enabled = !state.isLoading,
                     isLoading = state.isLoading,
@@ -75,13 +77,13 @@ fun ForgotPasswordScreen(
 
                 PaletaGhostButton(
                     modifier = Modifier.fillMaxWidth(),
-                    text = "У меня уже есть код",
+                    text = stringResource(id = R.string.have_code),
                     onClick = { onGoReset(email) },
                 )
 
                 PaletaGhostButton(
                     modifier = Modifier.fillMaxWidth(),
-                    text = "Назад",
+                    text = stringResource(id = R.string.back),
                     onClick = onBack,
                 )
             }
