@@ -8,6 +8,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -21,13 +24,18 @@ import androidx.navigation.navArgument
 import ru.diamko.paleta.R
 import ru.diamko.paleta.core.di.AppContainer
 import ru.diamko.paleta.ui.auth.AuthViewModel
+import ru.diamko.paleta.ui.auth.ForgotPasswordScreen
 import ru.diamko.paleta.ui.auth.LoginScreen
 import ru.diamko.paleta.ui.auth.RegisterScreen
+import ru.diamko.paleta.ui.auth.ResetPasswordScreen
 import ru.diamko.paleta.ui.components.PaletaGradientBackground
 import ru.diamko.paleta.ui.palettes.PaletteEditorScreen
 import ru.diamko.paleta.ui.palettes.PaletteGenerateScreen
 import ru.diamko.paleta.ui.palettes.PaletteListScreen
 import ru.diamko.paleta.ui.palettes.PaletteViewModel
+import ru.diamko.paleta.ui.settings.FaqScreen
+import ru.diamko.paleta.ui.settings.PasswordChangeScreen
+import ru.diamko.paleta.ui.settings.ProfileEditScreen
 import ru.diamko.paleta.ui.settings.SettingsScreen
 
 @Composable
@@ -41,16 +49,25 @@ fun PaletaApp(
 
     val authState by authViewModel.uiState.collectAsStateWithLifecycle()
     val paletteState by paletteViewModel.uiState.collectAsStateWithLifecycle()
+    var resetEmailPrefill by rememberSaveable { mutableStateOf("") }
 
     LaunchedEffect(authState.isCheckingSession, authState.user?.id) {
         if (authState.isCheckingSession) {
             return@LaunchedEffect
         }
 
-        val target = if (authState.user == null) Routes.LOGIN else Routes.PALETTES
-        navController.navigate(target) {
-            launchSingleTop = true
-            restoreState = false
+        val current = navController.currentBackStackEntry?.destination?.route
+        val authFlow = setOf(Routes.LOGIN, Routes.REGISTER, Routes.FORGOT_PASSWORD, Routes.RESET_PASSWORD)
+        val target = if (authState.user == null) {
+            if (current in authFlow) null else Routes.LOGIN
+        } else {
+            if (current in authFlow || current == null) Routes.PALETTES else null
+        }
+        if (target != null) {
+            navController.navigate(target) {
+                launchSingleTop = true
+                restoreState = false
+            }
         }
     }
 
@@ -77,7 +94,11 @@ fun PaletaApp(
                 state = authState,
                 onLoginClick = authViewModel::login,
                 onGoRegisterClick = { navController.navigate(Routes.REGISTER) },
-                onClearError = authViewModel::clearError,
+                onGoForgotPasswordClick = { navController.navigate(Routes.FORGOT_PASSWORD) },
+                onClearError = {
+                    authViewModel.clearError()
+                    authViewModel.clearInfoMessage()
+                },
             )
         }
 
@@ -86,7 +107,53 @@ fun PaletaApp(
                 state = authState,
                 onRegisterClick = authViewModel::register,
                 onGoLoginClick = { navController.navigate(Routes.LOGIN) },
-                onClearError = authViewModel::clearError,
+                onClearError = {
+                    authViewModel.clearError()
+                    authViewModel.clearInfoMessage()
+                },
+            )
+        }
+
+        composable(Routes.FORGOT_PASSWORD) {
+            ForgotPasswordScreen(
+                state = authState,
+                onRequestCode = { email ->
+                    authViewModel.requestPasswordResetCode(email)
+                },
+                onGoReset = { email ->
+                    resetEmailPrefill = email
+                    navController.navigate(Routes.RESET_PASSWORD)
+                },
+                onBack = { navController.popBackStack() },
+                onClearMessages = {
+                    authViewModel.clearError()
+                    authViewModel.clearInfoMessage()
+                },
+            )
+        }
+
+        composable(Routes.RESET_PASSWORD) {
+            ResetPasswordScreen(
+                state = authState,
+                prefillEmail = resetEmailPrefill,
+                onResetPassword = { email, code, newPassword, confirmPassword ->
+                    authViewModel.resetPassword(
+                        email = email,
+                        code = code,
+                        newPassword = newPassword,
+                        confirmPassword = confirmPassword,
+                    ) {
+                        navController.navigate(Routes.LOGIN) {
+                            popUpTo(Routes.LOGIN) { inclusive = false }
+                            launchSingleTop = true
+                        }
+                    }
+                },
+                onBack = { navController.popBackStack() },
+                onClearMessages = {
+                    authViewModel.clearError()
+                    authViewModel.clearInfoMessage()
+                },
             )
         }
 
@@ -99,6 +166,15 @@ fun PaletaApp(
                 onEditClick = { id -> navController.navigate(Routes.paletteEditor(id.toString())) },
                 onDeleteClick = { id -> paletteViewModel.deletePalette(id) },
                 onOpenSettings = { navController.navigate(Routes.SETTINGS) },
+                onExportPalette = { palette, format, onDone, onError ->
+                    paletteViewModel.exportPalette(
+                        name = palette.name,
+                        colors = palette.colors,
+                        format = format,
+                        onDone = onDone,
+                        onError = onError,
+                    )
+                },
             )
         }
 
@@ -112,9 +188,45 @@ fun PaletaApp(
         composable(Routes.SETTINGS) {
             SettingsScreen(
                 authState = authState,
+                onOpenProfile = { navController.navigate(Routes.PROFILE_EDIT) },
+                onOpenPasswordChange = { navController.navigate(Routes.PASSWORD_CHANGE) },
+                onOpenFaq = { navController.navigate(Routes.FAQ) },
                 onLogout = authViewModel::logout,
                 onBack = { navController.popBackStack() },
             )
+        }
+
+        composable(Routes.PROFILE_EDIT) {
+            ProfileEditScreen(
+                authState = authState,
+                onSave = { username, email, currentPassword ->
+                    authViewModel.updateProfile(username, email, currentPassword)
+                },
+                onBack = { navController.popBackStack() },
+                onClearMessages = {
+                    authViewModel.clearError()
+                    authViewModel.clearInfoMessage()
+                },
+            )
+        }
+
+        composable(Routes.PASSWORD_CHANGE) {
+            PasswordChangeScreen(
+                authState = authState,
+                onSendCode = { authViewModel.sendProfilePasswordCode() },
+                onChangePassword = { code, newPassword, confirmPassword ->
+                    authViewModel.changeProfilePassword(code, newPassword, confirmPassword)
+                },
+                onBack = { navController.popBackStack() },
+                onClearMessages = {
+                    authViewModel.clearError()
+                    authViewModel.clearInfoMessage()
+                },
+            )
+        }
+
+        composable(Routes.FAQ) {
+            FaqScreen(onBack = { navController.popBackStack() })
         }
 
         composable(

@@ -11,8 +11,14 @@ object FakeBackend {
     private data class UserRecord(
         val id: Long,
         var username: String,
-        val email: String,
+        var email: String,
         var password: String,
+    )
+
+    private data class ResetCode(
+        val code: String,
+        val expiresAtEpochSec: Long,
+        var attempts: Int = 0,
     )
 
     private val lock = Any()
@@ -48,6 +54,7 @@ object FakeBackend {
 
     private val accessSessions = mutableMapOf<String, Long>()
     private val refreshSessions = mutableMapOf<String, Long>()
+    private val resetCodesByEmail = mutableMapOf<String, ResetCode>()
 
     fun login(login: String, password: String): Pair<User, AuthTokens> = synchronized(lock) {
         val record = users.firstOrNull {
@@ -63,7 +70,6 @@ object FakeBackend {
         if (users.any { it.username.equals(username, ignoreCase = true) }) {
             throw IllegalArgumentException("Пользователь с таким именем уже существует")
         }
-
         if (users.any { it.email.equals(email, ignoreCase = true) }) {
             throw IllegalArgumentException("Этот email уже используется")
         }
@@ -80,6 +86,99 @@ object FakeBackend {
 
         val tokens = issueTokens(id)
         toUser(userRecord) to tokens
+    }
+
+    fun requestPasswordResetCode(email: String) {
+        synchronized(lock) {
+            val userExists = users.any { it.email.equals(email, ignoreCase = true) }
+            if (!userExists) {
+                return@synchronized
+            }
+            val code = (100000..999999).random().toString()
+            resetCodesByEmail[email.lowercase()] = ResetCode(
+                code = code,
+                expiresAtEpochSec = Instant.now().epochSecond + 15 * 60,
+            )
+        }
+    }
+
+    fun resetPassword(
+        email: String,
+        code: String,
+        newPassword: String,
+        confirmPassword: String,
+    ) {
+        synchronized(lock) {
+            if (newPassword != confirmPassword) {
+                throw IllegalArgumentException("Пароли не совпадают")
+            }
+            val normalizedEmail = email.lowercase()
+            val resetCode = resetCodesByEmail[normalizedEmail]
+                ?: throw IllegalArgumentException("Код не найден или истек")
+            if (resetCode.expiresAtEpochSec < Instant.now().epochSecond) {
+                resetCodesByEmail.remove(normalizedEmail)
+                throw IllegalArgumentException("Код не найден или истек")
+            }
+            if (resetCode.attempts >= 5) {
+                throw IllegalArgumentException("Превышено число попыток")
+            }
+            if (resetCode.code != code) {
+                resetCode.attempts += 1
+                throw IllegalArgumentException("Неверный код")
+            }
+            val user = users.firstOrNull { it.email.equals(normalizedEmail, ignoreCase = true) }
+                ?: throw IllegalArgumentException("Пользователь не найден")
+            user.password = newPassword
+            resetCodesByEmail.remove(normalizedEmail)
+        }
+    }
+
+    fun updateProfile(
+        accessToken: String,
+        username: String,
+        email: String,
+        currentPassword: String,
+    ): User = synchronized(lock) {
+        val userId = accessSessions[accessToken] ?: throw IllegalStateException("Сессия истекла")
+        val current = users.firstOrNull { it.id == userId } ?: throw IllegalArgumentException("Пользователь не найден")
+        if (current.password != currentPassword) {
+            throw IllegalArgumentException("Текущий пароль указан неверно")
+        }
+        if (users.any { it.id != userId && it.username.equals(username, ignoreCase = true) }) {
+            throw IllegalArgumentException("Это имя пользователя уже занято")
+        }
+        if (users.any { it.id != userId && it.email.equals(email, ignoreCase = true) }) {
+            throw IllegalArgumentException("Этот email уже используется")
+        }
+        current.username = username
+        current.email = email
+        toUser(current)
+    }
+
+    fun sendProfilePasswordCode(accessToken: String) {
+        synchronized(lock) {
+            val userId = accessSessions[accessToken] ?: throw IllegalStateException("Сессия истекла")
+            val user = users.firstOrNull { it.id == userId } ?: throw IllegalArgumentException("Пользователь не найден")
+            requestPasswordResetCode(user.email)
+        }
+    }
+
+    fun changeProfilePassword(
+        accessToken: String,
+        code: String,
+        newPassword: String,
+        confirmPassword: String,
+    ) {
+        synchronized(lock) {
+            val userId = accessSessions[accessToken] ?: throw IllegalStateException("Сессия истекла")
+            val user = users.firstOrNull { it.id == userId } ?: throw IllegalArgumentException("Пользователь не найден")
+            resetPassword(
+                email = user.email,
+                code = code,
+                newPassword = newPassword,
+                confirmPassword = confirmPassword,
+            )
+        }
     }
 
     fun userByAccessToken(accessToken: String): User? = synchronized(lock) {

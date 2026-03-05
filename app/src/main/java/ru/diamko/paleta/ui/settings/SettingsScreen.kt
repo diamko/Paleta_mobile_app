@@ -28,6 +28,9 @@ import ru.diamko.paleta.ui.components.PaletaSectionTitle
 @Composable
 fun SettingsScreen(
     authState: AuthUiState,
+    onOpenProfile: () -> Unit,
+    onOpenPasswordChange: () -> Unit,
+    onOpenFaq: () -> Unit,
     onLogout: () -> Unit,
     onBack: () -> Unit,
 ) {
@@ -59,6 +62,21 @@ fun SettingsScreen(
                     )
                     Text(text = authState.user?.email ?: "-")
 
+                    PaletaGhostButton(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = "Редактировать профиль",
+                        onClick = onOpenProfile,
+                    )
+                    PaletaGhostButton(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = "Смена пароля",
+                        onClick = onOpenPasswordChange,
+                    )
+                    PaletaGhostButton(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = "FAQ",
+                        onClick = onOpenFaq,
+                    )
                     PaletaPrimaryButton(
                         modifier = Modifier.fillMaxWidth(),
                         text = stringResource(id = R.string.logout),

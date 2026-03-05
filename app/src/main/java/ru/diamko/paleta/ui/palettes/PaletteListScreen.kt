@@ -1,5 +1,7 @@
 package ru.diamko.paleta.ui.palettes
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -17,6 +19,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -36,13 +39,22 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.draw.clip
 import ru.diamko.paleta.R
+import ru.diamko.paleta.core.palette.PaletteExportFormat
 import ru.diamko.paleta.domain.model.Palette
+import ru.diamko.paleta.domain.model.PaletteExportFile
 import ru.diamko.paleta.ui.components.PaletaCard
 import ru.diamko.paleta.ui.components.PaletaGhostButton
 import ru.diamko.paleta.ui.components.PaletaGradientBackground
@@ -54,7 +66,10 @@ import ru.diamko.paleta.ui.components.paletaTextFieldColors
 private enum class PaletteSortMode {
     NEWEST,
     OLDEST,
-    NAME,
+    NAME_ASC,
+    NAME_DESC,
+    COLORS_ASC,
+    COLORS_DESC,
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -67,16 +82,63 @@ fun PaletteListScreen(
     onEditClick: (Long) -> Unit,
     onDeleteClick: (Long) -> Unit,
     onOpenSettings: () -> Unit,
+    onExportPalette: (
+        palette: Palette,
+        format: String,
+        onDone: (PaletteExportFile) -> Unit,
+        onError: (String) -> Unit,
+    ) -> Unit,
 ) {
     var query by rememberSaveable { mutableStateOf("") }
     var sortMode by rememberSaveable { mutableStateOf(PaletteSortMode.NEWEST.name) }
+    var colorCountFilterRaw by rememberSaveable { mutableStateOf("") }
+    var selectedFormat by rememberSaveable { mutableStateOf(PaletteExportFormat.JSON.name) }
+    var localError by rememberSaveable { mutableStateOf<String?>(null) }
+    var statusMessage by rememberSaveable { mutableStateOf<String?>(null) }
+    var pendingDelete by remember { mutableStateOf<Palette?>(null) }
+    var pendingExport by remember { mutableStateOf<PaletteExportFile?>(null) }
+
+    val clipboard = LocalClipboardManager.current
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
         onReload()
     }
 
-    val visiblePalettes = remember(state.palettes, query, sortMode) {
-        val filtered = if (query.isBlank()) {
+    val createDocumentLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("*/*"),
+    ) { outputUri ->
+        val payload = pendingExport ?: return@rememberLauncherForActivityResult
+        if (outputUri == null) {
+            statusMessage = "Экспорт отменён"
+            pendingExport = null
+            return@rememberLauncherForActivityResult
+        }
+
+        scope.launch(Dispatchers.IO) {
+            runCatching {
+                context.contentResolver.openOutputStream(outputUri)?.use { stream ->
+                    stream.write(payload.bytes)
+                } ?: error("Не удалось открыть файл для записи")
+            }.onSuccess {
+                withContext(Dispatchers.Main) {
+                    statusMessage = "Файл сохранён: ${payload.fileName}"
+                    localError = null
+                    pendingExport = null
+                }
+            }.onFailure { error ->
+                withContext(Dispatchers.Main) {
+                    localError = error.message ?: "Ошибка экспорта"
+                    pendingExport = null
+                }
+            }
+        }
+    }
+
+    val visiblePalettes = remember(state.palettes, query, sortMode, colorCountFilterRaw) {
+        val colorCountFilter = colorCountFilterRaw.toIntOrNull()
+        val filteredByQuery = if (query.isBlank()) {
             state.palettes
         } else {
             val q = query.trim().lowercase()
@@ -85,14 +147,22 @@ fun PaletteListScreen(
                     palette.colors.any { it.lowercase().contains(q) }
             }
         }
-
+        val filtered = if (colorCountFilter == null) {
+            filteredByQuery
+        } else {
+            filteredByQuery.filter { it.colors.size == colorCountFilter }
+        }
         when (PaletteSortMode.valueOf(sortMode)) {
             PaletteSortMode.NEWEST -> filtered.sortedByDescending { it.createdAtIso }
             PaletteSortMode.OLDEST -> filtered.sortedBy { it.createdAtIso }
-            PaletteSortMode.NAME -> filtered.sortedBy { it.name.lowercase() }
+            PaletteSortMode.NAME_ASC -> filtered.sortedBy { it.name.lowercase() }
+            PaletteSortMode.NAME_DESC -> filtered.sortedByDescending { it.name.lowercase() }
+            PaletteSortMode.COLORS_ASC -> filtered.sortedWith(compareBy<Palette> { it.colors.size }.thenByDescending { it.createdAtIso })
+            PaletteSortMode.COLORS_DESC -> filtered.sortedWith(compareByDescending<Palette> { it.colors.size }.thenByDescending { it.createdAtIso })
         }
     }
-    val listError = state.error
+    val listError = state.error ?: localError
+    val exportFormat = remember(selectedFormat) { PaletteExportFormat.valueOf(selectedFormat) }
 
     PaletaGradientBackground(modifier = Modifier.fillMaxSize()) {
         Scaffold(
@@ -151,7 +221,7 @@ fun PaletteListScreen(
                     PaletaCard(modifier = Modifier.fillMaxWidth()) {
                         PaletaSectionTitle(
                             title = "Paleta Mobile",
-                            subtitle = "Создавайте, генерируйте и экспортируйте палитры прямо с телефона",
+                            subtitle = "Создавайте, генерируйте, копируйте и экспортируйте палитры",
                         )
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -168,6 +238,15 @@ fun PaletteListScreen(
                                 onClick = onCreateClick,
                             )
                         }
+                    }
+                }
+
+                if (statusMessage != null) {
+                    item {
+                        PaletaMessageBanner(
+                            message = statusMessage.orEmpty(),
+                            isError = false,
+                        )
                     }
                 }
 
@@ -193,25 +272,43 @@ fun PaletteListScreen(
                 }
 
                 item {
+                    OutlinedTextField(
+                        value = colorCountFilterRaw,
+                        onValueChange = { colorCountFilterRaw = it.filter(Char::isDigit).take(2) },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        shape = RoundedCornerShape(14.dp),
+                        label = { Text("Фильтр: ровно N цветов (3-15, опц.)") },
+                        colors = paletaTextFieldColors(),
+                    )
+                }
+
+                item {
                     Row(
                         modifier = Modifier.horizontalScroll(rememberScrollState()),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        SortChip(
-                            title = stringResource(id = R.string.sort_newest),
-                            selected = sortMode == PaletteSortMode.NEWEST.name,
-                            onClick = { sortMode = PaletteSortMode.NEWEST.name },
-                        )
-                        SortChip(
-                            title = stringResource(id = R.string.sort_oldest),
-                            selected = sortMode == PaletteSortMode.OLDEST.name,
-                            onClick = { sortMode = PaletteSortMode.OLDEST.name },
-                        )
-                        SortChip(
-                            title = stringResource(id = R.string.sort_name),
-                            selected = sortMode == PaletteSortMode.NAME.name,
-                            onClick = { sortMode = PaletteSortMode.NAME.name },
-                        )
+                        SortChip("Новые", sortMode == PaletteSortMode.NEWEST.name) { sortMode = PaletteSortMode.NEWEST.name }
+                        SortChip("Старые", sortMode == PaletteSortMode.OLDEST.name) { sortMode = PaletteSortMode.OLDEST.name }
+                        SortChip("Имя А-Я", sortMode == PaletteSortMode.NAME_ASC.name) { sortMode = PaletteSortMode.NAME_ASC.name }
+                        SortChip("Имя Я-А", sortMode == PaletteSortMode.NAME_DESC.name) { sortMode = PaletteSortMode.NAME_DESC.name }
+                        SortChip("Цветов ↑", sortMode == PaletteSortMode.COLORS_ASC.name) { sortMode = PaletteSortMode.COLORS_ASC.name }
+                        SortChip("Цветов ↓", sortMode == PaletteSortMode.COLORS_DESC.name) { sortMode = PaletteSortMode.COLORS_DESC.name }
+                    }
+                }
+
+                item {
+                    Row(
+                        modifier = Modifier.horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        PaletteExportFormat.entries.forEach { format ->
+                            SortChip(
+                                title = format.name,
+                                selected = selectedFormat == format.name,
+                                onClick = { selectedFormat = format.name },
+                            )
+                        }
                     }
                 }
 
@@ -220,7 +317,7 @@ fun PaletteListScreen(
                         PaletaCard(modifier = Modifier.fillMaxWidth()) {
                             PaletaSectionTitle(
                                 title = stringResource(id = R.string.empty_palettes),
-                                subtitle = "Создайте первую палитру вручную или сгенерируйте из изображения",
+                                subtitle = "Создайте палитру вручную или сгенерируйте из изображения",
                             )
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
@@ -244,7 +341,25 @@ fun PaletteListScreen(
                         PaletteCard(
                             palette = palette,
                             onEditClick = onEditClick,
-                            onDeleteClick = onDeleteClick,
+                            onDeleteClick = { pendingDelete = palette },
+                            onCopyClick = {
+                                clipboard.setText(AnnotatedString(palette.colors.joinToString("\n")))
+                                statusMessage = "Палитра скопирована в буфер"
+                                localError = null
+                            },
+                            onExportClick = {
+                                onExportPalette(
+                                    palette,
+                                    exportFormat.ext,
+                                    { payload ->
+                                        pendingExport = payload
+                                        createDocumentLauncher.launch(payload.fileName)
+                                    },
+                                    { error ->
+                                        localError = error
+                                    },
+                                )
+                            },
                         )
                     }
                 }
@@ -254,6 +369,30 @@ fun PaletteListScreen(
                 }
             }
         }
+    }
+
+    if (pendingDelete != null) {
+        val deleting = pendingDelete!!
+        AlertDialog(
+            onDismissRequest = { pendingDelete = null },
+            title = { Text("Удалить палитру") },
+            text = { Text("Вы уверены, что хотите удалить «${deleting.name}»?") },
+            confirmButton = {
+                PaletaPrimaryButton(
+                    text = "Удалить",
+                    onClick = {
+                        onDeleteClick(deleting.id)
+                        pendingDelete = null
+                    },
+                )
+            },
+            dismissButton = {
+                PaletaGhostButton(
+                    text = "Отмена",
+                    onClick = { pendingDelete = null },
+                )
+            },
+        )
     }
 }
 
@@ -286,6 +425,8 @@ private fun PaletteCard(
     palette: Palette,
     onEditClick: (Long) -> Unit,
     onDeleteClick: (Long) -> Unit,
+    onCopyClick: () -> Unit,
+    onExportClick: () -> Unit,
 ) {
     PaletaCard(
         modifier = Modifier.fillMaxWidth(),
@@ -314,6 +455,22 @@ private fun PaletteCard(
                         .background(runCatching { Color(android.graphics.Color.parseColor(hex)) }.getOrDefault(Color.Gray)),
                 )
             }
+        }
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            PaletaGhostButton(
+                modifier = Modifier.weight(1f),
+                text = "Copy",
+                onClick = onCopyClick,
+            )
+            PaletaGhostButton(
+                modifier = Modifier.weight(1f),
+                text = "Export",
+                onClick = onExportClick,
+            )
         }
 
         Row(

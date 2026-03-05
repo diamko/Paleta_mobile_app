@@ -37,6 +37,7 @@ fun LoginScreen(
     state: AuthUiState,
     onLoginClick: (login: String, password: String) -> Unit,
     onGoRegisterClick: () -> Unit,
+    onGoForgotPasswordClick: () -> Unit,
     onClearError: () -> Unit,
 ) {
     var login by remember { mutableStateOf("") }
@@ -115,6 +116,13 @@ fun LoginScreen(
                     modifier = Modifier.fillMaxWidth(),
                     text = stringResource(id = R.string.go_register),
                     onClick = onGoRegisterClick,
+                    enabled = !state.isLoading,
+                )
+
+                PaletaGhostButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = "Забыли пароль?",
+                    onClick = onGoForgotPasswordClick,
                     enabled = !state.isLoading,
                 )
             }

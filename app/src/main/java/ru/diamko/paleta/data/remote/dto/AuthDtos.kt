@@ -18,8 +18,35 @@ data class RegisterRequestDto(
 )
 
 @Serializable
+data class ForgotPasswordRequestDto(
+    val email: String,
+)
+
+@Serializable
+data class ResetPasswordRequestDto(
+    val email: String,
+    val code: String,
+    val new_password: String,
+    val confirm_password: String,
+)
+
+@Serializable
 data class RefreshRequestDto(
     val refresh_token: String,
+)
+
+@Serializable
+data class UpdateProfileRequestDto(
+    val username: String,
+    val email: String,
+    val current_password: String,
+)
+
+@Serializable
+data class ChangePasswordRequestDto(
+    val code: String,
+    val new_password: String,
+    val confirm_password: String,
 )
 
 @Serializable
