@@ -258,7 +258,11 @@ fun PaletteGenerateScreen(
         }
     }
 
-    fun updateColorFromImagePoint(position: Offset, colorIndex: Int = safeSelectedIndex) {
+    fun updateColorFromImagePoint(
+        position: Offset,
+        colorIndex: Int = safeSelectedIndex,
+        touchPosition: Offset = position,
+    ) {
         if (colorIndex !in paletteColors.indices) return
         val currentBitmap = bitmap ?: return
         val metrics = fitMetrics ?: return
@@ -274,7 +278,7 @@ fun PaletteGenerateScreen(
         }
         updatedMarkers[colorIndex] = Offset(sampled.xNorm, sampled.yNorm)
         markerPositions = updatedMarkers
-        loupeTouchPosition = position
+        loupeTouchPosition = touchPosition
         loupeSample = sampled
         localError = null
     }
@@ -392,8 +396,20 @@ fun PaletteGenerateScreen(
                                             statusMessage = "Р’С‹Р±СЂР°РЅР° РїРёРїРµС‚РєР°: Р¦РІРµС‚ ${draggingIndex + 1}"
                                             localError = null
                                         }
+                                        val markerNorm = markerPositions.getOrNull(draggingIndex)
+                                        val markerAnchor = markerNorm?.let {
+                                            Offset(
+                                                x = metrics.left + it.x * metrics.width,
+                                                y = metrics.top + it.y * metrics.height,
+                                            )
+                                        } ?: down.position
+                                        val touchOffset = down.position - markerAnchor
                                         isDraggingPipette = true
-                                        updateColorFromImagePoint(down.position, draggingIndex)
+                                        updateColorFromImagePoint(
+                                            position = markerAnchor,
+                                            colorIndex = draggingIndex,
+                                            touchPosition = down.position,
+                                        )
                                         var pointerId = down.id
 
                                         while (true) {
@@ -405,7 +421,11 @@ fun PaletteGenerateScreen(
                                             if (!change.pressed) {
                                                 break
                                             }
-                                            updateColorFromImagePoint(change.position, draggingIndex)
+                                            updateColorFromImagePoint(
+                                                position = change.position - touchOffset,
+                                                colorIndex = draggingIndex,
+                                                touchPosition = change.position,
+                                            )
                                             change.consume()
                                         }
 
@@ -440,12 +460,12 @@ fun PaletteGenerateScreen(
                                         modifier = Modifier
                                             .offset {
                                                 IntOffset(
-                                                    x = (markerX - 12f).roundToInt(),
-                                                    y = (markerY - 34f).roundToInt(),
+                                                    x = markerX.roundToInt(),
+                                                    y = markerY.roundToInt(),
                                                 )
                                             }
-                                            .size(24.dp, 34.dp)
-                                            .clickable {
+                                            .size(34.dp)
+                                            .clickable(enabled = false) {
                                                 selectedColorIndex = index
                                                 statusMessage = "Выбрана пипетка: Цвет ${index + 1}"
                                                 localError = null
@@ -741,10 +761,24 @@ private fun PipetteMarker(
 ) {
     val accent = if (selected) MaterialTheme.colorScheme.primary else Color.White
     Box(modifier = Modifier.fillMaxSize()) {
+        Canvas(
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .size(10.dp),
+        ) {
+            val triangle = Path().apply {
+                moveTo(0f, 0f)
+                lineTo(size.width, 0f)
+                lineTo(0f, size.height)
+                close()
+            }
+            drawPath(triangle, color = accent)
+        }
         Box(
             modifier = Modifier
-                .align(Alignment.TopCenter)
-                .size(if (dragging) 22.dp else 20.dp)
+                .align(Alignment.TopStart)
+                .offset(x = 3.dp, y = 3.dp)
+                .size(if (dragging) 26.dp else 24.dp)
                 .clip(CircleShape)
                 .background(color)
                 .border(
@@ -752,26 +786,6 @@ private fun PipetteMarker(
                     color = accent,
                     shape = CircleShape,
                 ),
-        )
-        Canvas(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .size(10.dp, 12.dp),
-        ) {
-            val triangle = Path().apply {
-                moveTo(size.width / 2f, size.height)
-                lineTo(0f, 1f)
-                lineTo(size.width, 1f)
-                close()
-            }
-            drawPath(triangle, color = accent)
-        }
-        Box(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .size(4.dp)
-                .clip(CircleShape)
-                .background(accent),
         )
     }
 }
@@ -904,20 +918,21 @@ private fun findMarkerIndexAtPosition(
     markerPositions: List<Offset?>,
     metrics: ImageFitMetrics,
 ): Int? {
-    val markerWidth = 24f
-    val markerHeight = 34f
-    val hitPadding = 10f
+    val circleOffset = 3f
+    val circleSize = 24f
+    val hitPadding = 8f
     return markerPositions.indices
         .reversed()
         .firstOrNull { index ->
             val marker = markerPositions[index] ?: return@firstOrNull false
-            val markerLeft = metrics.left + marker.x * metrics.width - 12f
-            val markerTop = metrics.top + marker.y * metrics.height - 34f
-            val left = markerLeft - hitPadding
-            val top = markerTop - hitPadding
-            val right = markerLeft + markerWidth + hitPadding
-            val bottom = markerTop + markerHeight + hitPadding
-            position.x in left..right && position.y in top..bottom
+            val markerLeft = metrics.left + marker.x * metrics.width
+            val markerTop = metrics.top + marker.y * metrics.height
+            val centerX = markerLeft + circleOffset + circleSize / 2f
+            val centerY = markerTop + circleOffset + circleSize / 2f
+            val radius = circleSize / 2f + hitPadding
+            val dx = position.x - centerX
+            val dy = position.y - centerY
+            dx * dx + dy * dy <= radius * radius
         }
 }
 
