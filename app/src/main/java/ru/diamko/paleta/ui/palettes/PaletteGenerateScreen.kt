@@ -22,9 +22,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -257,6 +259,11 @@ fun PaletteGenerateScreen(
             )
         }
     }
+    val imageAspectRatio = remember(bitmap) {
+        bitmap?.let { it.width.toFloat() / it.height.toFloat() }
+            ?.coerceIn(0.4f, 1.8f)
+            ?: 1f
+    }
 
     fun updateColorFromImagePoint(
         position: Offset,
@@ -378,7 +385,8 @@ fun PaletteGenerateScreen(
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(240.dp)
+                                .aspectRatio(imageAspectRatio)
+                                .heightIn(min = 240.dp, max = 520.dp)
                                 .clip(RoundedCornerShape(16.dp))
                                 .background(MaterialTheme.colorScheme.surfaceVariant)
                                 .onSizeChanged { imageBoxSize = it }
@@ -391,7 +399,9 @@ fun PaletteGenerateScreen(
                                             markerPositions = markerPositions,
                                             metrics = metrics,
                                         ) ?: return@awaitEachGesture
-                                        if (draggingIndex != safeSelectedIndex) {
+                                        val currentSelectedIndex = selectedColorIndex
+                                            .coerceIn(0, max(0, paletteColors.lastIndex))
+                                        if (draggingIndex != currentSelectedIndex) {
                                             selectedColorIndex = draggingIndex
                                             statusMessage = "Р’С‹Р±СЂР°РЅР° РїРёРїРµС‚РєР°: Р¦РІРµС‚ ${draggingIndex + 1}"
                                             localError = null
@@ -447,9 +457,6 @@ fun PaletteGenerateScreen(
                             if (metrics != null) {
                                 markerPositions.forEachIndexed { index, marker ->
                                     if (marker == null) return@forEachIndexed
-                                    if (isDraggingPipette && index == safeSelectedIndex) {
-                                        return@forEachIndexed
-                                    }
                                     val markerX = metrics.left + marker.x * metrics.width
                                     val markerY = metrics.top + marker.y * metrics.height
                                     val markerColor = paletteColors.getOrNull(index)?.let {
@@ -920,7 +927,7 @@ private fun findMarkerIndexAtPosition(
 ): Int? {
     val circleOffset = 3f
     val circleSize = 24f
-    val hitPadding = 8f
+    val hitPadding = 2f
     return markerPositions.indices
         .reversed()
         .firstOrNull { index ->
@@ -942,13 +949,13 @@ private fun calculateLoupeOffset(
 ): IntOffset {
     val loupeWidth = 72
     val loupeHeight = 86
-    val margin = 18
+    val margin = 24
 
-    var x = anchor.x.roundToInt() + margin
+    var x = anchor.x.roundToInt() - loupeWidth - margin
     var y = anchor.y.roundToInt() - loupeHeight - margin
 
-    if (x + loupeWidth > containerSize.width) {
-        x = anchor.x.roundToInt() - loupeWidth - margin
+    if (x < 0) {
+        x = anchor.x.roundToInt() + margin
     }
     if (y < 0) {
         y = anchor.y.roundToInt() + margin
