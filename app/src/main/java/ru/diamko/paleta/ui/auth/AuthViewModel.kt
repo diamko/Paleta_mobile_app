@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import ru.diamko.paleta.R
 import ru.diamko.paleta.core.di.AppContainer
 import ru.diamko.paleta.domain.model.User
 import ru.diamko.paleta.domain.usecase.ChangeProfilePasswordUseCase
@@ -38,6 +39,7 @@ class AuthViewModel(
     private val changeProfilePasswordUseCase: ChangeProfilePasswordUseCase,
     private val logoutUseCase: LogoutUseCase,
     private val getCurrentUserUseCase: GetCurrentUserUseCase,
+    private val getString: (Int) -> String,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AuthUiState())
@@ -49,7 +51,7 @@ class AuthViewModel(
 
     fun login(login: String, password: String) {
         if (login.isBlank() || password.isBlank()) {
-            _uiState.update { it.copy(error = "Заполните логин и пароль") }
+            _uiState.update { it.copy(error = getString(R.string.auth_fill_login_password)) }
             return
         }
 
@@ -71,7 +73,7 @@ class AuthViewModel(
                         it.copy(
                             isCheckingSession = false,
                             isLoading = false,
-                            error = error.message ?: "Ошибка входа",
+                            error = error.message ?: getString(R.string.auth_error_login),
                         )
                     }
                 }
@@ -80,7 +82,7 @@ class AuthViewModel(
 
     fun register(username: String, email: String, password: String) {
         if (username.isBlank() || email.isBlank() || password.isBlank()) {
-            _uiState.update { it.copy(error = "Заполните все поля") }
+            _uiState.update { it.copy(error = getString(R.string.auth_fill_all_fields)) }
             return
         }
 
@@ -102,7 +104,7 @@ class AuthViewModel(
                         it.copy(
                             isCheckingSession = false,
                             isLoading = false,
-                            error = error.message ?: "Ошибка регистрации",
+                            error = error.message ?: getString(R.string.auth_error_register),
                         )
                     }
                 }
@@ -111,7 +113,7 @@ class AuthViewModel(
 
     fun requestPasswordResetCode(email: String, onDone: () -> Unit = {}) {
         if (email.isBlank()) {
-            _uiState.update { it.copy(error = "Введите email") }
+            _uiState.update { it.copy(error = getString(R.string.auth_enter_email)) }
             return
         }
 
@@ -123,7 +125,7 @@ class AuthViewModel(
                         it.copy(
                             isLoading = false,
                             error = null,
-                            infoMessage = "Если email найден, код отправлен",
+                            infoMessage = getString(R.string.auth_reset_code_sent_if_exists),
                         )
                     }
                     onDone()
@@ -132,7 +134,7 @@ class AuthViewModel(
                     _uiState.update {
                         it.copy(
                             isLoading = false,
-                            error = error.message ?: "Не удалось отправить код",
+                            error = error.message ?: getString(R.string.auth_error_send_code),
                         )
                     }
                 }
@@ -147,7 +149,7 @@ class AuthViewModel(
         onDone: () -> Unit = {},
     ) {
         if (email.isBlank() || code.isBlank() || newPassword.isBlank() || confirmPassword.isBlank()) {
-            _uiState.update { it.copy(error = "Заполните все поля") }
+            _uiState.update { it.copy(error = getString(R.string.auth_fill_all_fields)) }
             return
         }
 
@@ -159,7 +161,7 @@ class AuthViewModel(
                         it.copy(
                             isLoading = false,
                             error = null,
-                            infoMessage = "Пароль обновлён. Войдите с новым паролем",
+                            infoMessage = getString(R.string.auth_password_updated_login_again),
                         )
                     }
                     onDone()
@@ -168,7 +170,7 @@ class AuthViewModel(
                     _uiState.update {
                         it.copy(
                             isLoading = false,
-                            error = error.message ?: "Не удалось обновить пароль",
+                            error = error.message ?: getString(R.string.auth_error_update_password),
                         )
                     }
                 }
@@ -182,7 +184,7 @@ class AuthViewModel(
         onDone: () -> Unit = {},
     ) {
         if (username.isBlank() || email.isBlank() || currentPassword.isBlank()) {
-            _uiState.update { it.copy(error = "Заполните все поля") }
+            _uiState.update { it.copy(error = getString(R.string.auth_fill_all_fields)) }
             return
         }
 
@@ -195,7 +197,7 @@ class AuthViewModel(
                             isLoading = false,
                             user = user,
                             error = null,
-                            infoMessage = "Профиль обновлён",
+                            infoMessage = getString(R.string.auth_profile_updated),
                         )
                     }
                     onDone()
@@ -204,7 +206,7 @@ class AuthViewModel(
                     _uiState.update {
                         it.copy(
                             isLoading = false,
-                            error = error.message ?: "Не удалось обновить профиль",
+                            error = error.message ?: getString(R.string.auth_error_update_profile),
                         )
                     }
                 }
@@ -220,7 +222,7 @@ class AuthViewModel(
                         it.copy(
                             isLoading = false,
                             error = null,
-                            infoMessage = "Код подтверждения отправлен",
+                            infoMessage = getString(R.string.auth_profile_password_code_sent),
                         )
                     }
                     onDone()
@@ -229,7 +231,7 @@ class AuthViewModel(
                     _uiState.update {
                         it.copy(
                             isLoading = false,
-                            error = error.message ?: "Не удалось отправить код",
+                            error = error.message ?: getString(R.string.auth_error_send_code),
                         )
                     }
                 }
@@ -243,7 +245,7 @@ class AuthViewModel(
         onDone: () -> Unit = {},
     ) {
         if (code.isBlank() || newPassword.isBlank() || confirmPassword.isBlank()) {
-            _uiState.update { it.copy(error = "Заполните все поля") }
+            _uiState.update { it.copy(error = getString(R.string.auth_fill_all_fields)) }
             return
         }
 
@@ -255,7 +257,7 @@ class AuthViewModel(
                         it.copy(
                             isLoading = false,
                             error = null,
-                            infoMessage = "Пароль успешно изменён",
+                            infoMessage = getString(R.string.auth_password_changed),
                         )
                     }
                     onDone()
@@ -264,7 +266,7 @@ class AuthViewModel(
                     _uiState.update {
                         it.copy(
                             isLoading = false,
-                            error = error.message ?: "Не удалось изменить пароль",
+                            error = error.message ?: getString(R.string.auth_error_change_password),
                         )
                     }
                 }
@@ -331,6 +333,7 @@ class AuthViewModel(
                         changeProfilePasswordUseCase = ChangeProfilePasswordUseCase(container.authRepository),
                         logoutUseCase = LogoutUseCase(container.authRepository),
                         getCurrentUserUseCase = GetCurrentUserUseCase(container.authRepository),
+                        getString = container::getString,
                     ) as T
                 }
             }

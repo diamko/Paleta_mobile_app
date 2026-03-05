@@ -124,7 +124,7 @@ fun PaletteGenerateScreen(
     var imageBitmap by remember { mutableStateOf<Bitmap?>(null) }
     var imageBoxSize by remember { mutableStateOf(IntSize.Zero) }
 
-    var paletteName by remember { mutableStateOf("Моя палитра") }
+    var paletteName by remember { mutableStateOf(context.getString(R.string.new_palette)) }
     var colorCountRaw by remember { mutableStateOf("5") }
     var paletteColors by remember { mutableStateOf<List<String>>(emptyList()) }
     var selectedColorIndex by remember { mutableStateOf(0) }
@@ -147,7 +147,7 @@ fun PaletteGenerateScreen(
     fun applyPalette(colors: List<String>, message: String) {
         val normalized = HexColors.normalize(colors)
         if (normalized == null) {
-            localError = "Некорректная палитра (нужно от 3 до 15 HEX-цветов)"
+            localError = context.getString(R.string.palette_invalid_hex_count)
             return
         }
         paletteColors = normalized
@@ -173,7 +173,7 @@ fun PaletteGenerateScreen(
         scope.launch {
             isBusy = true
             localError = null
-            statusMessage = "Извлечение цветов..."
+            statusMessage = context.getString(R.string.extracting_colors)
             paletteColors = emptyList()
             markerPositions = emptyList()
             selectedColorIndex = 0
@@ -189,7 +189,7 @@ fun PaletteGenerateScreen(
             val bitmap = data.second
             if (bytes == null || bytes.isEmpty() || bitmap == null) {
                 isBusy = false
-                localError = "Не удалось прочитать изображение"
+                localError = context.getString(R.string.read_image_failed)
                 return@launch
             }
 
@@ -202,10 +202,10 @@ fun PaletteGenerateScreen(
                 onDone = { colors ->
                     isBusy = false
                     if (colors.isEmpty()) {
-                        localError = "Не удалось извлечь цвета из изображения"
+                        localError = context.getString(R.string.extract_colors_failed)
                         return@generateFromImage
                     }
-                    applyPalette(colors, "Извлечено цветов: ${colors.size}")
+                    applyPalette(colors, context.getString(R.string.extracted_colors_count, colors.size))
                     markerPositions = estimateInitialMarkerPositions(bitmap, colors)
                 },
                 onError = { error ->
@@ -220,7 +220,7 @@ fun PaletteGenerateScreen(
         scope.launch {
             isBusy = true
             localError = null
-            statusMessage = "Извлечение цветов..."
+            statusMessage = context.getString(R.string.extracting_colors)
             paletteColors = emptyList()
             markerPositions = emptyList()
             selectedColorIndex = 0
@@ -234,10 +234,10 @@ fun PaletteGenerateScreen(
                 onDone = { colors ->
                     isBusy = false
                     if (colors.isEmpty()) {
-                        localError = "Не удалось извлечь цвета из изображения"
+                        localError = context.getString(R.string.extract_colors_failed)
                         return@generateFromRecentUpload
                     }
-                    applyPalette(colors, "Извлечено цветов: ${colors.size} ($fileName)")
+                    applyPalette(colors, "${context.getString(R.string.extracted_colors_count, colors.size)} ($fileName)")
                 },
                 onError = { error ->
                     isBusy = false
@@ -252,7 +252,7 @@ fun PaletteGenerateScreen(
     ) { outputUri ->
         val payload = pendingExport ?: return@rememberLauncherForActivityResult
         if (outputUri == null) {
-            statusMessage = "Экспорт отменен"
+            statusMessage = context.getString(R.string.export_canceled)
             pendingExport = null
             return@rememberLauncherForActivityResult
         }
@@ -261,16 +261,16 @@ fun PaletteGenerateScreen(
             runCatching {
                 context.contentResolver.openOutputStream(outputUri)?.use { stream ->
                     stream.write(payload.bytes)
-                } ?: error("Не удалось открыть файл для записи")
+                } ?: error(context.getString(R.string.open_file_write_error))
             }.onSuccess {
                 withContext(Dispatchers.Main) {
-                    statusMessage = "Файл сохранен: ${payload.fileName}"
+                    statusMessage = context.getString(R.string.file_saved, payload.fileName)
                     localError = null
                     pendingExport = null
                 }
             }.onFailure { error ->
                 withContext(Dispatchers.Main) {
-                    localError = error.message ?: "Ошибка экспорта"
+                    localError = error.message ?: context.getString(R.string.export_error_generic)
                     pendingExport = null
                 }
             }
@@ -360,8 +360,8 @@ fun PaletteGenerateScreen(
 
                 PaletaCard(modifier = Modifier.fillMaxWidth()) {
                     PaletaSectionTitle(
-                        title = "Источник палитры",
-                        subtitle = "Случайная генерация или извлечение цветов из изображения",
+                        title = stringResource(id = R.string.source_title),
+                        subtitle = stringResource(id = R.string.source_subtitle),
                     )
 
                     OutlinedTextField(
@@ -400,7 +400,7 @@ fun PaletteGenerateScreen(
                             onClick = {
                                 applyPalette(
                                     colors = RandomPaletteGenerator.generate(paletteSize()),
-                                    message = "Сгенерирована случайная палитра",
+                                    message = context.getString(R.string.random_palette_generated),
                                 )
                             },
                             enabled = !isBusy,
@@ -418,8 +418,8 @@ fun PaletteGenerateScreen(
                 if (paletteState.recentUploads.isNotEmpty()) {
                     PaletaCard(modifier = Modifier.fillMaxWidth()) {
                         PaletaSectionTitle(
-                            title = "Недавние изображения",
-                            subtitle = "Повторно использовать загрузки за последние дни",
+                            title = stringResource(id = R.string.recent_uploads_title),
+                            subtitle = stringResource(id = R.string.recent_uploads_subtitle),
                         )
                         paletteState.recentUploads.take(8).forEach { upload ->
                             Row(
@@ -433,7 +433,7 @@ fun PaletteGenerateScreen(
                                 )
                                 PaletaGhostButton(
                                     modifier = Modifier.width(116.dp),
-                                    text = "Использовать",
+                                    text = stringResource(id = R.string.use_action),
                                     onClick = { useRecentUpload(upload.url, upload.filename) },
                                     enabled = !isBusy,
                                 )
@@ -445,8 +445,8 @@ fun PaletteGenerateScreen(
                 if (bitmap != null) {
                     PaletaCard(modifier = Modifier.fillMaxWidth()) {
                         PaletaSectionTitle(
-                            title = "Пипетка по изображению",
-                            subtitle = "Выберите цвет ниже и ведите пальцем по фото",
+                            title = stringResource(id = R.string.pipette_title),
+                            subtitle = stringResource(id = R.string.pipette_subtitle),
                         )
 
                         Box(
@@ -470,7 +470,7 @@ fun PaletteGenerateScreen(
                                             .coerceIn(0, max(0, paletteColors.lastIndex))
                                         if (draggingIndex != currentSelectedIndex) {
                                             selectedColorIndex = draggingIndex
-                                            statusMessage = "Р’С‹Р±СЂР°РЅР° РїРёРїРµС‚РєР°: Р¦РІРµС‚ ${draggingIndex + 1}"
+                                            statusMessage = context.getString(R.string.pipette_selected, draggingIndex + 1)
                                             localError = null
                                         }
                                         val markerNorm = markerPositions.getOrNull(draggingIndex)
@@ -507,7 +507,7 @@ fun PaletteGenerateScreen(
                                         }
 
                                         isDraggingPipette = false
-                                        statusMessage = "Цвет ${safeSelectedIndex + 1} обновлен из изображения"
+                                        statusMessage = context.getString(R.string.color_updated_from_image, safeSelectedIndex + 1)
                                         loupeTouchPosition = null
                                         loupeSample = null
                                     }
@@ -515,7 +515,7 @@ fun PaletteGenerateScreen(
                         ) {
                             Image(
                                 bitmap = bitmap.asImageBitmap(),
-                                contentDescription = "Выбранное изображение",
+                                contentDescription = stringResource(id = R.string.selected_image_desc),
                                 contentScale = ContentScale.Fit,
                                 modifier = Modifier.fillMaxSize(),
                             )
@@ -541,7 +541,7 @@ fun PaletteGenerateScreen(
                                             .size(34.dp)
                                             .clickable(enabled = false) {
                                                 selectedColorIndex = index
-                                                statusMessage = "Выбрана пипетка: Цвет ${index + 1}"
+                                                statusMessage = context.getString(R.string.pipette_selected, index + 1)
                                                 localError = null
                                             },
                                     ) {
@@ -578,7 +578,7 @@ fun PaletteGenerateScreen(
                         }
 
                         Text(
-                            text = "Пипетки появляются сразу после извлечения. Лупа показывается только при выборе и движении активной пипетки.",
+                            text = stringResource(id = R.string.pipette_help),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -587,13 +587,13 @@ fun PaletteGenerateScreen(
 
                 PaletaCard(modifier = Modifier.fillMaxWidth()) {
                     PaletaSectionTitle(
-                        title = "Цвета палитры",
-                        subtitle = "Максимум 3 карточки в ряд, редактирование каждого цвета отдельно",
+                        title = stringResource(id = R.string.palette_colors_title),
+                        subtitle = stringResource(id = R.string.palette_colors_subtitle),
                     )
 
                     if (!hasPalette) {
                         Text(
-                            text = "Сначала сгенерируйте палитру или извлеките цвета из изображения",
+                            text = stringResource(id = R.string.generate_first_hint),
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     } else {
@@ -634,7 +634,7 @@ fun PaletteGenerateScreen(
                                             ),
                                     )
                                     Text(
-                                        text = "Цвет ${index + 1}",
+                                        text = stringResource(id = R.string.color_label, index + 1),
                                         style = MaterialTheme.typography.labelSmall,
                                         color = if (selected) {
                                             MaterialTheme.colorScheme.primary
@@ -648,8 +648,8 @@ fun PaletteGenerateScreen(
                         }
 
                         PaletaSectionTitle(
-                            title = "Редактор выбранного цвета",
-                            subtitle = "Выбран: Цвет ${safeSelectedIndex + 1} ($selectedHex)",
+                            title = stringResource(id = R.string.color_editor_title),
+                            subtitle = stringResource(id = R.string.selected_color_subtitle, safeSelectedIndex + 1, selectedHex),
                         )
 
                         ColorChannelSlider(
@@ -695,15 +695,15 @@ fun PaletteGenerateScreen(
                         ) {
                             PaletaGhostButton(
                                 modifier = Modifier.weight(1f),
-                                text = "Копировать HEX",
+                                text = stringResource(id = R.string.copy_hex),
                                 onClick = {
                                     clipboard.setText(AnnotatedString(selectedHex))
-                                    statusMessage = "HEX скопирован: $selectedHex"
+                                    statusMessage = context.getString(R.string.hex_copied, selectedHex)
                                 },
                             )
                             PaletaGhostButton(
                                 modifier = Modifier.weight(1f),
-                                text = "Случайный цвет",
+                                text = stringResource(id = R.string.random_color),
                                 onClick = {
                                     val random = ColorTools.colorIntToHex(
                                         AndroidColor.rgb(
@@ -721,8 +721,8 @@ fun PaletteGenerateScreen(
 
                 PaletaCard(modifier = Modifier.fillMaxWidth()) {
                     PaletaSectionTitle(
-                        title = "Экспорт и сохранение",
-                        subtitle = "Выберите формат и действие",
+                        title = stringResource(id = R.string.export_save_title),
+                        subtitle = stringResource(id = R.string.export_save_subtitle),
                     )
                     Row(
                         modifier = Modifier.horizontalScroll(rememberScrollState()),
@@ -752,7 +752,7 @@ fun PaletteGenerateScreen(
                             onClick = {
                                 val colors = HexColors.normalize(paletteColors)
                                 if (colors == null) {
-                                    localError = "Палитра должна содержать от 3 до 15 корректных цветов"
+                                    localError = context.getString(R.string.palette_invalid_hex_count)
                                     return@PaletaPrimaryButton
                                 }
                                 isBusy = true
@@ -784,14 +784,13 @@ fun PaletteGenerateScreen(
                                 }
                                 val colors = HexColors.normalize(paletteColors)
                                 if (colors == null) {
-                                    localError = "Палитра должна содержать от 3 до 15 корректных цветов"
+                                    localError = context.getString(R.string.palette_invalid_hex_count)
                                     return@PaletaGhostButton
                                 }
                                 paletteViewModel.createPalette(
                                     name = paletteName,
                                     colors = colors,
                                 )
-                                statusMessage = "Палитра сохранена"
                                 statusMessage = context.getString(R.string.palette_saved)
                                 localError = null
                             },

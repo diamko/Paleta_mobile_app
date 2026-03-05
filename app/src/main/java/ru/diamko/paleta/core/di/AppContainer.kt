@@ -20,6 +20,8 @@ class AppContainer(
 ) {
     private val appContext = context.applicationContext
 
+    fun getString(resId: Int): String = appContext.getString(resId)
+
     val tokenStore: TokenStore by lazy {
         DataStoreTokenStore(appContext)
     }

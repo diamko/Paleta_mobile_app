@@ -1,6 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Paleta</string>
+    <string name="auth_enter_email">Введите email</string>
+    <string name="auth_error_change_password">Не удалось изменить пароль</string>
+    <string name="auth_error_login">Ошибка входа</string>
+    <string name="auth_error_register">Ошибка регистрации</string>
+    <string name="auth_error_send_code">Не удалось отправить код</string>
+    <string name="auth_error_update_password">Не удалось обновить пароль</string>
+    <string name="auth_error_update_profile">Не удалось обновить профиль</string>
+    <string name="auth_fill_all_fields">Заполните все поля</string>
+    <string name="auth_fill_login_password">Заполните логин и пароль</string>
+    <string name="auth_password_changed">Пароль успешно изменён</string>
+    <string name="auth_password_updated_login_again">Пароль обновлён. Войдите с новым паролем</string>
+    <string name="auth_profile_password_code_sent">Код подтверждения отправлен</string>
+    <string name="auth_profile_updated">Профиль обновлён</string>
+    <string name="auth_reset_code_sent_if_exists">Если email найден, код отправлен</string>
     <string name="back">Назад</string>
     <string name="cancel">Отмена</string>
     <string name="change_password">Изменить пароль</string>
