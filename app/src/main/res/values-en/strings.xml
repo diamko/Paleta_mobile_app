@@ -8,6 +8,7 @@
     <string name="login_button">Log in</string>
     <string name="go_register">No account? Sign up</string>
     <string name="forgot_password_link">Forgot password?</string>
+    <string name="continue_as_guest">Continue as guest</string>
     <string name="wifi_hint">For testing, use the same Wi-Fi network as the backend server</string>
 
     <string name="register_title">Sign up</string>
@@ -106,6 +107,7 @@
     <string name="export_file">Export</string>
     <string name="save_palette">Save</string>
     <string name="palette_saved">Palette saved</string>
+    <string name="login_to_save_palette">Log in to save palettes</string>
     <string name="export_canceled">Export canceled</string>
     <string name="open_file_write_error">Failed to open file for writing</string>
     <string name="file_saved">File saved: %1$s</string>

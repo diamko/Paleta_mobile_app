@@ -38,6 +38,7 @@ fun LoginScreen(
     onLoginClick: (login: String, password: String) -> Unit,
     onGoRegisterClick: () -> Unit,
     onGoForgotPasswordClick: () -> Unit,
+    onContinueAsGuestClick: () -> Unit,
     onClearError: () -> Unit,
 ) {
     var login by remember { mutableStateOf("") }
@@ -123,6 +124,13 @@ fun LoginScreen(
                     modifier = Modifier.fillMaxWidth(),
                     text = stringResource(id = R.string.forgot_password_link),
                     onClick = onGoForgotPasswordClick,
+                    enabled = !state.isLoading,
+                )
+
+                PaletaGhostButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = stringResource(id = R.string.continue_as_guest),
+                    onClick = onContinueAsGuestClick,
                     enabled = !state.isLoading,
                 )
             }

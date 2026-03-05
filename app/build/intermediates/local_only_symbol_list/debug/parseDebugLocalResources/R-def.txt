@@ -18,6 +18,7 @@ string color_editor_title
 string color_label
 string color_updated_from_image
 string confirm_password
+string continue_as_guest
 string copy_action
 string copy_hex
 string copy_palette_success
@@ -76,6 +77,7 @@ string login_button
 string login_hint
 string login_subtitle
 string login_title
+string login_to_save_palette
 string logout
 string new_palette
 string new_password

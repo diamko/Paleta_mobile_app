@@ -73,8 +73,9 @@ fun PaletaApp(
 
         val current = navController.currentBackStackEntry?.destination?.route
         val authFlow = setOf(Routes.LOGIN, Routes.REGISTER, Routes.FORGOT_PASSWORD, Routes.RESET_PASSWORD)
+        val guestAllowed = setOf(Routes.GENERATE)
         val target = if (authState.user == null) {
-            if (current in authFlow) null else Routes.LOGIN
+            if (current in authFlow || current in guestAllowed) null else Routes.LOGIN
         } else {
             if (current in authFlow || current == null) Routes.PALETTES else null
         }
@@ -110,6 +111,7 @@ fun PaletaApp(
                 onLoginClick = authViewModel::login,
                 onGoRegisterClick = { navController.navigate(Routes.REGISTER) },
                 onGoForgotPasswordClick = { navController.navigate(Routes.FORGOT_PASSWORD) },
+                onContinueAsGuestClick = { navController.navigate(Routes.GENERATE) },
                 onClearError = {
                     authViewModel.clearError()
                     authViewModel.clearInfoMessage()
@@ -197,6 +199,12 @@ fun PaletaApp(
             PaletteGenerateScreen(
                 paletteViewModel = paletteViewModel,
                 onBack = { navController.popBackStack() },
+                isAuthenticated = authState.user != null,
+                onRequireLogin = {
+                    navController.navigate(Routes.LOGIN) {
+                        launchSingleTop = true
+                    }
+                },
             )
         }
 

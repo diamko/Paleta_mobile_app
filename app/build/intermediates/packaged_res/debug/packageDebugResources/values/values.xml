@@ -18,6 +18,7 @@
     <string name="color_label">Color %1$d</string>
     <string name="color_updated_from_image">Color %1$d updated from image</string>
     <string name="confirm_password">Confirm password</string>
+    <string name="continue_as_guest">Continue as guest</string>
     <string name="copy_action">Copy</string>
     <string name="copy_hex">Copy HEX</string>
     <string name="copy_palette_success">Palette copied to clipboard</string>
@@ -76,6 +77,7 @@
     <string name="login_hint">Username or email</string>
     <string name="login_subtitle">Access generation, saving, and palette export</string>
     <string name="login_title">Login</string>
+    <string name="login_to_save_palette">Log in to save palettes</string>
     <string name="logout">Log out</string>
     <string name="new_palette">New palette</string>
     <string name="new_password">New password</string>

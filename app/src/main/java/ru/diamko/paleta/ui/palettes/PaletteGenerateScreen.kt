@@ -114,6 +114,8 @@ private data class SampledPoint(
 fun PaletteGenerateScreen(
     paletteViewModel: PaletteViewModel,
     onBack: () -> Unit,
+    isAuthenticated: Boolean,
+    onRequireLogin: () -> Unit,
 ) {
     val context = LocalContext.current
     val clipboard = LocalClipboardManager.current
@@ -775,6 +777,11 @@ fun PaletteGenerateScreen(
                             modifier = Modifier.weight(1f),
                             text = stringResource(id = R.string.save_palette),
                             onClick = {
+                                if (!isAuthenticated) {
+                                    localError = context.getString(R.string.login_to_save_palette)
+                                    onRequireLogin()
+                                    return@PaletaGhostButton
+                                }
                                 val colors = HexColors.normalize(paletteColors)
                                 if (colors == null) {
                                     localError = "Палитра должна содержать от 3 до 15 корректных цветов"
@@ -785,6 +792,7 @@ fun PaletteGenerateScreen(
                                     colors = colors,
                                 )
                                 statusMessage = "Палитра сохранена"
+                                statusMessage = context.getString(R.string.palette_saved)
                                 localError = null
                             },
                             enabled = !isBusy,

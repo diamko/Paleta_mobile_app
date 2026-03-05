@@ -1943,6 +1943,7 @@
     <string name="color_label">Color %1$d</string>
     <string name="color_updated_from_image">Color %1$d updated from image</string>
     <string name="confirm_password">Confirm password</string>
+    <string name="continue_as_guest">Continue as guest</string>
     <string name="copy_action">Copy</string>
     <string name="copy_hex">Copy HEX</string>
     <string name="copy_palette_success">Palette copied to clipboard</string>
@@ -2016,6 +2017,7 @@
     <string name="login_hint">Username or email</string>
     <string name="login_subtitle">Access generation, saving, and palette export</string>
     <string name="login_title">Login</string>
+    <string name="login_to_save_palette">Log in to save palettes</string>
     <string name="logout">Log out</string>
     <string name="m3_exceed_max_badge_text_suffix" translatable="false"><ns2:g example="Some te" id="part of a long text">%1$s</ns2:g><ns2:g example="…" id="suffix">%2$s</ns2:g></string>
     <string name="m3_ref_typeface_brand_medium" translatable="false">sans-serif-medium</string>

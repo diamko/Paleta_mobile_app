@@ -8,6 +8,7 @@
     <string name="login_button">Войти</string>
     <string name="go_register">Нет аккаунта? Зарегистрироваться</string>
     <string name="forgot_password_link">Забыли пароль?</string>
+    <string name="continue_as_guest">Продолжить как гость</string>
     <string name="wifi_hint">Для теста используйте одну Wi-Fi сеть с backend-сервером</string>
 
     <string name="register_title">Регистрация</string>
@@ -106,6 +107,7 @@
     <string name="export_file">Экспорт</string>
     <string name="save_palette">Сохранить</string>
     <string name="palette_saved">Палитра сохранена</string>
+    <string name="login_to_save_palette">Войдите, чтобы сохранять палитры</string>
     <string name="export_canceled">Экспорт отменён</string>
     <string name="open_file_write_error">Не удалось открыть файл для записи</string>
     <string name="file_saved">Файл сохранён: %1$s</string>

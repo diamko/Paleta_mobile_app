@@ -10,6 +10,7 @@
     <string name="color_label">Цвет %1$d</string>
     <string name="color_updated_from_image">Цвет %1$d обновлён из изображения</string>
     <string name="confirm_password">Повторите пароль</string>
+    <string name="continue_as_guest">Продолжить как гость</string>
     <string name="copy_action">Копировать</string>
     <string name="copy_hex">Копировать HEX</string>
     <string name="copy_palette_success">Палитра скопирована в буфер</string>
@@ -68,6 +69,7 @@
     <string name="login_hint">Логин или email</string>
     <string name="login_subtitle">Доступ к генерации, сохранению и экспорту палитр</string>
     <string name="login_title">Вход</string>
+    <string name="login_to_save_palette">Войдите, чтобы сохранять палитры</string>
     <string name="logout">Выйти</string>
     <string name="new_palette">Новая палитра</string>
     <string name="new_password">Новый пароль</string>
