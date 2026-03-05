@@ -12,5 +12,5 @@ public final class BuildConfig {
   // Field from default config.
   public static final String API_BASE_URL = "http://192.168.0.110:5000/";
   // Field from default config.
-  public static final String REPOSITORY_MODE = "remote";
+  public static final String REPOSITORY_MODE = "fake";
 }

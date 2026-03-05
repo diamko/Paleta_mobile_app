@@ -4,7 +4,7 @@
             "outputFile": "ru.diamko.paleta.app-mergeDebugResources-67:/values-watch-v21/values-watch-v21.xml",
             "map": [
                 {
-                    "source": "/home/di/.gradle/caches/8.13/transforms/b0a0de9cfd9601dc3af5572b7cbe08e3/transformed/appcompat-1.6.1/res/values-watch-v21/values-watch-v21.xml",
+                    "source": "C:\\Users\\jtyur\\.gradle\\caches\\8.13\\transforms\\b0a0de9cfd9601dc3af5572b7cbe08e3\\transformed\\appcompat-1.6.1\\res\\values-watch-v21\\values-watch-v21.xml",
                     "from": {
                         "startLines": "2,6,10",
                         "startColumns": "4,4,4",

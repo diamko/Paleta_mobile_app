@@ -4,7 +4,7 @@
             "outputFile": "ru.diamko.paleta.app-mergeDebugResources-67:/values-ldrtl-v17/values-ldrtl-v17.xml",
             "map": [
                 {
-                    "source": "/home/di/.gradle/caches/8.13/transforms/c33dd5de804d23f7a635a15ad8f14b4d/transformed/material-1.12.0/res/values-ldrtl-v17/values-ldrtl-v17.xml",
+                    "source": "C:\\Users\\jtyur\\.gradle\\caches\\8.13\\transforms\\c33dd5de804d23f7a635a15ad8f14b4d\\transformed\\material-1.12.0\\res\\values-ldrtl-v17\\values-ldrtl-v17.xml",
                     "from": {
                         "startLines": "2,3",
                         "startColumns": "4,4",

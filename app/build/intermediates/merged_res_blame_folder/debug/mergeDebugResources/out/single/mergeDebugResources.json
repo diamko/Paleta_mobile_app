@@ -1,14 +1,14 @@
 [
     {
+        "merged": "ru.diamko.paleta.app-debug-69:/xml_backup_rules.xml.flat",
+        "source": "ru.diamko.paleta.app-main-71:/xml/backup_rules.xml"
+    },
+    {
         "merged": "ru.diamko.paleta.app-debug-69:/xml_network_security_config.xml.flat",
         "source": "ru.diamko.paleta.app-debug-70:/xml/network_security_config.xml"
     },
     {
-        "merged": "/home/di/.gradle/daemon/8.13/ru.diamko.paleta.app-debug-69:/xml_backup_rules.xml.flat",
-        "source": "/home/di/.gradle/daemon/8.13/ru.diamko.paleta.app-main-71:/xml/backup_rules.xml"
-    },
-    {
-        "merged": "/home/di/.gradle/daemon/8.13/ru.diamko.paleta.app-debug-69:/xml_data_extraction_rules.xml.flat",
-        "source": "/home/di/.gradle/daemon/8.13/ru.diamko.paleta.app-main-71:/xml/data_extraction_rules.xml"
+        "merged": "ru.diamko.paleta.app-debug-69:/xml_data_extraction_rules.xml.flat",
+        "source": "ru.diamko.paleta.app-main-71:/xml/data_extraction_rules.xml"
     }
 ]
