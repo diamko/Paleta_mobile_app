@@ -2,6 +2,7 @@ package ru.diamko.paleta.ui.palettes
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -35,6 +36,8 @@ import androidx.compose.ui.unit.dp
 import ru.diamko.paleta.R
 import ru.diamko.paleta.core.palette.ColorTools
 import ru.diamko.paleta.core.palette.HexColors
+import ru.diamko.paleta.core.palette.RandomPaletteGenerator
+import ru.diamko.paleta.ui.components.ColorWheelPicker
 import ru.diamko.paleta.ui.components.PaletaCard
 import ru.diamko.paleta.ui.components.PaletaGhostButton
 import ru.diamko.paleta.ui.components.PaletaGradientBackground
@@ -42,6 +45,7 @@ import ru.diamko.paleta.ui.components.PaletaMessageBanner
 import ru.diamko.paleta.ui.components.PaletaPrimaryButton
 import ru.diamko.paleta.ui.components.PaletaSectionTitle
 import ru.diamko.paleta.ui.components.paletaTextFieldColors
+import kotlin.math.max
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -52,15 +56,43 @@ fun PaletteEditorScreen(
 ) {
     val context = LocalContext.current
     val existing = paletteId?.let { paletteViewModel.paletteById(it) }
+    val isCreateMode = existing == null
 
     var name by remember(existing?.id) { mutableStateOf(existing?.name.orEmpty()) }
     var colorsInput by remember(existing?.id) { mutableStateOf(existing?.colors?.joinToString(",").orEmpty()) }
+    var createColors by remember(existing?.id) {
+        mutableStateOf(if (isCreateMode) RandomPaletteGenerator.generate(5) else emptyList())
+    }
     var localError by remember { mutableStateOf<String?>(null) }
+    var selectedColorIndex by remember(existing?.id) { mutableStateOf(0) }
 
     LaunchedEffect(Unit) {
         if (paletteViewModel.uiState.value.palettes.isEmpty()) {
             paletteViewModel.loadPalettes()
         }
+    }
+
+    val parsedColors = remember(colorsInput, createColors, isCreateMode) {
+        if (isCreateMode) {
+            createColors
+        } else {
+            HexColors.parse(colorsInput) ?: emptyList()
+        }
+    }
+    val safeSelectedColorIndex = selectedColorIndex.coerceIn(0, max(0, parsedColors.lastIndex))
+    val selectedColorHex = parsedColors.getOrNull(safeSelectedColorIndex)
+
+    fun updateColorAt(index: Int, rawHex: String) {
+        if (index !in parsedColors.indices) return
+        val normalized = ColorTools.hexToColorInt(rawHex)?.let(ColorTools::colorIntToHex) ?: return
+        val updated = parsedColors.toMutableList()
+        updated[index] = normalized
+        if (isCreateMode) {
+            createColors = updated
+        } else {
+            colorsInput = updated.joinToString(",")
+        }
+        localError = null
     }
 
     PaletaGradientBackground(modifier = Modifier.fillMaxSize()) {
@@ -104,40 +136,83 @@ fun PaletteEditorScreen(
                         colors = paletaTextFieldColors(),
                     )
 
-                    val parsedColors = remember(colorsInput) { HexColors.parse(colorsInput) }
-                    if (!parsedColors.isNullOrEmpty()) {
+                    if (parsedColors.isNotEmpty()) {
                         FlowRow(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             verticalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
-                            parsedColors.forEach { hex ->
+                            parsedColors.forEachIndexed { index, hex ->
                                 val color = ColorTools.hexToColorInt(hex)?.let(::Color) ?: Color.Gray
+                                val isSelected = index == safeSelectedColorIndex
                                 Box(
                                     modifier = Modifier
-                                        .size(34.dp)
+                                        .size(if (isSelected) 40.dp else 34.dp)
                                         .background(color, CircleShape)
                                         .border(
-                                            width = 1.dp,
-                                            color = Color.White.copy(alpha = 0.8f),
+                                            width = if (isSelected) 2.dp else 1.dp,
+                                            color = if (isSelected) {
+                                                Color.White
+                                            } else {
+                                                Color.White.copy(alpha = 0.8f)
+                                            },
                                             shape = CircleShape,
-                                        ),
+                                        )
+                                        .clickable { selectedColorIndex = index },
                                 )
                             }
                         }
                     }
 
-                    OutlinedTextField(
-                        modifier = Modifier.fillMaxWidth(),
-                        value = colorsInput,
-                        onValueChange = {
-                            colorsInput = it
-                            localError = null
-                        },
-                        label = { Text(stringResource(id = R.string.palette_colors_hint)) },
-                        shape = RoundedCornerShape(14.dp),
-                        colors = paletaTextFieldColors(),
-                    )
+                    if (!isCreateMode) {
+                        OutlinedTextField(
+                            modifier = Modifier.fillMaxWidth(),
+                            value = colorsInput,
+                            onValueChange = {
+                                colorsInput = it
+                                localError = null
+                            },
+                            label = { Text(stringResource(id = R.string.palette_colors_hint)) },
+                            shape = RoundedCornerShape(14.dp),
+                            colors = paletaTextFieldColors(),
+                        )
+                    }
+
+                    if (selectedColorHex != null) {
+                        PaletaSectionTitle(
+                            title = stringResource(id = R.string.color_wheel_title),
+                            subtitle = stringResource(
+                                id = R.string.color_wheel_subtitle,
+                                safeSelectedColorIndex + 1,
+                                selectedColorHex,
+                            ),
+                        )
+                        ColorWheelPicker(
+                            colorHex = selectedColorHex,
+                            onColorChange = { updatedHex ->
+                                updateColorAt(safeSelectedColorIndex, updatedHex)
+                            },
+                        )
+
+                        ColorHarmonySection(
+                            baseHex = selectedColorHex,
+                            colorCount = parsedColors.size.coerceAtLeast(3),
+                            onApply = { harmony ->
+                                if (isCreateMode) {
+                                    createColors = harmony
+                                } else {
+                                    colorsInput = harmony.joinToString(",")
+                                }
+                                selectedColorIndex = 0
+                                localError = null
+                            },
+                        )
+                    } else {
+                        Text(
+                            text = stringResource(id = R.string.color_wheel_empty_hint),
+                            color = Color.White.copy(alpha = 0.8f),
+                        )
+                    }
 
                     localError?.let {
                         PaletaMessageBanner(
@@ -146,12 +221,12 @@ fun PaletteEditorScreen(
                         )
                     }
 
-                    if (existing == null) {
+                    if (isCreateMode) {
                         PaletaPrimaryButton(
                             modifier = Modifier.fillMaxWidth(),
                             text = stringResource(id = R.string.create_palette),
                             onClick = {
-                                val parsed = HexColors.parse(colorsInput)
+                                val parsed = HexColors.normalize(parsedColors)
                                 if (parsed == null) {
                                     localError = context.getString(R.string.palette_invalid_hex_count)
                                     return@PaletaPrimaryButton

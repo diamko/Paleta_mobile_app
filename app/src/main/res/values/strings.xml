@@ -82,10 +82,18 @@
     <string name="palette_name_required">Palette name cannot be empty</string>
     <string name="save">Save</string>
     <string name="cancel">Cancel</string>
+    <string name="color_wheel_title">Color wheel</string>
+    <string name="color_wheel_subtitle">Editing color %1$d (%2$s)</string>
+    <string name="color_wheel_brightness">Brightness: %1$d%%</string>
+    <string name="color_wheel_empty_hint">Add at least one valid HEX color to enable the color wheel</string>
 
     <string name="generate_palette_title">Generator</string>
+    <string name="generator_random_page">Random generator</string>
+    <string name="generator_image_page">Image generator</string>
     <string name="source_title">Palette source</string>
     <string name="source_subtitle">Random generation or color extraction from an image</string>
+    <string name="source_random_subtitle">Generate random palettes and tune harmony</string>
+    <string name="source_image_subtitle">Extract colors from image and recent uploads</string>
     <string name="generate_random">Random</string>
     <string name="pick_image">From image</string>
     <string name="color_count_hint">Number of colors (3-15)</string>
@@ -115,6 +123,18 @@
     <string name="copy_hex">Copy HEX</string>
     <string name="hex_copied">HEX copied: %1$s</string>
     <string name="random_color">Random color</string>
+    <string name="harmony_title">Color harmony</string>
+    <string name="harmony_subtitle">Generate related colors like Adobe Color</string>
+    <string name="harmony_apply">Apply harmony</string>
+    <string name="harmony_applied">Harmony applied</string>
+    <string name="harmony_sequential">Sequential</string>
+    <string name="harmony_analogous">Analogous</string>
+    <string name="harmony_monochromatic">Monochromatic</string>
+    <string name="harmony_triadic">Triadic</string>
+    <string name="harmony_complementary">Complementary</string>
+    <string name="harmony_square">Square</string>
+    <string name="harmony_split_complementary">Split complementary</string>
+    <string name="harmony_tetradic">Tetradic</string>
 
     <string name="export_save_title">Export and save</string>
     <string name="export_save_subtitle">Choose format and action</string>

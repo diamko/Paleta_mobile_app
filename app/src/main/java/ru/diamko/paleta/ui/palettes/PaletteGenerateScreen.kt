@@ -109,10 +109,16 @@ private data class SampledPoint(
     val pixelY: Int,
 )
 
+enum class PaletteGenerateScreenMode {
+    RANDOM,
+    IMAGE,
+}
+
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun PaletteGenerateScreen(
     paletteViewModel: PaletteViewModel,
+    mode: PaletteGenerateScreenMode,
     onBack: () -> Unit,
     isAuthenticated: Boolean,
     onRequireLogin: () -> Unit,
@@ -140,8 +146,10 @@ fun PaletteGenerateScreen(
     var pendingExport by remember { mutableStateOf<PaletteExportFile?>(null) }
     val paletteState by paletteViewModel.uiState.collectAsStateWithLifecycle()
 
-    LaunchedEffect(Unit) {
-        paletteViewModel.loadRecentUploads()
+    LaunchedEffect(mode) {
+        if (mode == PaletteGenerateScreenMode.IMAGE) {
+            paletteViewModel.loadRecentUploads()
+        }
     }
 
     fun applyPalette(colors: List<String>, message: String) {
@@ -336,7 +344,15 @@ fun PaletteGenerateScreen(
             topBar = {
                 TopAppBar(
                     colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
-                    title = { Text(stringResource(id = R.string.generate_palette_title)) },
+                    title = {
+                        Text(
+                            text = if (mode == PaletteGenerateScreenMode.RANDOM) {
+                                stringResource(id = R.string.generator_random_page)
+                            } else {
+                                stringResource(id = R.string.generator_image_page)
+                            },
+                        )
+                    },
                     actions = {
                         PaletaGhostButton(
                             modifier = Modifier.padding(end = 12.dp),
@@ -361,7 +377,11 @@ fun PaletteGenerateScreen(
                 PaletaCard(modifier = Modifier.fillMaxWidth()) {
                     PaletaSectionTitle(
                         title = stringResource(id = R.string.source_title),
-                        subtitle = stringResource(id = R.string.source_subtitle),
+                        subtitle = if (mode == PaletteGenerateScreenMode.RANDOM) {
+                            stringResource(id = R.string.source_random_subtitle)
+                        } else {
+                            stringResource(id = R.string.source_image_subtitle)
+                        },
                     )
 
                     OutlinedTextField(
@@ -394,28 +414,32 @@ fun PaletteGenerateScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        PaletaPrimaryButton(
-                            modifier = Modifier.weight(1f),
-                            text = stringResource(id = R.string.generate_random),
-                            onClick = {
-                                applyPalette(
-                                    colors = RandomPaletteGenerator.generate(paletteSize()),
-                                    message = context.getString(R.string.random_palette_generated),
-                                )
-                            },
-                            enabled = !isBusy,
-                        )
-
-                        PaletaGhostButton(
-                            modifier = Modifier.weight(1f),
-                            text = stringResource(id = R.string.pick_image),
-                            onClick = { pickImageLauncher.launch("image/*") },
-                            enabled = !isBusy,
-                        )
+                        if (mode == PaletteGenerateScreenMode.RANDOM) {
+                            PaletaPrimaryButton(
+                                modifier = Modifier.fillMaxWidth(),
+                                text = stringResource(id = R.string.generate_random),
+                                onClick = {
+                                    imageBitmap = null
+                                    markerPositions = emptyList()
+                                    applyPalette(
+                                        colors = RandomPaletteGenerator.generate(paletteSize()),
+                                        message = context.getString(R.string.random_palette_generated),
+                                    )
+                                },
+                                enabled = !isBusy,
+                            )
+                        } else {
+                            PaletaPrimaryButton(
+                                modifier = Modifier.fillMaxWidth(),
+                                text = stringResource(id = R.string.pick_image),
+                                onClick = { pickImageLauncher.launch("image/*") },
+                                enabled = !isBusy,
+                            )
+                        }
                     }
                 }
 
-                if (paletteState.recentUploads.isNotEmpty()) {
+                if (mode == PaletteGenerateScreenMode.IMAGE && paletteState.recentUploads.isNotEmpty()) {
                     PaletaCard(modifier = Modifier.fillMaxWidth()) {
                         PaletaSectionTitle(
                             title = stringResource(id = R.string.recent_uploads_title),
@@ -442,7 +466,7 @@ fun PaletteGenerateScreen(
                     }
                 }
 
-                if (bitmap != null) {
+                if (mode == PaletteGenerateScreenMode.IMAGE && bitmap != null) {
                     PaletaCard(modifier = Modifier.fillMaxWidth()) {
                         PaletaSectionTitle(
                             title = stringResource(id = R.string.pipette_title),
@@ -713,6 +737,19 @@ fun PaletteGenerateScreen(
                                         ),
                                     )
                                     updateColorAt(safeSelectedIndex, random)
+                                },
+                            )
+                        }
+
+                        if (mode == PaletteGenerateScreenMode.RANDOM) {
+                            ColorHarmonySection(
+                                baseHex = selectedHex,
+                                colorCount = paletteColors.size.coerceAtLeast(3),
+                                onApply = { harmonyColors ->
+                                    applyPalette(
+                                        colors = harmonyColors,
+                                        message = context.getString(R.string.harmony_applied),
+                                    )
                                 },
                             )
                         }

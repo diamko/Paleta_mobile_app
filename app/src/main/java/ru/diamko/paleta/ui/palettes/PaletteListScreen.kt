@@ -78,7 +78,8 @@ fun PaletteListScreen(
     state: PaletteUiState,
     onReload: () -> Unit,
     onCreateClick: () -> Unit,
-    onOpenGenerator: () -> Unit,
+    onOpenRandomGenerator: () -> Unit,
+    onOpenImageGenerator: () -> Unit,
     onEditClick: (Long) -> Unit,
     onDeleteClick: (Long) -> Unit,
     onOpenSettings: () -> Unit,
@@ -229,9 +230,19 @@ fun PaletteListScreen(
                         ) {
                             PaletaPrimaryButton(
                                 modifier = Modifier.weight(1f),
-                                text = stringResource(id = R.string.generate_palette_title),
-                                onClick = onOpenGenerator,
+                                text = stringResource(id = R.string.generator_random_page),
+                                onClick = onOpenRandomGenerator,
                             )
+                            PaletaGhostButton(
+                                modifier = Modifier.weight(1f),
+                                text = stringResource(id = R.string.generator_image_page),
+                                onClick = onOpenImageGenerator,
+                            )
+                        }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
                             PaletaGhostButton(
                                 modifier = Modifier.weight(1f),
                                 text = stringResource(id = R.string.new_palette),
@@ -330,8 +341,18 @@ fun PaletteListScreen(
                                 )
                                 PaletaGhostButton(
                                     modifier = Modifier.weight(1f),
-                                    text = stringResource(id = R.string.generate_palette_title),
-                                    onClick = onOpenGenerator,
+                                    text = stringResource(id = R.string.generator_random_page),
+                                    onClick = onOpenRandomGenerator,
+                                )
+                            }
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            ) {
+                                PaletaGhostButton(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    text = stringResource(id = R.string.generator_image_page),
+                                    onClick = onOpenImageGenerator,
                                 )
                             }
                         }

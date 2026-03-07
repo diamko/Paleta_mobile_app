@@ -82,10 +82,18 @@
     <string name="palette_name_required">Название палитры не может быть пустым</string>
     <string name="save">Сохранить</string>
     <string name="cancel">Отмена</string>
+    <string name="color_wheel_title">Цветовой круг</string>
+    <string name="color_wheel_subtitle">Редактирование цвета %1$d (%2$s)</string>
+    <string name="color_wheel_brightness">Яркость: %1$d%%</string>
+    <string name="color_wheel_empty_hint">Добавьте хотя бы один корректный HEX-цвет, чтобы включить цветовой круг</string>
 
     <string name="generate_palette_title">Генератор</string>
+    <string name="generator_random_page">Случайный генератор</string>
+    <string name="generator_image_page">Генератор по изображению</string>
     <string name="source_title">Источник палитры</string>
     <string name="source_subtitle">Случайная генерация или извлечение цветов из изображения</string>
+    <string name="source_random_subtitle">Генерируйте случайные палитры и применяйте гармонии</string>
+    <string name="source_image_subtitle">Извлекайте цвета из изображения и недавних загрузок</string>
     <string name="generate_random">Случайная</string>
     <string name="pick_image">Из изображения</string>
     <string name="color_count_hint">Количество цветов (3-15)</string>
@@ -115,6 +123,18 @@
     <string name="copy_hex">Копировать HEX</string>
     <string name="hex_copied">HEX скопирован: %1$s</string>
     <string name="random_color">Случайный цвет</string>
+    <string name="harmony_title">Гармонии цвета</string>
+    <string name="harmony_subtitle">Генерируйте связанные цвета как в Adobe Color</string>
+    <string name="harmony_apply">Применить гармонию</string>
+    <string name="harmony_applied">Гармония применена</string>
+    <string name="harmony_sequential">Последовательная</string>
+    <string name="harmony_analogous">Аналоговая</string>
+    <string name="harmony_monochromatic">Монохромная</string>
+    <string name="harmony_triadic">Треугольная</string>
+    <string name="harmony_complementary">Комплементарная</string>
+    <string name="harmony_square">Квадратная</string>
+    <string name="harmony_split_complementary">Раздельно-комплементарная</string>
+    <string name="harmony_tetradic">Тетрадная</string>
 
     <string name="export_save_title">Экспорт и сохранение</string>
     <string name="export_save_subtitle">Выберите формат и действие</string>

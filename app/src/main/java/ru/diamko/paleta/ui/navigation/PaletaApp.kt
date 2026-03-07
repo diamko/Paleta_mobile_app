@@ -35,6 +35,7 @@ import ru.diamko.paleta.ui.auth.ResetPasswordScreen
 import ru.diamko.paleta.ui.components.PaletaGradientBackground
 import ru.diamko.paleta.ui.palettes.PaletteEditorScreen
 import ru.diamko.paleta.ui.palettes.PaletteGenerateScreen
+import ru.diamko.paleta.ui.palettes.PaletteGenerateScreenMode
 import ru.diamko.paleta.ui.palettes.PaletteListScreen
 import ru.diamko.paleta.ui.palettes.PaletteViewModel
 import ru.diamko.paleta.ui.settings.FaqScreen
@@ -73,7 +74,7 @@ fun PaletaApp(
 
         val current = navController.currentBackStackEntry?.destination?.route
         val authFlow = setOf(Routes.LOGIN, Routes.REGISTER, Routes.FORGOT_PASSWORD, Routes.RESET_PASSWORD)
-        val guestAllowed = setOf(Routes.GENERATE)
+        val guestAllowed = setOf(Routes.GENERATE_RANDOM, Routes.GENERATE_IMAGE)
         val target = if (authState.user == null) {
             if (current in authFlow || current in guestAllowed) null else Routes.LOGIN
         } else {
@@ -111,7 +112,7 @@ fun PaletaApp(
                 onLoginClick = authViewModel::login,
                 onGoRegisterClick = { navController.navigate(Routes.REGISTER) },
                 onGoForgotPasswordClick = { navController.navigate(Routes.FORGOT_PASSWORD) },
-                onContinueAsGuestClick = { navController.navigate(Routes.GENERATE) },
+                onContinueAsGuestClick = { navController.navigate(Routes.GENERATE_RANDOM) },
                 onClearError = {
                     authViewModel.clearError()
                     authViewModel.clearInfoMessage()
@@ -179,7 +180,8 @@ fun PaletaApp(
                 state = paletteState,
                 onReload = paletteViewModel::loadPalettes,
                 onCreateClick = { navController.navigate(Routes.paletteEditor("new")) },
-                onOpenGenerator = { navController.navigate(Routes.GENERATE) },
+                onOpenRandomGenerator = { navController.navigate(Routes.GENERATE_RANDOM) },
+                onOpenImageGenerator = { navController.navigate(Routes.GENERATE_IMAGE) },
                 onEditClick = { id -> navController.navigate(Routes.paletteEditor(id.toString())) },
                 onDeleteClick = { id -> paletteViewModel.deletePalette(id) },
                 onOpenSettings = { navController.navigate(Routes.SETTINGS) },
@@ -195,9 +197,24 @@ fun PaletaApp(
             )
         }
 
-        composable(Routes.GENERATE) {
+        composable(Routes.GENERATE_RANDOM) {
             PaletteGenerateScreen(
                 paletteViewModel = paletteViewModel,
+                mode = PaletteGenerateScreenMode.RANDOM,
+                onBack = { navController.popBackStack() },
+                isAuthenticated = authState.user != null,
+                onRequireLogin = {
+                    navController.navigate(Routes.LOGIN) {
+                        launchSingleTop = true
+                    }
+                },
+            )
+        }
+
+        composable(Routes.GENERATE_IMAGE) {
+            PaletteGenerateScreen(
+                paletteViewModel = paletteViewModel,
+                mode = PaletteGenerateScreenMode.IMAGE,
                 onBack = { navController.popBackStack() },
                 isAuthenticated = authState.user != null,
                 onRequireLogin = {
