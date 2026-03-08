@@ -155,6 +155,7 @@
     <string name="language_en">EN</string>
     <string name="language_ru">RU</string>
     <string name="language_subtitle">Выберите язык приложения</string>
+    <string name="language_switching">Применяем язык...</string>
     <string name="language_title">Язык интерфейса</string>
     <string name="loading">Загрузка...</string>
     <string name="login_button">Войти</string>
@@ -283,10 +284,12 @@
     <string name="new_password">Новый пароль</string>
     <string msgid="6610465462668679431" name="not_selected">"Не выбрано"</string>
     <string name="open_file_write_error">Не удалось открыть файл для записи</string>
+    <string name="palette_color_count">Количество цветов: %1$d</string>
     <string name="palette_colors_hint">HEX цвета через запятую, например #112233,#AABBCC,#FFFFFF</string>
     <string name="palette_colors_subtitle">Максимум 3 карточки в ряд, каждый цвет редактируется отдельно</string>
     <string name="palette_colors_title">Цвета палитры</string>
     <string name="palette_editor_subtitle">Введите название и HEX-цвета через запятую</string>
+    <string name="palette_editor_subtitle_create">Введите название палитры и редактируйте цвета на круге</string>
     <string name="palette_editor_title">Редактор палитры</string>
     <string name="palette_invalid_hex_count">Введите от 3 до 15 корректных HEX-цветов</string>
     <string name="palette_name_hint">Название палитры</string>
@@ -321,6 +324,7 @@
     <string name="reset_password_subtitle">Введите email, код и новый пароль</string>
     <string name="reset_password_title">Сброс пароля</string>
     <string name="save">Сохранить</string>
+    <string name="save_changes">Сохранить изменения</string>
     <string name="save_palette">Сохранить</string>
     <string name="save_profile">Сохранить профиль</string>
     <string msgid="6264217191555673260" name="search_menu_title">"Поиск"</string>

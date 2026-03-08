@@ -437,6 +437,19 @@ fun PaletteGenerateScreen(
                             )
                         }
                     }
+
+                    if (mode == PaletteGenerateScreenMode.RANDOM && hasPalette) {
+                        ColorHarmonySection(
+                            baseHex = selectedHex,
+                            colorCount = paletteColors.size.coerceAtLeast(3),
+                            onApply = { harmonyColors ->
+                                applyPalette(
+                                    colors = harmonyColors,
+                                    message = context.getString(R.string.harmony_applied),
+                                )
+                            },
+                        )
+                    }
                 }
 
                 if (mode == PaletteGenerateScreenMode.IMAGE && paletteState.recentUploads.isNotEmpty()) {
@@ -741,18 +754,6 @@ fun PaletteGenerateScreen(
                             )
                         }
 
-                        if (mode == PaletteGenerateScreenMode.RANDOM) {
-                            ColorHarmonySection(
-                                baseHex = selectedHex,
-                                colorCount = paletteColors.size.coerceAtLeast(3),
-                                onApply = { harmonyColors ->
-                                    applyPalette(
-                                        colors = harmonyColors,
-                                        message = context.getString(R.string.harmony_applied),
-                                    )
-                                },
-                            )
-                        }
                     }
                 }
 

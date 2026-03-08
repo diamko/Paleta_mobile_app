@@ -104,6 +104,61 @@ class PaletteViewModel(
         }
     }
 
+    fun savePaletteChanges(
+        id: Long,
+        newName: String,
+        newColors: List<String>,
+        onDone: () -> Unit = {},
+    ) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, error = null) }
+            runCatching {
+                val desiredName = newName.trim()
+                if (desiredName.isBlank()) {
+                    throw IllegalArgumentException("Palette name cannot be empty")
+                }
+                val normalizedColors = newColors.map { it.trim() }
+                if (normalizedColors.isEmpty()) {
+                    throw IllegalArgumentException("Palette colors are required")
+                }
+
+                val current = findPaletteById(id)
+                    ?: throw IllegalArgumentException("Palette not found")
+                val nameChanged = !current.name.equals(desiredName)
+                val colorsChanged = current.colors != normalizedColors
+
+                if (!nameChanged && !colorsChanged) {
+                    return@runCatching
+                }
+
+                if (!colorsChanged) {
+                    renamePaletteUseCase(id, desiredName)
+                    return@runCatching
+                }
+
+                val tempName = "__tmp_${System.currentTimeMillis()}_${current.name}"
+                    .take(90)
+                    .replace(Regex("\\s+"), "_")
+                renamePaletteUseCase(id, tempName)
+
+                runCatching {
+                    createPaletteUseCase(desiredName, normalizedColors)
+                    deletePaletteUseCase(id)
+                }.onFailure { createOrDeleteError ->
+                    runCatching { renamePaletteUseCase(id, current.name) }
+                    throw createOrDeleteError
+                }
+            }
+                .onSuccess {
+                    loadPalettes()
+                    onDone()
+                }
+                .onFailure { error ->
+                    _uiState.update { it.copy(isLoading = false, error = error.message ?: "РћС€РёР±РєР° СЃРѕС…СЂР°РЅРµРЅРёСЏ") }
+                }
+        }
+    }
+
     fun deletePalette(id: Long, onDone: () -> Unit = {}) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
@@ -184,6 +239,14 @@ class PaletteViewModel(
 
     fun paletteById(id: Long): Palette? {
         return _uiState.value.palettes.firstOrNull { it.id == id }
+    }
+
+    private suspend fun findPaletteById(id: Long): Palette? {
+        val fromState = _uiState.value.palettes.firstOrNull { it.id == id }
+        if (fromState != null) return fromState
+        return runCatching { getPalettesUseCase() }
+            .getOrElse { emptyList() }
+            .firstOrNull { it.id == id }
     }
 
     private fun createUniquePaletteName(

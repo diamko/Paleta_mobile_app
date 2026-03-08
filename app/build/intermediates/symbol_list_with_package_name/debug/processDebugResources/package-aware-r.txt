@@ -3851,6 +3851,7 @@ string item_view_role_description
 string language_en
 string language_ru
 string language_subtitle
+string language_switching
 string language_title
 string loading
 string login_button
@@ -4021,10 +4022,12 @@ string new_palette
 string new_password
 string not_selected
 string open_file_write_error
+string palette_color_count
 string palette_colors_hint
 string palette_colors_subtitle
 string palette_colors_title
 string palette_editor_subtitle
+string palette_editor_subtitle_create
 string palette_editor_title
 string palette_invalid_hex_count
 string palette_name_hint
@@ -4063,6 +4066,7 @@ string rename_palette
 string reset_password_subtitle
 string reset_password_title
 string save
+string save_changes
 string save_palette
 string save_profile
 string search_menu_title

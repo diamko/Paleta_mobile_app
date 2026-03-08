@@ -24,6 +24,8 @@ import ru.diamko.paleta.domain.model.Palette
 import ru.diamko.paleta.domain.model.PaletteExportFile
 import ru.diamko.paleta.domain.model.RecentUpload
 import ru.diamko.paleta.domain.repository.PaletteRepository
+import java.net.URLDecoder
+import java.nio.charset.StandardCharsets
 
 class RemotePaletteRepository(
     private val paletteApi: PaletteApi,
@@ -134,8 +136,11 @@ class RemotePaletteRepository(
         val mimeType = response.headers()["Content-Type"]
             ?: body.contentType()?.toString()
             ?: "application/octet-stream"
-        val fileName = parseFileName(response.headers()["Content-Disposition"])
-            ?: "${name.ifBlank { "palette" }}.${format.lowercase()}"
+        val fileName = buildExportFileName(
+            requestedName = name,
+            format = format,
+            fallbackHeader = response.headers()["Content-Disposition"],
+        )
 
         PaletteExportFile(
             fileName = fileName,
@@ -201,6 +206,30 @@ class RemotePaletteRepository(
         val value = contentDisposition ?: return null
         val regex = Regex("filename\\*=UTF-8''([^;]+)|filename=\"?([^\";]+)\"?")
         val match = regex.find(value) ?: return null
-        return (match.groups[1]?.value ?: match.groups[2]?.value)?.trim()
+        val raw = (match.groups[1]?.value ?: match.groups[2]?.value)?.trim() ?: return null
+        return runCatching { URLDecoder.decode(raw, StandardCharsets.UTF_8.name()) }.getOrDefault(raw)
+    }
+
+    private fun buildExportFileName(
+        requestedName: String,
+        format: String,
+        fallbackHeader: String?,
+    ): String {
+        val extension = format.trim().lowercase().ifBlank { "json" }
+        val normalized = requestedName
+            .trim()
+            .replace(Regex("[\\\\/:*?\"<>|]"), "_")
+            .ifBlank { "palette" }
+        if (normalized.contains('.')) {
+            return normalized
+        }
+        val parsedHeaderName = parseFileName(fallbackHeader)
+        val parsedHeaderExt = parsedHeaderName
+            ?.substringAfterLast('.', missingDelimiterValue = "")
+            ?.trim()
+            ?.lowercase()
+            ?.takeIf { it.isNotBlank() }
+        val ext = parsedHeaderExt ?: extension
+        return "$normalized.$ext"
     }
 }

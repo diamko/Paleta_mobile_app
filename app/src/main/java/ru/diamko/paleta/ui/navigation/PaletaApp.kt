@@ -1,5 +1,8 @@
 package ru.diamko.paleta.ui.navigation
 
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,6 +17,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
@@ -24,6 +28,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import ru.diamko.paleta.R
 import ru.diamko.paleta.core.di.AppContainer
@@ -47,6 +52,7 @@ import ru.diamko.paleta.ui.settings.SettingsScreen
 fun PaletaApp(
     container: AppContainer,
 ) {
+    val context = LocalContext.current
     val navController = rememberNavController()
     val scope = rememberCoroutineScope()
 
@@ -57,6 +63,7 @@ fun PaletaApp(
     val paletteState by paletteViewModel.uiState.collectAsStateWithLifecycle()
     var resetEmailPrefill by rememberSaveable { mutableStateOf("") }
     var currentLanguageTag by rememberSaveable { mutableStateOf("ru") }
+    var isApplyingLanguage by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         val stored = container.localeStore.readLanguageTag()
@@ -229,13 +236,22 @@ fun PaletaApp(
             SettingsScreen(
                 authState = authState,
                 currentLanguageTag = currentLanguageTag,
+                isApplyingLanguage = isApplyingLanguage,
                 onChangeLanguage = { languageTag ->
                     val safeTag = if (languageTag == "en") "en" else "ru"
-                    currentLanguageTag = safeTag
-                    scope.launch {
-                        container.localeStore.saveLanguageTag(safeTag)
+                    if (safeTag != currentLanguageTag && !isApplyingLanguage) {
+                        isApplyingLanguage = true
+                        currentLanguageTag = safeTag
+                        scope.launch {
+                            runCatching {
+                                container.localeStore.saveLanguageTag(safeTag)
+                                AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(safeTag))
+                                delay(250)
+                                findActivity(context)?.recreate()
+                            }
+                            isApplyingLanguage = false
+                        }
                     }
-                    AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(safeTag))
                 },
                 onOpenProfile = { navController.navigate(Routes.PROFILE_EDIT) },
                 onOpenPasswordChange = { navController.navigate(Routes.PASSWORD_CHANGE) },
@@ -290,5 +306,13 @@ fun PaletaApp(
                 onBack = { navController.popBackStack() },
             )
         }
+    }
+}
+
+private tailrec fun findActivity(context: Context): Activity? {
+    return when (context) {
+        is Activity -> context
+        is ContextWrapper -> findActivity(context.baseContext)
+        else -> null
     }
 }

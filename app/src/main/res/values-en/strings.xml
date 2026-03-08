@@ -73,10 +73,13 @@
 
     <string name="palette_editor_title">Palette editor</string>
     <string name="palette_editor_subtitle">Enter a name and HEX colors separated by commas</string>
+    <string name="palette_editor_subtitle_create">Enter a palette name and edit colors on the wheel</string>
     <string name="palette_name_hint">Palette name</string>
     <string name="palette_colors_hint">HEX colors separated by commas, e.g. #112233,#AABBCC,#FFFFFF</string>
+    <string name="palette_color_count">Color count: %1$d</string>
     <string name="create_palette">Create palette</string>
     <string name="rename_palette">Rename palette</string>
+    <string name="save_changes">Save changes</string>
     <string name="delete_palette">Delete palette</string>
     <string name="palette_invalid_hex_count">Enter from 3 to 15 valid HEX colors</string>
     <string name="palette_name_required">Palette name cannot be empty</string>
@@ -164,6 +167,7 @@
     <string name="language_subtitle">Choose app language</string>
     <string name="language_ru">RU</string>
     <string name="language_en">EN</string>
+    <string name="language_switching">Applying language...</string>
     <string name="edit_profile">Edit profile</string>
     <string name="faq">FAQ</string>
 

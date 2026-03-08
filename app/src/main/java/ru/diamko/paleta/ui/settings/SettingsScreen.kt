@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
@@ -32,6 +33,7 @@ import ru.diamko.paleta.ui.components.PaletaSectionTitle
 fun SettingsScreen(
     authState: AuthUiState,
     currentLanguageTag: String,
+    isApplyingLanguage: Boolean,
     onChangeLanguage: (String) -> Unit,
     onOpenProfile: () -> Unit,
     onOpenPasswordChange: () -> Unit,
@@ -78,6 +80,7 @@ fun SettingsScreen(
                         FilterChip(
                             selected = currentLanguageTag == "ru",
                             onClick = { onChangeLanguage("ru") },
+                            enabled = !isApplyingLanguage,
                             label = { Text(stringResource(id = R.string.language_ru)) },
                             colors = FilterChipDefaults.filterChipColors(
                                 selectedContainerColor = Color(0x1A1976D2),
@@ -86,6 +89,7 @@ fun SettingsScreen(
                         FilterChip(
                             selected = currentLanguageTag == "en",
                             onClick = { onChangeLanguage("en") },
+                            enabled = !isApplyingLanguage,
                             label = { Text(stringResource(id = R.string.language_en)) },
                             colors = FilterChipDefaults.filterChipColors(
                                 selectedContainerColor = Color(0x1A1976D2),
@@ -93,30 +97,45 @@ fun SettingsScreen(
                         )
                     }
 
+                    if (isApplyingLanguage) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            CircularProgressIndicator(modifier = Modifier.padding(top = 2.dp))
+                            Text(text = stringResource(id = R.string.language_switching))
+                        }
+                    }
+
                     PaletaGhostButton(
                         modifier = Modifier.fillMaxWidth(),
                         text = stringResource(id = R.string.edit_profile),
                         onClick = onOpenProfile,
+                        enabled = !isApplyingLanguage,
                     )
                     PaletaGhostButton(
                         modifier = Modifier.fillMaxWidth(),
                         text = stringResource(id = R.string.password_change_title),
                         onClick = onOpenPasswordChange,
+                        enabled = !isApplyingLanguage,
                     )
                     PaletaGhostButton(
                         modifier = Modifier.fillMaxWidth(),
                         text = stringResource(id = R.string.faq),
                         onClick = onOpenFaq,
+                        enabled = !isApplyingLanguage,
                     )
                     PaletaPrimaryButton(
                         modifier = Modifier.fillMaxWidth(),
                         text = stringResource(id = R.string.logout),
                         onClick = onLogout,
+                        enabled = !isApplyingLanguage,
                     )
                     PaletaGhostButton(
                         modifier = Modifier.fillMaxWidth(),
                         text = stringResource(id = R.string.cancel),
                         onClick = onBack,
+                        enabled = !isApplyingLanguage,
                     )
                 }
             }

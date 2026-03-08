@@ -73,10 +73,13 @@
 
     <string name="palette_editor_title">Редактор палитры</string>
     <string name="palette_editor_subtitle">Введите название и HEX-цвета через запятую</string>
+    <string name="palette_editor_subtitle_create">Введите название палитры и редактируйте цвета на круге</string>
     <string name="palette_name_hint">Название палитры</string>
     <string name="palette_colors_hint">HEX цвета через запятую, например #112233,#AABBCC,#FFFFFF</string>
+    <string name="palette_color_count">Количество цветов: %1$d</string>
     <string name="create_palette">Создать палитру</string>
     <string name="rename_palette">Переименовать палитру</string>
+    <string name="save_changes">Сохранить изменения</string>
     <string name="delete_palette">Удалить палитру</string>
     <string name="palette_invalid_hex_count">Введите от 3 до 15 корректных HEX-цветов</string>
     <string name="palette_name_required">Название палитры не может быть пустым</string>
@@ -164,6 +167,7 @@
     <string name="language_subtitle">Выберите язык приложения</string>
     <string name="language_ru">RU</string>
     <string name="language_en">EN</string>
+    <string name="language_switching">Применяем язык...</string>
     <string name="edit_profile">Редактировать профиль</string>
     <string name="faq">FAQ</string>
 

@@ -17,8 +17,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -63,6 +65,9 @@ fun PaletteEditorScreen(
     var createColors by remember(existing?.id) {
         mutableStateOf(if (isCreateMode) RandomPaletteGenerator.generate(5) else emptyList())
     }
+    var createColorCount by remember(existing?.id) {
+        mutableStateOf(createColors.size.coerceIn(3, 15))
+    }
     var localError by remember { mutableStateOf<String?>(null) }
     var selectedColorIndex by remember(existing?.id) { mutableStateOf(0) }
 
@@ -95,6 +100,24 @@ fun PaletteEditorScreen(
         localError = null
     }
 
+    fun resizeCreateColors(targetCount: Int) {
+        if (!isCreateMode) return
+        val safeTarget = targetCount.coerceIn(3, 15)
+        val current = createColors
+        createColors = if (current.size >= safeTarget) {
+            current.take(safeTarget)
+        } else {
+            buildList {
+                addAll(current)
+                while (size < safeTarget) {
+                    add(RandomPaletteGenerator.generate(1).firstOrNull() ?: "#000000")
+                }
+            }
+        }
+        createColorCount = safeTarget
+        selectedColorIndex = selectedColorIndex.coerceIn(0, max(0, createColors.lastIndex))
+    }
+
     PaletaGradientBackground(modifier = Modifier.fillMaxSize()) {
         Scaffold(
             containerColor = Color.Transparent,
@@ -118,9 +141,13 @@ fun PaletteEditorScreen(
                         title = if (existing == null) {
                             stringResource(id = R.string.create_palette)
                         } else {
-                            stringResource(id = R.string.rename_palette)
+                            stringResource(id = R.string.save_changes)
                         },
-                        subtitle = stringResource(id = R.string.palette_editor_subtitle),
+                        subtitle = if (isCreateMode) {
+                            stringResource(id = R.string.palette_editor_subtitle_create)
+                        } else {
+                            stringResource(id = R.string.palette_editor_subtitle)
+                        },
                     )
 
                     OutlinedTextField(
@@ -137,6 +164,19 @@ fun PaletteEditorScreen(
                     )
 
                     if (parsedColors.isNotEmpty()) {
+                        if (isCreateMode) {
+                            Text(
+                                text = stringResource(id = R.string.palette_color_count, createColorCount),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                            Slider(
+                                value = createColorCount.toFloat(),
+                                onValueChange = { resizeCreateColors(it.toInt()) },
+                                valueRange = 3f..15f,
+                                steps = 11,
+                            )
+                        }
+
                         FlowRow(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -179,6 +219,21 @@ fun PaletteEditorScreen(
                     }
 
                     if (selectedColorHex != null) {
+                        ColorHarmonySection(
+                            baseHex = selectedColorHex,
+                            colorCount = parsedColors.size.coerceAtLeast(3),
+                            onApply = { harmony ->
+                                if (isCreateMode) {
+                                    createColors = harmony
+                                    createColorCount = harmony.size.coerceIn(3, 15)
+                                } else {
+                                    colorsInput = harmony.joinToString(",")
+                                }
+                                selectedColorIndex = 0
+                                localError = null
+                            },
+                        )
+
                         PaletaSectionTitle(
                             title = stringResource(id = R.string.color_wheel_title),
                             subtitle = stringResource(
@@ -191,20 +246,6 @@ fun PaletteEditorScreen(
                             colorHex = selectedColorHex,
                             onColorChange = { updatedHex ->
                                 updateColorAt(safeSelectedColorIndex, updatedHex)
-                            },
-                        )
-
-                        ColorHarmonySection(
-                            baseHex = selectedColorHex,
-                            colorCount = parsedColors.size.coerceAtLeast(3),
-                            onApply = { harmony ->
-                                if (isCreateMode) {
-                                    createColors = harmony
-                                } else {
-                                    colorsInput = harmony.joinToString(",")
-                                }
-                                selectedColorIndex = 0
-                                localError = null
                             },
                         )
                     } else {
@@ -239,13 +280,22 @@ fun PaletteEditorScreen(
                     } else {
                         PaletaPrimaryButton(
                             modifier = Modifier.fillMaxWidth(),
-                            text = stringResource(id = R.string.rename_palette),
+                            text = stringResource(id = R.string.save_changes),
                             onClick = {
+                                val parsed = HexColors.parse(colorsInput)
                                 if (name.isBlank()) {
                                     localError = context.getString(R.string.palette_name_required)
                                     return@PaletaPrimaryButton
                                 }
-                                paletteViewModel.renamePalette(existing.id, name) {
+                                if (parsed == null) {
+                                    localError = context.getString(R.string.palette_invalid_hex_count)
+                                    return@PaletaPrimaryButton
+                                }
+                                paletteViewModel.savePaletteChanges(
+                                    id = existing.id,
+                                    newName = name,
+                                    newColors = parsed,
+                                ) {
                                     onBack()
                                 }
                             },
