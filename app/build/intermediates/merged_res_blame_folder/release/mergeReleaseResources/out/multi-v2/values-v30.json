@@ -1,0 +1,19 @@
+{
+    "logs": [
+        {
+            "outputFile": "ru.diamko.paleta.app-mergeReleaseResources-63:/values-v30/values-v30.xml",
+            "map": [
+                {
+                    "source": "/home/di/.gradle/caches/8.13/transforms/9d17caa0a29036671291698d8f26dcb4/transformed/jetified-material3-release/res/values-v30/values-v30.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "72",
+                        "endOffsets": "123"
+                    }
+                }
+            ]
+        }
+    ]
+}

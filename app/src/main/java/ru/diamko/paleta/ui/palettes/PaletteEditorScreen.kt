@@ -43,9 +43,9 @@ import ru.diamko.paleta.ui.components.ColorWheelPicker
 import ru.diamko.paleta.ui.components.PaletaCard
 import ru.diamko.paleta.ui.components.PaletaGhostButton
 import ru.diamko.paleta.ui.components.PaletaGradientBackground
-import ru.diamko.paleta.ui.components.PaletaMessageBanner
 import ru.diamko.paleta.ui.components.PaletaPrimaryButton
 import ru.diamko.paleta.ui.components.PaletaSectionTitle
+import ru.diamko.paleta.ui.components.PaletaTopBannerHost
 import ru.diamko.paleta.ui.components.paletaTextFieldColors
 import kotlin.math.max
 
@@ -130,27 +130,31 @@ fun PaletteEditorScreen(
                 )
             },
         ) { paddingValues ->
-            Column(
+            Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(paddingValues)
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+                    .padding(paddingValues),
             ) {
-                PaletaCard(modifier = Modifier.fillMaxWidth()) {
-                    PaletaSectionTitle(
-                        title = if (existing == null) {
-                            stringResource(id = R.string.create_palette)
-                        } else {
-                            stringResource(id = R.string.save_changes)
-                        },
-                        subtitle = if (isCreateMode) {
-                            stringResource(id = R.string.palette_editor_subtitle_create)
-                        } else {
-                            stringResource(id = R.string.palette_editor_subtitle)
-                        },
-                    )
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    PaletaCard(modifier = Modifier.fillMaxWidth()) {
+                        PaletaSectionTitle(
+                            title = if (existing == null) {
+                                stringResource(id = R.string.create_palette)
+                            } else {
+                                stringResource(id = R.string.save_changes)
+                            },
+                            subtitle = if (isCreateMode) {
+                                stringResource(id = R.string.palette_editor_subtitle_create)
+                            } else {
+                                stringResource(id = R.string.palette_editor_subtitle)
+                            },
+                        )
 
                     OutlinedTextField(
                         modifier = Modifier.fillMaxWidth(),
@@ -257,13 +261,6 @@ fun PaletteEditorScreen(
                         )
                     }
 
-                    localError?.let {
-                        PaletaMessageBanner(
-                            message = it,
-                            isError = true,
-                        )
-                    }
-
                     if (isCreateMode) {
                         PaletaPrimaryButton(
                             modifier = Modifier.fillMaxWidth(),
@@ -335,7 +332,13 @@ fun PaletteEditorScreen(
                         text = stringResource(id = R.string.cancel),
                         onClick = onBack,
                     )
+                    }
                 }
+
+                PaletaTopBannerHost(
+                    error = localError,
+                    info = null,
+                )
             }
         }
     }

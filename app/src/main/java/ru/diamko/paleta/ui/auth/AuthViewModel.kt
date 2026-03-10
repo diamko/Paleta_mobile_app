@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import ru.diamko.paleta.R
 import ru.diamko.paleta.core.di.AppContainer
+import ru.diamko.paleta.core.validation.AuthValidation
 import ru.diamko.paleta.domain.model.User
 import ru.diamko.paleta.domain.usecase.ChangeProfilePasswordUseCase
 import ru.diamko.paleta.domain.usecase.GetCurrentUserUseCase
@@ -50,14 +51,28 @@ class AuthViewModel(
     }
 
     fun login(login: String, password: String) {
-        if (login.isBlank() || password.isBlank()) {
+        val loginTrimmed = login.trim()
+        if (loginTrimmed.isBlank() || password.isBlank()) {
             _uiState.update { it.copy(error = getString(R.string.auth_fill_login_password)) }
+            return
+        }
+        val loginError = if (loginTrimmed.contains('@')) {
+            if (!AuthValidation.isValidEmail(loginTrimmed)) getString(R.string.auth_invalid_email) else null
+        } else {
+            if (!AuthValidation.isValidUsername(loginTrimmed)) getString(R.string.auth_invalid_username) else null
+        }
+        if (loginError != null) {
+            _uiState.update { it.copy(error = loginError) }
+            return
+        }
+        if (!AuthValidation.isValidPassword(password)) {
+            _uiState.update { it.copy(error = getString(R.string.auth_invalid_password)) }
             return
         }
 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null, infoMessage = null) }
-            runCatching { loginUseCase(login, password) }
+            runCatching { loginUseCase(loginTrimmed, password) }
                 .onSuccess { user ->
                     _uiState.update {
                         it.copy(
@@ -81,14 +96,28 @@ class AuthViewModel(
     }
 
     fun register(username: String, email: String, password: String) {
-        if (username.isBlank() || email.isBlank() || password.isBlank()) {
+        val usernameTrimmed = username.trim()
+        val emailTrimmed = email.trim()
+        if (usernameTrimmed.isBlank() || emailTrimmed.isBlank() || password.isBlank()) {
             _uiState.update { it.copy(error = getString(R.string.auth_fill_all_fields)) }
+            return
+        }
+        if (!AuthValidation.isValidUsername(usernameTrimmed)) {
+            _uiState.update { it.copy(error = getString(R.string.auth_invalid_username)) }
+            return
+        }
+        if (!AuthValidation.isValidEmail(emailTrimmed)) {
+            _uiState.update { it.copy(error = getString(R.string.auth_invalid_email)) }
+            return
+        }
+        if (!AuthValidation.isValidPassword(password)) {
+            _uiState.update { it.copy(error = getString(R.string.auth_invalid_password)) }
             return
         }
 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null, infoMessage = null) }
-            runCatching { registerUseCase(username, email, password) }
+            runCatching { registerUseCase(usernameTrimmed, emailTrimmed, password) }
                 .onSuccess { user ->
                     _uiState.update {
                         it.copy(
@@ -112,14 +141,19 @@ class AuthViewModel(
     }
 
     fun requestPasswordResetCode(email: String, onDone: () -> Unit = {}) {
-        if (email.isBlank()) {
+        val emailTrimmed = email.trim()
+        if (emailTrimmed.isBlank()) {
             _uiState.update { it.copy(error = getString(R.string.auth_enter_email)) }
+            return
+        }
+        if (!AuthValidation.isValidEmail(emailTrimmed)) {
+            _uiState.update { it.copy(error = getString(R.string.auth_invalid_email)) }
             return
         }
 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null, infoMessage = null) }
-            runCatching { requestPasswordResetCodeUseCase(email) }
+            runCatching { requestPasswordResetCodeUseCase(emailTrimmed) }
                 .onSuccess {
                     _uiState.update {
                         it.copy(
@@ -148,14 +182,27 @@ class AuthViewModel(
         confirmPassword: String,
         onDone: () -> Unit = {},
     ) {
-        if (email.isBlank() || code.isBlank() || newPassword.isBlank() || confirmPassword.isBlank()) {
+        val emailTrimmed = email.trim()
+        if (emailTrimmed.isBlank() || code.isBlank() || newPassword.isBlank() || confirmPassword.isBlank()) {
             _uiState.update { it.copy(error = getString(R.string.auth_fill_all_fields)) }
+            return
+        }
+        if (!AuthValidation.isValidEmail(emailTrimmed)) {
+            _uiState.update { it.copy(error = getString(R.string.auth_invalid_email)) }
+            return
+        }
+        if (!AuthValidation.isValidPassword(newPassword)) {
+            _uiState.update { it.copy(error = getString(R.string.auth_invalid_password)) }
+            return
+        }
+        if (newPassword != confirmPassword) {
+            _uiState.update { it.copy(error = getString(R.string.auth_passwords_not_match)) }
             return
         }
 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null, infoMessage = null) }
-            runCatching { resetPasswordUseCase(email, code, newPassword, confirmPassword) }
+            runCatching { resetPasswordUseCase(emailTrimmed, code, newPassword, confirmPassword) }
                 .onSuccess {
                     _uiState.update {
                         it.copy(
@@ -183,14 +230,24 @@ class AuthViewModel(
         currentPassword: String,
         onDone: () -> Unit = {},
     ) {
-        if (username.isBlank() || email.isBlank() || currentPassword.isBlank()) {
+        val usernameTrimmed = username.trim()
+        val emailTrimmed = email.trim()
+        if (usernameTrimmed.isBlank() || emailTrimmed.isBlank() || currentPassword.isBlank()) {
             _uiState.update { it.copy(error = getString(R.string.auth_fill_all_fields)) }
+            return
+        }
+        if (!AuthValidation.isValidUsername(usernameTrimmed)) {
+            _uiState.update { it.copy(error = getString(R.string.auth_invalid_username)) }
+            return
+        }
+        if (!AuthValidation.isValidEmail(emailTrimmed)) {
+            _uiState.update { it.copy(error = getString(R.string.auth_invalid_email)) }
             return
         }
 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null, infoMessage = null) }
-            runCatching { updateProfileUseCase(username, email, currentPassword) }
+            runCatching { updateProfileUseCase(usernameTrimmed, emailTrimmed, currentPassword) }
                 .onSuccess { user ->
                     _uiState.update {
                         it.copy(
@@ -246,6 +303,14 @@ class AuthViewModel(
     ) {
         if (code.isBlank() || newPassword.isBlank() || confirmPassword.isBlank()) {
             _uiState.update { it.copy(error = getString(R.string.auth_fill_all_fields)) }
+            return
+        }
+        if (!AuthValidation.isValidPassword(newPassword)) {
+            _uiState.update { it.copy(error = getString(R.string.auth_invalid_password)) }
+            return
+        }
+        if (newPassword != confirmPassword) {
+            _uiState.update { it.copy(error = getString(R.string.auth_passwords_not_match)) }
             return
         }
 

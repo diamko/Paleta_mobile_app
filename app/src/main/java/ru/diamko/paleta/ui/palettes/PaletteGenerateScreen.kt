@@ -82,13 +82,14 @@ import ru.diamko.paleta.core.palette.ColorTools
 import ru.diamko.paleta.core.palette.HexColors
 import ru.diamko.paleta.core.palette.PaletteExportFormat
 import ru.diamko.paleta.core.palette.RandomPaletteGenerator
+import ru.diamko.paleta.core.storage.LastImageStorage
 import ru.diamko.paleta.domain.model.PaletteExportFile
 import ru.diamko.paleta.ui.components.PaletaCard
 import ru.diamko.paleta.ui.components.PaletaGhostButton
 import ru.diamko.paleta.ui.components.PaletaGradientBackground
-import ru.diamko.paleta.ui.components.PaletaMessageBanner
 import ru.diamko.paleta.ui.components.PaletaPrimaryButton
 import ru.diamko.paleta.ui.components.PaletaSectionTitle
+import ru.diamko.paleta.ui.components.PaletaTopBannerHost
 import ru.diamko.paleta.ui.components.ColorCountDropdown
 import ru.diamko.paleta.ui.components.paletaTextFieldColors
 import kotlin.math.max
@@ -127,6 +128,8 @@ fun PaletteGenerateScreen(
     val context = LocalContext.current
     val clipboard = LocalClipboardManager.current
     val scope = rememberCoroutineScope()
+    val appContext = context.applicationContext
+    val lastImageStorage = remember(appContext) { LastImageStorage(appContext) }
 
     var imageBitmap by remember { mutableStateOf<Bitmap?>(null) }
     var imageBoxSize by remember { mutableStateOf(IntSize.Zero) }
@@ -146,12 +149,6 @@ fun PaletteGenerateScreen(
     var selectedFormat by remember { mutableStateOf(PaletteExportFormat.JSON) }
     var pendingExport by remember { mutableStateOf<PaletteExportFile?>(null) }
     val paletteState by paletteViewModel.uiState.collectAsStateWithLifecycle()
-
-    LaunchedEffect(mode) {
-        if (mode == PaletteGenerateScreenMode.IMAGE) {
-            paletteViewModel.loadRecentUploads()
-        }
-    }
 
     fun applyPalette(colors: List<String>, message: String) {
         val normalized = HexColors.normalize(colors)
@@ -178,6 +175,54 @@ fun PaletteGenerateScreen(
         return colorCount.coerceIn(3, 15)
     }
 
+    suspend fun restoreLastImageIfAvailable() {
+        if (mode != PaletteGenerateScreenMode.IMAGE || imageBitmap != null) return
+        val bytes = lastImageStorage.read() ?: return
+        if (bytes.isEmpty()) return
+        val bitmap = withContext(Dispatchers.Default) {
+            BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+        } ?: run {
+            localError = context.getString(R.string.last_image_restore_failed)
+            return
+        }
+
+        imageBitmap = bitmap
+        isBusy = true
+        localError = null
+        statusMessage = context.getString(R.string.last_image_restored)
+        paletteColors = emptyList()
+        markerPositions = emptyList()
+        selectedColorIndex = 0
+        loupeTouchPosition = null
+        loupeSample = null
+
+        paletteViewModel.generateFromImage(
+            fileName = "last_image.jpg",
+            imageBytes = bytes,
+            colorCount = paletteSize(),
+            onDone = { colors ->
+                isBusy = false
+                if (colors.isEmpty()) {
+                    localError = context.getString(R.string.extract_colors_failed)
+                    return@generateFromImage
+                }
+                applyPalette(colors, context.getString(R.string.extracted_colors_count, colors.size))
+                markerPositions = estimateInitialMarkerPositions(bitmap, colors)
+            },
+            onError = { error ->
+                isBusy = false
+                localError = error
+            },
+        )
+    }
+
+    LaunchedEffect(mode) {
+        if (mode == PaletteGenerateScreenMode.IMAGE) {
+            paletteViewModel.loadRecentUploads()
+            restoreLastImageIfAvailable()
+        }
+    }
+
     fun extractFromImage(uri: Uri) {
         scope.launch {
             isBusy = true
@@ -189,18 +234,23 @@ fun PaletteGenerateScreen(
             loupeTouchPosition = null
             loupeSample = null
 
-            val data = withContext(Dispatchers.IO) {
-                val bytes = context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
-                val bitmap = bytes?.let { BitmapFactory.decodeByteArray(it, 0, it.size) }
-                bytes to bitmap
+            val bytes = withContext(Dispatchers.IO) {
+                context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
             }
-            val bytes = data.first
-            val bitmap = data.second
-            if (bytes == null || bytes.isEmpty() || bitmap == null) {
+            if (bytes == null || bytes.isEmpty()) {
                 isBusy = false
                 localError = context.getString(R.string.read_image_failed)
                 return@launch
             }
+            val bitmap = withContext(Dispatchers.Default) {
+                BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+            }
+            if (bitmap == null) {
+                isBusy = false
+                localError = context.getString(R.string.read_image_failed)
+                return@launch
+            }
+            lastImageStorage.save(bytes)
 
             imageBitmap = bitmap
             val fileName = resolveFileName(context, uri)
@@ -358,26 +408,27 @@ fun PaletteGenerateScreen(
                 )
             },
         ) { paddingValues ->
-            Column(
+            Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(paddingValues)
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+                    .padding(paddingValues),
             ) {
-                localError?.let { PaletaMessageBanner(message = it, isError = true) }
-                statusMessage?.let { PaletaMessageBanner(message = it, isError = false) }
-
-                PaletaCard(modifier = Modifier.fillMaxWidth()) {
-                    PaletaSectionTitle(
-                        title = stringResource(id = R.string.source_title),
-                        subtitle = if (mode == PaletteGenerateScreenMode.RANDOM) {
-                            stringResource(id = R.string.source_random_subtitle)
-                        } else {
-                            stringResource(id = R.string.source_image_subtitle)
-                        },
-                    )
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    PaletaCard(modifier = Modifier.fillMaxWidth()) {
+                        PaletaSectionTitle(
+                            title = stringResource(id = R.string.source_title),
+                            subtitle = if (mode == PaletteGenerateScreenMode.RANDOM) {
+                                stringResource(id = R.string.source_random_subtitle)
+                            } else {
+                                stringResource(id = R.string.source_image_subtitle)
+                            },
+                        )
 
                     OutlinedTextField(
                         value = paletteName,
@@ -833,14 +884,20 @@ fun PaletteGenerateScreen(
                     )
                 }
 
-                if (isBusy) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center,
-                    ) {
-                        CircularProgressIndicator()
+                    if (isBusy) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center,
+                        ) {
+                            CircularProgressIndicator()
+                        }
                     }
                 }
+
+                PaletaTopBannerHost(
+                    error = localError,
+                    info = statusMessage,
+                )
             }
         }
     }

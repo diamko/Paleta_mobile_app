@@ -1,6 +1,7 @@
 package ru.diamko.paleta.ui.auth
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,12 +21,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import ru.diamko.paleta.R
+import ru.diamko.paleta.core.validation.AuthValidation
 import ru.diamko.paleta.ui.components.PaletaCard
 import ru.diamko.paleta.ui.components.PaletaGhostButton
 import ru.diamko.paleta.ui.components.PaletaGradientBackground
-import ru.diamko.paleta.ui.components.PaletaMessageBanner
 import ru.diamko.paleta.ui.components.PaletaPrimaryButton
 import ru.diamko.paleta.ui.components.PaletaSectionTitle
+import ru.diamko.paleta.ui.components.PaletaTopBannerHost
 import ru.diamko.paleta.ui.components.paletaTextFieldColors
 
 @Composable
@@ -42,90 +44,94 @@ fun ResetPasswordScreen(
     var confirmPassword by remember { mutableStateOf("") }
 
     PaletaGradientBackground(modifier = Modifier.fillMaxSize()) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            PaletaCard(modifier = Modifier.fillMaxWidth()) {
-                PaletaSectionTitle(
-                    title = stringResource(id = R.string.reset_password_title),
-                    subtitle = stringResource(id = R.string.reset_password_subtitle),
-                )
+        Box(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                PaletaCard(modifier = Modifier.fillMaxWidth()) {
+                    PaletaSectionTitle(
+                        title = stringResource(id = R.string.reset_password_title),
+                        subtitle = stringResource(id = R.string.reset_password_subtitle),
+                    )
 
-                OutlinedTextField(
-                    value = email,
-                    onValueChange = {
-                        email = it
-                        onClearMessages()
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    shape = RoundedCornerShape(14.dp),
-                    label = { Text(stringResource(id = R.string.email_hint)) },
-                    colors = paletaTextFieldColors(),
-                )
+                    OutlinedTextField(
+                        value = email,
+                        onValueChange = {
+                            email = it.take(AuthValidation.EMAIL_MAX)
+                            onClearMessages()
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        shape = RoundedCornerShape(14.dp),
+                        label = { Text(stringResource(id = R.string.email_hint)) },
+                        colors = paletaTextFieldColors(),
+                    )
 
-                OutlinedTextField(
-                    value = code,
-                    onValueChange = {
-                        code = it.filter(Char::isDigit).take(6)
-                        onClearMessages()
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    shape = RoundedCornerShape(14.dp),
-                    label = { Text(stringResource(id = R.string.code_6_digits)) },
-                    colors = paletaTextFieldColors(),
-                )
+                    OutlinedTextField(
+                        value = code,
+                        onValueChange = {
+                            code = it.filter(Char::isDigit).take(6)
+                            onClearMessages()
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        shape = RoundedCornerShape(14.dp),
+                        label = { Text(stringResource(id = R.string.code_6_digits)) },
+                        colors = paletaTextFieldColors(),
+                    )
 
-                OutlinedTextField(
-                    value = newPassword,
-                    onValueChange = {
-                        newPassword = it
-                        onClearMessages()
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    shape = RoundedCornerShape(14.dp),
-                    label = { Text(stringResource(id = R.string.new_password)) },
-                    visualTransformation = PasswordVisualTransformation(),
-                    colors = paletaTextFieldColors(),
-                )
+                    OutlinedTextField(
+                        value = newPassword,
+                        onValueChange = {
+                            newPassword = it.take(AuthValidation.PASSWORD_MAX)
+                            onClearMessages()
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        shape = RoundedCornerShape(14.dp),
+                        label = { Text(stringResource(id = R.string.new_password)) },
+                        visualTransformation = PasswordVisualTransformation(),
+                        colors = paletaTextFieldColors(),
+                    )
 
-                OutlinedTextField(
-                    value = confirmPassword,
-                    onValueChange = {
-                        confirmPassword = it
-                        onClearMessages()
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    shape = RoundedCornerShape(14.dp),
-                    label = { Text(stringResource(id = R.string.confirm_password)) },
-                    visualTransformation = PasswordVisualTransformation(),
-                    colors = paletaTextFieldColors(),
-                )
+                    OutlinedTextField(
+                        value = confirmPassword,
+                        onValueChange = {
+                            confirmPassword = it.take(AuthValidation.PASSWORD_MAX)
+                            onClearMessages()
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        shape = RoundedCornerShape(14.dp),
+                        label = { Text(stringResource(id = R.string.confirm_password)) },
+                        visualTransformation = PasswordVisualTransformation(),
+                        colors = paletaTextFieldColors(),
+                    )
 
-                state.error?.let { PaletaMessageBanner(message = it, isError = true) }
-                state.infoMessage?.let { PaletaMessageBanner(message = it, isError = false) }
+                    PaletaPrimaryButton(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = stringResource(id = R.string.update_password),
+                        onClick = { onResetPassword(email, code, newPassword, confirmPassword) },
+                        enabled = !state.isLoading,
+                        isLoading = state.isLoading,
+                    )
 
-                PaletaPrimaryButton(
-                    modifier = Modifier.fillMaxWidth(),
-                    text = stringResource(id = R.string.update_password),
-                    onClick = { onResetPassword(email, code, newPassword, confirmPassword) },
-                    enabled = !state.isLoading,
-                    isLoading = state.isLoading,
-                )
-
-                PaletaGhostButton(
-                    modifier = Modifier.fillMaxWidth(),
-                    text = stringResource(id = R.string.back),
-                    onClick = onBack,
-                )
+                    PaletaGhostButton(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = stringResource(id = R.string.back),
+                        onClick = onBack,
+                    )
+                }
             }
+
+            PaletaTopBannerHost(
+                error = state.error,
+                info = state.infoMessage,
+            )
         }
     }
 }

@@ -18,8 +18,12 @@
     <string name="auth_error_update_profile">Failed to update profile</string>
     <string name="auth_fill_all_fields">Fill in all fields</string>
     <string name="auth_fill_login_password">Enter login and password</string>
+    <string name="auth_invalid_email">Enter a valid email address</string>
+    <string name="auth_invalid_password">Password must be 8-64 characters and include letters and numbers</string>
+    <string name="auth_invalid_username">Username must be 3-20 characters (letters, numbers, _ or .)</string>
     <string name="auth_password_changed">Password changed successfully</string>
     <string name="auth_password_updated_login_again">Password updated. Log in with your new password</string>
+    <string name="auth_passwords_not_match">Passwords do not match</string>
     <string name="auth_profile_password_code_sent">Verification code sent</string>
     <string name="auth_profile_updated">Profile updated</string>
     <string name="auth_reset_code_sent_if_exists">If this email exists, the code has been sent</string>
@@ -106,6 +110,8 @@
     <string name="language_subtitle">Choose app language</string>
     <string name="language_switching">Applying language...</string>
     <string name="language_title">Interface language</string>
+    <string name="last_image_restore_failed">Failed to restore last image</string>
+    <string name="last_image_restored">Last image restored</string>
     <string name="loading">Loading...</string>
     <string name="login_button">Log in</string>
     <string name="login_hint">Username or email</string>

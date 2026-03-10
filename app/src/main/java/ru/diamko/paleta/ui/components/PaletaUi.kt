@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import ru.diamko.paleta.ui.theme.BrandBlue
 import ru.diamko.paleta.ui.theme.BrandSuccess
@@ -200,6 +201,31 @@ fun PaletaMessageBanner(
                 BrandSuccess
             },
         )
+    }
+}
+
+@Composable
+fun BoxScope.PaletaTopBannerHost(
+    error: String?,
+    info: String?,
+    modifier: Modifier = Modifier,
+    topPadding: Dp = 0.dp,
+) {
+    if (error.isNullOrBlank() && info.isNullOrBlank()) return
+    Column(
+        modifier = modifier
+            .align(Alignment.TopCenter)
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+            .padding(top = topPadding + 8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        if (!error.isNullOrBlank()) {
+            PaletaMessageBanner(message = error, isError = true)
+        }
+        if (!info.isNullOrBlank()) {
+            PaletaMessageBanner(message = info, isError = false)
+        }
     }
 }
 

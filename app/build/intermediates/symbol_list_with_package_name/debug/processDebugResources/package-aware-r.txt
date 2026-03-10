@@ -3734,8 +3734,12 @@ string auth_error_update_password
 string auth_error_update_profile
 string auth_fill_all_fields
 string auth_fill_login_password
+string auth_invalid_email
+string auth_invalid_password
+string auth_invalid_username
 string auth_password_changed
 string auth_password_updated_login_again
+string auth_passwords_not_match
 string auth_profile_password_code_sent
 string auth_profile_updated
 string auth_reset_code_sent_if_exists
@@ -3854,6 +3858,8 @@ string language_ru
 string language_subtitle
 string language_switching
 string language_title
+string last_image_restore_failed
+string last_image_restored
 string loading
 string login_button
 string login_hint
