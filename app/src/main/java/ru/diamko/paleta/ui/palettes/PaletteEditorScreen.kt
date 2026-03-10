@@ -20,7 +20,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -39,6 +38,7 @@ import ru.diamko.paleta.R
 import ru.diamko.paleta.core.palette.ColorTools
 import ru.diamko.paleta.core.palette.HexColors
 import ru.diamko.paleta.core.palette.RandomPaletteGenerator
+import ru.diamko.paleta.ui.components.ColorCountDropdown
 import ru.diamko.paleta.ui.components.ColorWheelPicker
 import ru.diamko.paleta.ui.components.PaletaCard
 import ru.diamko.paleta.ui.components.PaletaGhostButton
@@ -55,6 +55,8 @@ fun PaletteEditorScreen(
     paletteId: Long?,
     paletteViewModel: PaletteViewModel,
     onBack: () -> Unit,
+    isAuthenticated: Boolean,
+    onRequireLogin: () -> Unit,
 ) {
     val context = LocalContext.current
     val existing = paletteId?.let { paletteViewModel.paletteById(it) }
@@ -165,15 +167,15 @@ fun PaletteEditorScreen(
 
                     if (parsedColors.isNotEmpty()) {
                         if (isCreateMode) {
-                            Text(
-                                text = stringResource(id = R.string.palette_color_count, createColorCount),
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                            Slider(
-                                value = createColorCount.toFloat(),
-                                onValueChange = { resizeCreateColors(it.toInt()) },
-                                valueRange = 3f..15f,
-                                steps = 11,
+                            ColorCountDropdown(
+                                label = stringResource(id = R.string.color_count_hint),
+                                selectedCount = createColorCount,
+                                onSelected = { selected ->
+                                    if (selected != null) {
+                                        resizeCreateColors(selected)
+                                    }
+                                },
+                                modifier = Modifier.fillMaxWidth(),
                             )
                         }
 
@@ -267,13 +269,18 @@ fun PaletteEditorScreen(
                             modifier = Modifier.fillMaxWidth(),
                             text = stringResource(id = R.string.create_palette),
                             onClick = {
-                                val parsed = HexColors.normalize(parsedColors)
-                                if (parsed == null) {
-                                    localError = context.getString(R.string.palette_invalid_hex_count)
-                                    return@PaletaPrimaryButton
-                                }
-                                paletteViewModel.createPalette(name = name, colors = parsed) {
-                                    onBack()
+                                if (!isAuthenticated) {
+                                    localError = context.getString(R.string.login_to_save_palette)
+                                    onRequireLogin()
+                                } else {
+                                    val parsed = HexColors.normalize(parsedColors)
+                                    if (parsed == null) {
+                                        localError = context.getString(R.string.palette_invalid_hex_count)
+                                        return@PaletaPrimaryButton
+                                    }
+                                    paletteViewModel.createPalette(name = name, colors = parsed) {
+                                        onBack()
+                                    }
                                 }
                             },
                         )
@@ -282,6 +289,11 @@ fun PaletteEditorScreen(
                             modifier = Modifier.fillMaxWidth(),
                             text = stringResource(id = R.string.save_changes),
                             onClick = {
+                                if (!isAuthenticated) {
+                                    localError = context.getString(R.string.login_to_save_palette)
+                                    onRequireLogin()
+                                    return@PaletaPrimaryButton
+                                }
                                 val parsed = HexColors.parse(colorsInput)
                                 if (name.isBlank()) {
                                     localError = context.getString(R.string.palette_name_required)
@@ -305,8 +317,13 @@ fun PaletteEditorScreen(
                             modifier = Modifier.fillMaxWidth(),
                             text = stringResource(id = R.string.delete_palette),
                             onClick = {
-                                paletteViewModel.deletePalette(existing.id) {
-                                    onBack()
+                                if (!isAuthenticated) {
+                                    localError = context.getString(R.string.login_to_save_palette)
+                                    onRequireLogin()
+                                } else {
+                                    paletteViewModel.deletePalette(existing.id) {
+                                        onBack()
+                                    }
                                 }
                             },
                             isDanger = true,

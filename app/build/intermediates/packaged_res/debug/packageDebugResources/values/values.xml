@@ -27,6 +27,7 @@
     <string name="cancel">Cancel</string>
     <string name="change_password">Change password</string>
     <string name="code_6_digits">Code (6 digits)</string>
+    <string name="color_count_any">Any number of colors</string>
     <string name="color_count_hint">Number of colors (3-15)</string>
     <string name="color_editor_title">Selected color editor</string>
     <string name="color_label">Color %1$d</string>
@@ -56,8 +57,8 @@
     <string name="export_canceled">Export canceled</string>
     <string name="export_error_generic">Export error</string>
     <string name="export_file">Export</string>
-    <string name="export_save_subtitle">Choose format and action</string>
-    <string name="export_save_title">Export and save</string>
+    <string name="export_subtitle">Choose format and export file</string>
+    <string name="export_title">Export</string>
     <string name="extract_colors_failed">Failed to extract colors from image</string>
     <string name="extracted_colors_count">Extracted colors: %1$d</string>
     <string name="extracting_colors">Extracting colors...</string>
@@ -73,13 +74,13 @@
     <string name="faq_subtitle">Quick answers about Paleta</string>
     <string name="faq_title">FAQ</string>
     <string name="file_saved">File saved: %1$s</string>
-    <string name="filter_exact_colors">Filter: exactly N colors (3-15, optional)</string>
+    <string name="filter_exact_colors">Filter by number of colors</string>
     <string name="forgot_password_link">Forgot password?</string>
     <string name="forgot_password_subtitle">Enter your email to receive a verification code</string>
     <string name="forgot_password_title">Password recovery</string>
     <string name="generate_first_hint">Generate a palette first or extract colors from an image</string>
     <string name="generate_palette_title">Generator</string>
-    <string name="generate_random">Random</string>
+    <string name="generate_random">Generate</string>
     <string name="generator_image_page">Image generator</string>
     <string name="generator_random_page">Random generator</string>
     <string name="go_login">Already have an account? Log in</string>
@@ -155,6 +156,8 @@
     <string name="save_changes">Save changes</string>
     <string name="save_palette">Save</string>
     <string name="save_profile">Save profile</string>
+    <string name="save_subtitle">Save to My palettes</string>
+    <string name="save_title">Save</string>
     <string name="search_palettes">Search palettes</string>
     <string name="selected_color_subtitle">Selected: Color %1$d (%2$s)</string>
     <string name="selected_image_desc">Selected image</string>

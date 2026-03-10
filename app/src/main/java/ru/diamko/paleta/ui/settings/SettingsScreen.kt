@@ -38,9 +38,13 @@ fun SettingsScreen(
     onOpenProfile: () -> Unit,
     onOpenPasswordChange: () -> Unit,
     onOpenFaq: () -> Unit,
+    onOpenLogin: () -> Unit,
+    onOpenRegister: () -> Unit,
     onLogout: () -> Unit,
     onBack: () -> Unit,
 ) {
+    val isAuthenticated = authState.user != null
+
     PaletaGradientBackground(modifier = Modifier.fillMaxSize()) {
         Scaffold(
             containerColor = Color.Transparent,
@@ -59,15 +63,17 @@ fun SettingsScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 PaletaCard(modifier = Modifier.fillMaxWidth()) {
-                    PaletaSectionTitle(
-                        title = stringResource(id = R.string.profile_title),
-                        subtitle = stringResource(id = R.string.profile_session_subtitle),
-                    )
-                    Text(
-                        text = authState.user?.username ?: "-",
-                        fontWeight = FontWeight.SemiBold,
-                    )
-                    Text(text = authState.user?.email ?: "-")
+                    if (isAuthenticated) {
+                        PaletaSectionTitle(
+                            title = stringResource(id = R.string.profile_title),
+                            subtitle = stringResource(id = R.string.profile_session_subtitle),
+                        )
+                        Text(
+                            text = authState.user?.username ?: "-",
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                        Text(text = authState.user?.email ?: "-")
+                    }
 
                     PaletaSectionTitle(
                         title = stringResource(id = R.string.language_title),
@@ -107,30 +113,47 @@ fun SettingsScreen(
                         }
                     }
 
-                    PaletaGhostButton(
-                        modifier = Modifier.fillMaxWidth(),
-                        text = stringResource(id = R.string.edit_profile),
-                        onClick = onOpenProfile,
-                        enabled = !isApplyingLanguage,
-                    )
-                    PaletaGhostButton(
-                        modifier = Modifier.fillMaxWidth(),
-                        text = stringResource(id = R.string.password_change_title),
-                        onClick = onOpenPasswordChange,
-                        enabled = !isApplyingLanguage,
-                    )
+                    if (isAuthenticated) {
+                        PaletaGhostButton(
+                            modifier = Modifier.fillMaxWidth(),
+                            text = stringResource(id = R.string.edit_profile),
+                            onClick = onOpenProfile,
+                            enabled = !isApplyingLanguage,
+                        )
+                        PaletaGhostButton(
+                            modifier = Modifier.fillMaxWidth(),
+                            text = stringResource(id = R.string.password_change_title),
+                            onClick = onOpenPasswordChange,
+                            enabled = !isApplyingLanguage,
+                        )
+                    } else {
+                        PaletaPrimaryButton(
+                            modifier = Modifier.fillMaxWidth(),
+                            text = stringResource(id = R.string.login_button),
+                            onClick = onOpenLogin,
+                            enabled = !isApplyingLanguage,
+                        )
+                        PaletaGhostButton(
+                            modifier = Modifier.fillMaxWidth(),
+                            text = stringResource(id = R.string.go_register),
+                            onClick = onOpenRegister,
+                            enabled = !isApplyingLanguage,
+                        )
+                    }
                     PaletaGhostButton(
                         modifier = Modifier.fillMaxWidth(),
                         text = stringResource(id = R.string.faq),
                         onClick = onOpenFaq,
                         enabled = !isApplyingLanguage,
                     )
-                    PaletaPrimaryButton(
-                        modifier = Modifier.fillMaxWidth(),
-                        text = stringResource(id = R.string.logout),
-                        onClick = onLogout,
-                        enabled = !isApplyingLanguage,
-                    )
+                    if (isAuthenticated) {
+                        PaletaPrimaryButton(
+                            modifier = Modifier.fillMaxWidth(),
+                            text = stringResource(id = R.string.logout),
+                            onClick = onLogout,
+                            enabled = !isApplyingLanguage,
+                        )
+                    }
                     PaletaGhostButton(
                         modifier = Modifier.fillMaxWidth(),
                         text = stringResource(id = R.string.cancel),

@@ -27,6 +27,7 @@ string back
 string cancel
 string change_password
 string code_6_digits
+string color_count_any
 string color_count_hint
 string color_editor_title
 string color_label
@@ -56,8 +57,8 @@ string export_action
 string export_canceled
 string export_error_generic
 string export_file
-string export_save_subtitle
-string export_save_title
+string export_subtitle
+string export_title
 string extract_colors_failed
 string extracted_colors_count
 string extracting_colors
@@ -155,6 +156,8 @@ string save
 string save_changes
 string save_palette
 string save_profile
+string save_subtitle
+string save_title
 string search_palettes
 string selected_color_subtitle
 string selected_image_desc

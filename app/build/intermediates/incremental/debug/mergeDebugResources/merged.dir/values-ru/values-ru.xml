@@ -69,6 +69,7 @@
     <string msgid="406453423630273620" name="close_drawer">"Закрыть меню навигации"</string>
     <string msgid="7573152094250666567" name="close_sheet">"Закрыть лист"</string>
     <string name="code_6_digits">Код (6 цифр)</string>
+    <string name="color_count_any">Любое количество цветов</string>
     <string name="color_count_hint">Количество цветов (3-15)</string>
     <string name="color_editor_title">Редактор выбранного цвета</string>
     <string name="color_label">Цвет %1$d</string>
@@ -103,8 +104,8 @@
     <string name="export_canceled">Экспорт отменён</string>
     <string name="export_error_generic">Ошибка экспорта</string>
     <string name="export_file">Экспорт</string>
-    <string name="export_save_subtitle">Выберите формат и действие</string>
-    <string name="export_save_title">Экспорт и сохранение</string>
+    <string name="export_subtitle">Выберите формат и экспортируйте файл</string>
+    <string name="export_title">Экспорт</string>
     <string name="exposed_dropdown_menu_content_description">Показать раскрывающееся меню</string>
     <string name="extract_colors_failed">Не удалось извлечь цвета из изображения</string>
     <string name="extracted_colors_count">Извлечено цветов: %1$d</string>
@@ -121,13 +122,13 @@
     <string name="faq_subtitle">Краткие ответы по работе с Paleta</string>
     <string name="faq_title">FAQ</string>
     <string name="file_saved">Файл сохранён: %1$s</string>
-    <string name="filter_exact_colors">Фильтр: ровно N цветов (3-15, опционально)</string>
+    <string name="filter_exact_colors">Фильтр по количеству цветов</string>
     <string name="forgot_password_link">Забыли пароль?</string>
     <string name="forgot_password_subtitle">Введите email, чтобы получить код подтверждения</string>
     <string name="forgot_password_title">Восстановление пароля</string>
     <string name="generate_first_hint">Сначала сгенерируйте палитру или извлеките цвета из изображения</string>
     <string name="generate_palette_title">Генератор</string>
-    <string name="generate_random">Случайная</string>
+    <string name="generate_random">Генерировать</string>
     <string name="generator_image_page">Генератор по изображению</string>
     <string name="generator_random_page">Случайный генератор</string>
     <string name="go_login">Уже есть аккаунт? Войти</string>
@@ -141,7 +142,7 @@
     <string name="harmony_split_complementary">Раздельно-комплементарная</string>
     <string name="harmony_square">Квадратная</string>
     <string name="harmony_subtitle">Генерируйте связанные цвета как в Adobe Color</string>
-    <string name="harmony_tetradic">Тетрадная</string>
+    <string name="harmony_tetradic">Тетрада</string>
     <string name="harmony_title">Гармонии цвета</string>
     <string name="harmony_triadic">Треугольная</string>
     <string name="have_code">У меня уже есть код</string>
@@ -327,6 +328,8 @@
     <string name="save_changes">Сохранить изменения</string>
     <string name="save_palette">Сохранить</string>
     <string name="save_profile">Сохранить профиль</string>
+    <string name="save_subtitle">Сохранить в «Мои палитры»</string>
+    <string name="save_title">Сохранение</string>
     <string msgid="6264217191555673260" name="search_menu_title">"Поиск"</string>
     <string name="search_palettes">Поиск по палитрам</string>
     <string name="searchview_clear_text_content_description">Очистить текстовое поле</string>

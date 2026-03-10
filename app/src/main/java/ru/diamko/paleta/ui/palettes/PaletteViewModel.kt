@@ -39,10 +39,31 @@ class PaletteViewModel(
     private val exportPaletteUseCase: ExportPaletteUseCase,
 ) : ViewModel() {
 
+    private var isGuest: Boolean = false
+
     private val _uiState = MutableStateFlow(PaletteUiState())
     val uiState: StateFlow<PaletteUiState> = _uiState.asStateFlow()
 
+    fun setGuestMode(isGuest: Boolean, isAuthenticated: Boolean) {
+        this.isGuest = isGuest
+        when {
+            isGuest -> {
+                _uiState.update { it.copy(isLoading = false, palettes = emptyList(), error = null) }
+            }
+            isAuthenticated -> {
+                loadPalettes()
+            }
+            else -> {
+                _uiState.update { it.copy(isLoading = false, palettes = emptyList(), error = null) }
+            }
+        }
+    }
+
     fun loadPalettes() {
+        if (isGuest) {
+            _uiState.update { it.copy(isLoading = false, palettes = emptyList(), error = null) }
+            return
+        }
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
             runCatching { getPalettesUseCase() }
@@ -69,6 +90,10 @@ class PaletteViewModel(
     }
 
     fun createPalette(name: String, colors: List<String>, onDone: () -> Unit = {}) {
+        if (isGuest) {
+            _uiState.update { it.copy(isLoading = false, error = "Нужно войти в аккаунт") }
+            return
+        }
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
             runCatching {
@@ -91,6 +116,10 @@ class PaletteViewModel(
     }
 
     fun renamePalette(id: Long, name: String, onDone: () -> Unit = {}) {
+        if (isGuest) {
+            _uiState.update { it.copy(isLoading = false, error = "Нужно войти в аккаунт") }
+            return
+        }
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
             runCatching { renamePaletteUseCase(id, name) }
@@ -110,6 +139,10 @@ class PaletteViewModel(
         newColors: List<String>,
         onDone: () -> Unit = {},
     ) {
+        if (isGuest) {
+            _uiState.update { it.copy(isLoading = false, error = "Нужно войти в аккаунт") }
+            return
+        }
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
             runCatching {
@@ -160,6 +193,10 @@ class PaletteViewModel(
     }
 
     fun deletePalette(id: Long, onDone: () -> Unit = {}) {
+        if (isGuest) {
+            _uiState.update { it.copy(isLoading = false, error = "Нужно войти в аккаунт") }
+            return
+        }
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
             runCatching { deletePaletteUseCase(id) }

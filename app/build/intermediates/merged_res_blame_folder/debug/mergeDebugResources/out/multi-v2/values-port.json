@@ -4,7 +4,7 @@
             "outputFile": "ru.diamko.paleta.app-mergeDebugResources-67:/values-port/values-port.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\jtyur\\.gradle\\caches\\8.13\\transforms\\5beaad276d285ed2803ce5113864b795\\transformed\\appcompat-1.7.0\\res\\values-port\\values-port.xml",
+                    "source": "/home/di/.gradle/caches/8.13/transforms/5beaad276d285ed2803ce5113864b795/transformed/appcompat-1.7.0/res/values-port/values-port.xml",
                     "from": {
                         "startLines": "2",
                         "startColumns": "4",

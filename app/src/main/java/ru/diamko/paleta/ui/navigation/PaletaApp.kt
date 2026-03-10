@@ -3,6 +3,7 @@ package ru.diamko.paleta.ui.navigation
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -64,6 +65,7 @@ fun PaletaApp(
     var resetEmailPrefill by rememberSaveable { mutableStateOf("") }
     var currentLanguageTag by rememberSaveable { mutableStateOf("ru") }
     var isApplyingLanguage by rememberSaveable { mutableStateOf(false) }
+    var isGuest by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         val stored = container.localeStore.readLanguageTag()
@@ -74,18 +76,58 @@ fun PaletaApp(
         AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(tag))
     }
 
-    LaunchedEffect(authState.isCheckingSession, authState.user?.id) {
+    LaunchedEffect(authState.user?.id) {
+        if (authState.user != null) {
+            isGuest = false
+        }
+    }
+
+    LaunchedEffect(isGuest, authState.user?.id) {
+        paletteViewModel.setGuestMode(
+            isGuest = isGuest,
+            isAuthenticated = authState.user != null,
+        )
+    }
+
+    fun requireLogin() {
+        navController.navigate(Routes.LOGIN) {
+            launchSingleTop = true
+        }
+    }
+
+    LaunchedEffect(authState.isCheckingSession, authState.user?.id, isGuest) {
         if (authState.isCheckingSession) {
             return@LaunchedEffect
         }
 
+        val isAuthenticated = authState.user != null
         val current = navController.currentBackStackEntry?.destination?.route
         val authFlow = setOf(Routes.LOGIN, Routes.REGISTER, Routes.FORGOT_PASSWORD, Routes.RESET_PASSWORD)
-        val guestAllowed = setOf(Routes.GENERATE_RANDOM, Routes.GENERATE_IMAGE)
-        val target = if (authState.user == null) {
-            if (current in authFlow || current in guestAllowed) null else Routes.LOGIN
-        } else {
-            if (current in authFlow || current == null) Routes.PALETTES else null
+        val guestAllowed = setOf(
+            Routes.PALETTES,
+            Routes.GENERATE_RANDOM,
+            Routes.GENERATE_IMAGE,
+            Routes.SETTINGS,
+            Routes.FAQ,
+            Routes.PALETTE_EDITOR,
+        )
+        val guestForbidden = setOf(Routes.PROFILE_EDIT, Routes.PASSWORD_CHANGE)
+
+        val target = when {
+            isAuthenticated -> {
+                if (current in authFlow || current == null) Routes.PALETTES else null
+            }
+            isGuest -> {
+                when {
+                    current == null -> Routes.PALETTES
+                    current in guestForbidden -> Routes.SETTINGS
+                    current in authFlow || current in guestAllowed -> null
+                    else -> Routes.PALETTES
+                }
+            }
+            else -> {
+                if (current in authFlow) null else Routes.LOGIN
+            }
         }
         if (target != null) {
             navController.navigate(target) {
@@ -111,15 +153,27 @@ fun PaletaApp(
 
     NavHost(
         navController = navController,
-        startDestination = if (authState.user == null) Routes.LOGIN else Routes.PALETTES,
+        startDestination = if (authState.user == null && !isGuest) Routes.LOGIN else Routes.PALETTES,
     ) {
         composable(Routes.LOGIN) {
+            if (isGuest) {
+                BackHandler {
+                    navController.navigate(Routes.PALETTES) {
+                        launchSingleTop = true
+                    }
+                }
+            }
             LoginScreen(
                 state = authState,
                 onLoginClick = authViewModel::login,
                 onGoRegisterClick = { navController.navigate(Routes.REGISTER) },
                 onGoForgotPasswordClick = { navController.navigate(Routes.FORGOT_PASSWORD) },
-                onContinueAsGuestClick = { navController.navigate(Routes.GENERATE_RANDOM) },
+                onContinueAsGuestClick = {
+                    isGuest = true
+                    navController.navigate(Routes.PALETTES) {
+                        launchSingleTop = true
+                    }
+                },
                 onClearError = {
                     authViewModel.clearError()
                     authViewModel.clearInfoMessage()
@@ -192,6 +246,7 @@ fun PaletaApp(
                 onEditClick = { id -> navController.navigate(Routes.paletteEditor(id.toString())) },
                 onDeleteClick = { id -> paletteViewModel.deletePalette(id) },
                 onOpenSettings = { navController.navigate(Routes.SETTINGS) },
+                isAuthenticated = authState.user != null,
                 onExportPalette = { palette, format, onDone, onError ->
                     paletteViewModel.exportPalette(
                         name = palette.name,
@@ -210,11 +265,7 @@ fun PaletaApp(
                 mode = PaletteGenerateScreenMode.RANDOM,
                 onBack = { navController.popBackStack() },
                 isAuthenticated = authState.user != null,
-                onRequireLogin = {
-                    navController.navigate(Routes.LOGIN) {
-                        launchSingleTop = true
-                    }
-                },
+                onRequireLogin = { requireLogin() },
             )
         }
 
@@ -224,11 +275,7 @@ fun PaletaApp(
                 mode = PaletteGenerateScreenMode.IMAGE,
                 onBack = { navController.popBackStack() },
                 isAuthenticated = authState.user != null,
-                onRequireLogin = {
-                    navController.navigate(Routes.LOGIN) {
-                        launchSingleTop = true
-                    }
-                },
+                onRequireLogin = { requireLogin() },
             )
         }
 
@@ -256,7 +303,12 @@ fun PaletaApp(
                 onOpenProfile = { navController.navigate(Routes.PROFILE_EDIT) },
                 onOpenPasswordChange = { navController.navigate(Routes.PASSWORD_CHANGE) },
                 onOpenFaq = { navController.navigate(Routes.FAQ) },
-                onLogout = authViewModel::logout,
+                onOpenLogin = { navController.navigate(Routes.LOGIN) },
+                onOpenRegister = { navController.navigate(Routes.REGISTER) },
+                onLogout = {
+                    isGuest = false
+                    authViewModel.logout()
+                },
                 onBack = { navController.popBackStack() },
             )
         }
@@ -303,7 +355,17 @@ fun PaletaApp(
             PaletteEditorScreen(
                 paletteId = paletteId,
                 paletteViewModel = paletteViewModel,
-                onBack = { navController.popBackStack() },
+                onBack = {
+                    if (paletteId == null) {
+                        navController.navigate(Routes.PALETTES) {
+                            launchSingleTop = true
+                        }
+                    } else {
+                        navController.popBackStack()
+                    }
+                },
+                isAuthenticated = authState.user != null,
+                onRequireLogin = { requireLogin() },
             )
         }
     }

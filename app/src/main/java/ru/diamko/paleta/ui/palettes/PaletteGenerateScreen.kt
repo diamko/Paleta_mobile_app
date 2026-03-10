@@ -89,6 +89,7 @@ import ru.diamko.paleta.ui.components.PaletaGradientBackground
 import ru.diamko.paleta.ui.components.PaletaMessageBanner
 import ru.diamko.paleta.ui.components.PaletaPrimaryButton
 import ru.diamko.paleta.ui.components.PaletaSectionTitle
+import ru.diamko.paleta.ui.components.ColorCountDropdown
 import ru.diamko.paleta.ui.components.paletaTextFieldColors
 import kotlin.math.max
 import kotlin.math.min
@@ -131,7 +132,7 @@ fun PaletteGenerateScreen(
     var imageBoxSize by remember { mutableStateOf(IntSize.Zero) }
 
     var paletteName by remember { mutableStateOf(context.getString(R.string.new_palette)) }
-    var colorCountRaw by remember { mutableStateOf("5") }
+    var colorCount by remember { mutableStateOf(5) }
     var paletteColors by remember { mutableStateOf<List<String>>(emptyList()) }
     var selectedColorIndex by remember { mutableStateOf(0) }
     var markerPositions by remember { mutableStateOf<List<Offset?>>(emptyList()) }
@@ -174,7 +175,7 @@ fun PaletteGenerateScreen(
     }
 
     fun paletteSize(): Int {
-        return colorCountRaw.toIntOrNull()?.coerceIn(3, 15) ?: 5
+        return colorCount.coerceIn(3, 15)
     }
 
     fun extractFromImage(uri: Uri) {
@@ -265,23 +266,17 @@ fun PaletteGenerateScreen(
             return@rememberLauncherForActivityResult
         }
 
-        scope.launch(Dispatchers.IO) {
-            runCatching {
-                context.contentResolver.openOutputStream(outputUri)?.use { stream ->
-                    stream.write(payload.bytes)
-                } ?: error(context.getString(R.string.open_file_write_error))
-            }.onSuccess {
-                withContext(Dispatchers.Main) {
+        scope.launch {
+            writeExportFile(context, outputUri, payload)
+                .onSuccess {
                     statusMessage = context.getString(R.string.file_saved, payload.fileName)
                     localError = null
                     pendingExport = null
                 }
-            }.onFailure { error ->
-                withContext(Dispatchers.Main) {
+                .onFailure { error ->
                     localError = error.message ?: context.getString(R.string.export_error_generic)
                     pendingExport = null
                 }
-            }
         }
     }
 
@@ -397,17 +392,16 @@ fun PaletteGenerateScreen(
                         colors = paletaTextFieldColors(),
                     )
 
-                    OutlinedTextField(
-                        value = colorCountRaw,
-                        onValueChange = {
-                            colorCountRaw = it.filter(Char::isDigit).take(2)
-                            localError = null
+                    ColorCountDropdown(
+                        label = stringResource(id = R.string.color_count_hint),
+                        selectedCount = colorCount,
+                        onSelected = {
+                            if (it != null) {
+                                colorCount = it
+                                localError = null
+                            }
                         },
-                        label = { Text(stringResource(id = R.string.color_count_hint)) },
                         modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                        shape = RoundedCornerShape(14.dp),
-                        colors = paletaTextFieldColors(),
                     )
 
                     Row(
@@ -759,8 +753,8 @@ fun PaletteGenerateScreen(
 
                 PaletaCard(modifier = Modifier.fillMaxWidth()) {
                     PaletaSectionTitle(
-                        title = stringResource(id = R.string.export_save_title),
-                        subtitle = stringResource(id = R.string.export_save_subtitle),
+                        title = stringResource(id = R.string.export_title),
+                        subtitle = stringResource(id = R.string.export_subtitle),
                     )
                     Row(
                         modifier = Modifier.horizontalScroll(rememberScrollState()),
@@ -780,61 +774,63 @@ fun PaletteGenerateScreen(
                         }
                     }
 
-                    Row(
+                    PaletaPrimaryButton(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        PaletaPrimaryButton(
-                            modifier = Modifier.weight(1f),
-                            text = stringResource(id = R.string.export_file),
-                            onClick = {
+                        text = stringResource(id = R.string.export_file),
+                        onClick = {
+                            val colors = HexColors.normalize(paletteColors)
+                            if (colors == null) {
+                                localError = context.getString(R.string.palette_invalid_hex_count)
+                                return@PaletaPrimaryButton
+                            }
+                            isBusy = true
+                            paletteViewModel.exportPalette(
+                                name = paletteName,
+                                colors = colors,
+                                format = selectedFormat.ext,
+                                onDone = { payload ->
+                                    isBusy = false
+                                    pendingExport = payload
+                                    createDocumentLauncher.launch(payload.fileName)
+                                },
+                                onError = { error ->
+                                    isBusy = false
+                                    localError = error
+                                },
+                            )
+                        },
+                        enabled = !isBusy,
+                    )
+                }
+
+                PaletaCard(modifier = Modifier.fillMaxWidth()) {
+                    PaletaSectionTitle(
+                        title = stringResource(id = R.string.save_title),
+                        subtitle = stringResource(id = R.string.save_subtitle),
+                    )
+                    PaletaPrimaryButton(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = stringResource(id = R.string.save_palette),
+                        onClick = {
+                            if (!isAuthenticated) {
+                                localError = context.getString(R.string.login_to_save_palette)
+                                onRequireLogin()
+                            } else {
                                 val colors = HexColors.normalize(paletteColors)
                                 if (colors == null) {
                                     localError = context.getString(R.string.palette_invalid_hex_count)
-                                    return@PaletaPrimaryButton
+                                } else {
+                                    paletteViewModel.createPalette(
+                                        name = paletteName,
+                                        colors = colors,
+                                    )
+                                    statusMessage = context.getString(R.string.palette_saved)
+                                    localError = null
                                 }
-                                isBusy = true
-                                paletteViewModel.exportPalette(
-                                    name = paletteName,
-                                    colors = colors,
-                                    format = selectedFormat.ext,
-                                    onDone = { payload ->
-                                        isBusy = false
-                                        pendingExport = payload
-                                        createDocumentLauncher.launch(payload.fileName)
-                                    },
-                                    onError = { error ->
-                                        isBusy = false
-                                        localError = error
-                                    },
-                                )
-                            },
-                            enabled = !isBusy,
-                        )
-                        PaletaGhostButton(
-                            modifier = Modifier.weight(1f),
-                            text = stringResource(id = R.string.save_palette),
-                            onClick = {
-                                if (!isAuthenticated) {
-                                    localError = context.getString(R.string.login_to_save_palette)
-                                    onRequireLogin()
-                                    return@PaletaGhostButton
-                                }
-                                val colors = HexColors.normalize(paletteColors)
-                                if (colors == null) {
-                                    localError = context.getString(R.string.palette_invalid_hex_count)
-                                    return@PaletaGhostButton
-                                }
-                                paletteViewModel.createPalette(
-                                    name = paletteName,
-                                    colors = colors,
-                                )
-                                statusMessage = context.getString(R.string.palette_saved)
-                                localError = null
-                            },
-                            enabled = !isBusy,
-                        )
-                    }
+                            }
+                        },
+                        enabled = !isBusy,
+                    )
                 }
 
                 if (isBusy) {

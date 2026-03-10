@@ -57,7 +57,7 @@
     <string name="search_palettes">Поиск по палитрам</string>
     <string name="empty_palettes">Пока нет палитр</string>
     <string name="empty_palettes_subtitle">Создайте палитру вручную или сгенерируйте из изображения</string>
-    <string name="filter_exact_colors">Фильтр: ровно N цветов (3-15, опционально)</string>
+    <string name="filter_exact_colors">Фильтр по количеству цветов</string>
     <string name="sort_newest">Новые</string>
     <string name="sort_oldest">Старые</string>
     <string name="sort_name">Имя А-Я</string>
@@ -97,9 +97,10 @@
     <string name="source_subtitle">Случайная генерация или извлечение цветов из изображения</string>
     <string name="source_random_subtitle">Генерируйте случайные палитры и применяйте гармонии</string>
     <string name="source_image_subtitle">Извлекайте цвета из изображения и недавних загрузок</string>
-    <string name="generate_random">Случайная</string>
+    <string name="generate_random">Генерировать</string>
     <string name="pick_image">Из изображения</string>
     <string name="color_count_hint">Количество цветов (3-15)</string>
+    <string name="color_count_any">Любое количество цветов</string>
     <string name="random_palette_generated">Сгенерирована случайная палитра</string>
     <string name="extracting_colors">Извлечение цветов...</string>
     <string name="read_image_failed">Не удалось прочитать изображение</string>
@@ -137,11 +138,13 @@
     <string name="harmony_complementary">Комплементарная</string>
     <string name="harmony_square">Квадратная</string>
     <string name="harmony_split_complementary">Раздельно-комплементарная</string>
-    <string name="harmony_tetradic">Тетрадная</string>
+    <string name="harmony_tetradic">Тетрада</string>
 
-    <string name="export_save_title">Экспорт и сохранение</string>
-    <string name="export_save_subtitle">Выберите формат и действие</string>
+    <string name="export_title">Экспорт</string>
+    <string name="export_subtitle">Выберите формат и экспортируйте файл</string>
     <string name="export_file">Экспорт</string>
+    <string name="save_title">Сохранение</string>
+    <string name="save_subtitle">Сохранить в «Мои палитры»</string>
     <string name="save_palette">Сохранить</string>
     <string name="palette_saved">Палитра сохранена</string>
     <string name="login_to_save_palette">Войдите, чтобы сохранять палитры</string>

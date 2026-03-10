@@ -57,7 +57,7 @@
     <string name="search_palettes">Search palettes</string>
     <string name="empty_palettes">No palettes yet</string>
     <string name="empty_palettes_subtitle">Create a palette manually or generate one from an image</string>
-    <string name="filter_exact_colors">Filter: exactly N colors (3-15, optional)</string>
+    <string name="filter_exact_colors">Filter by number of colors</string>
     <string name="sort_newest">Newest</string>
     <string name="sort_oldest">Oldest</string>
     <string name="sort_name">Name A-Z</string>
@@ -97,9 +97,10 @@
     <string name="source_subtitle">Random generation or color extraction from an image</string>
     <string name="source_random_subtitle">Generate random palettes and tune harmony</string>
     <string name="source_image_subtitle">Extract colors from image and recent uploads</string>
-    <string name="generate_random">Random</string>
+    <string name="generate_random">Generate</string>
     <string name="pick_image">From image</string>
     <string name="color_count_hint">Number of colors (3-15)</string>
+    <string name="color_count_any">Any number of colors</string>
     <string name="random_palette_generated">Random palette generated</string>
     <string name="extracting_colors">Extracting colors...</string>
     <string name="read_image_failed">Failed to read image</string>
@@ -139,9 +140,11 @@
     <string name="harmony_split_complementary">Split complementary</string>
     <string name="harmony_tetradic">Tetradic</string>
 
-    <string name="export_save_title">Export and save</string>
-    <string name="export_save_subtitle">Choose format and action</string>
+    <string name="export_title">Export</string>
+    <string name="export_subtitle">Choose format and export file</string>
     <string name="export_file">Export</string>
+    <string name="save_title">Save</string>
+    <string name="save_subtitle">Save to My palettes</string>
     <string name="save_palette">Save</string>
     <string name="palette_saved">Palette saved</string>
     <string name="login_to_save_palette">Log in to save palettes</string>

@@ -48,13 +48,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import ru.diamko.paleta.R
 import ru.diamko.paleta.core.palette.PaletteExportFormat
 import ru.diamko.paleta.domain.model.Palette
 import ru.diamko.paleta.domain.model.PaletteExportFile
+import ru.diamko.paleta.ui.components.ColorCountDropdown
 import ru.diamko.paleta.ui.components.PaletaCard
 import ru.diamko.paleta.ui.components.PaletaGhostButton
 import ru.diamko.paleta.ui.components.PaletaGradientBackground
@@ -83,6 +82,7 @@ fun PaletteListScreen(
     onEditClick: (Long) -> Unit,
     onDeleteClick: (Long) -> Unit,
     onOpenSettings: () -> Unit,
+    isAuthenticated: Boolean,
     onExportPalette: (
         palette: Palette,
         format: String,
@@ -92,7 +92,7 @@ fun PaletteListScreen(
 ) {
     var query by rememberSaveable { mutableStateOf("") }
     var sortMode by rememberSaveable { mutableStateOf(PaletteSortMode.NEWEST.name) }
-    var colorCountFilterRaw by rememberSaveable { mutableStateOf("") }
+    var colorCountFilter by rememberSaveable { mutableStateOf<Int?>(null) }
     var selectedFormat by rememberSaveable { mutableStateOf(PaletteExportFormat.JSON.name) }
     var localError by rememberSaveable { mutableStateOf<String?>(null) }
     var statusMessage by rememberSaveable { mutableStateOf<String?>(null) }
@@ -117,28 +117,21 @@ fun PaletteListScreen(
             return@rememberLauncherForActivityResult
         }
 
-        scope.launch(Dispatchers.IO) {
-            runCatching {
-                context.contentResolver.openOutputStream(outputUri)?.use { stream ->
-                    stream.write(payload.bytes)
-                } ?: error(context.getString(R.string.open_file_write_error))
-            }.onSuccess {
-                withContext(Dispatchers.Main) {
+        scope.launch {
+            writeExportFile(context, outputUri, payload)
+                .onSuccess {
                     statusMessage = context.getString(R.string.file_saved, payload.fileName)
                     localError = null
                     pendingExport = null
                 }
-            }.onFailure { error ->
-                withContext(Dispatchers.Main) {
+                .onFailure { error ->
                     localError = error.message ?: context.getString(R.string.export_error_generic)
                     pendingExport = null
                 }
-            }
         }
     }
 
-    val visiblePalettes = remember(state.palettes, query, sortMode, colorCountFilterRaw) {
-        val colorCountFilter = colorCountFilterRaw.toIntOrNull()
+    val visiblePalettes = remember(state.palettes, query, sortMode, colorCountFilter) {
         val filteredByQuery = if (query.isBlank()) {
             state.palettes
         } else {
@@ -252,136 +245,136 @@ fun PaletteListScreen(
                     }
                 }
 
-                if (statusMessage != null) {
-                    item {
-                        PaletaMessageBanner(
-                            message = statusMessage.orEmpty(),
-                            isError = false,
-                        )
-                    }
-                }
-
-                if (listError != null) {
-                    item {
-                        PaletaMessageBanner(
-                            message = listError,
-                            isError = true,
-                        )
-                    }
-                }
-
-                item {
-                    OutlinedTextField(
-                        value = query,
-                        onValueChange = { query = it },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                        shape = RoundedCornerShape(14.dp),
-                        label = { Text(stringResource(id = R.string.search_palettes)) },
-                        colors = paletaTextFieldColors(),
-                    )
-                }
-
-                item {
-                    OutlinedTextField(
-                        value = colorCountFilterRaw,
-                        onValueChange = { colorCountFilterRaw = it.filter(Char::isDigit).take(2) },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                        shape = RoundedCornerShape(14.dp),
-                        label = { Text(stringResource(id = R.string.filter_exact_colors)) },
-                        colors = paletaTextFieldColors(),
-                    )
-                }
-
-                item {
-                    Row(
-                        modifier = Modifier.horizontalScroll(rememberScrollState()),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        SortChip(stringResource(id = R.string.sort_newest), sortMode == PaletteSortMode.NEWEST.name) { sortMode = PaletteSortMode.NEWEST.name }
-                        SortChip(stringResource(id = R.string.sort_oldest), sortMode == PaletteSortMode.OLDEST.name) { sortMode = PaletteSortMode.OLDEST.name }
-                        SortChip(stringResource(id = R.string.sort_name), sortMode == PaletteSortMode.NAME_ASC.name) { sortMode = PaletteSortMode.NAME_ASC.name }
-                        SortChip(stringResource(id = R.string.sort_name_desc), sortMode == PaletteSortMode.NAME_DESC.name) { sortMode = PaletteSortMode.NAME_DESC.name }
-                        SortChip(stringResource(id = R.string.sort_colors_asc), sortMode == PaletteSortMode.COLORS_ASC.name) { sortMode = PaletteSortMode.COLORS_ASC.name }
-                        SortChip(stringResource(id = R.string.sort_colors_desc), sortMode == PaletteSortMode.COLORS_DESC.name) { sortMode = PaletteSortMode.COLORS_DESC.name }
-                    }
-                }
-
-                item {
-                    Row(
-                        modifier = Modifier.horizontalScroll(rememberScrollState()),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        PaletteExportFormat.entries.forEach { format ->
-                            SortChip(
-                                title = format.name,
-                                selected = selectedFormat == format.name,
-                                onClick = { selectedFormat = format.name },
+                if (isAuthenticated) {
+                    if (statusMessage != null) {
+                        item {
+                            PaletaMessageBanner(
+                                message = statusMessage.orEmpty(),
+                                isError = false,
                             )
                         }
                     }
-                }
 
-                if (visiblePalettes.isEmpty()) {
-                    item {
-                        PaletaCard(modifier = Modifier.fillMaxWidth()) {
-                            PaletaSectionTitle(
-                                title = stringResource(id = R.string.empty_palettes),
-                                subtitle = stringResource(id = R.string.empty_palettes_subtitle),
+                    if (listError != null) {
+                        item {
+                            PaletaMessageBanner(
+                                message = listError,
+                                isError = true,
                             )
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            ) {
-                                PaletaPrimaryButton(
-                                    modifier = Modifier.weight(1f),
-                                    text = stringResource(id = R.string.new_palette),
-                                    onClick = onCreateClick,
-                                )
-                                PaletaGhostButton(
-                                    modifier = Modifier.weight(1f),
-                                    text = stringResource(id = R.string.generator_random_page),
-                                    onClick = onOpenRandomGenerator,
+                        }
+                    }
+
+                    item {
+                        OutlinedTextField(
+                            value = query,
+                            onValueChange = { query = it },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true,
+                            shape = RoundedCornerShape(14.dp),
+                            label = { Text(stringResource(id = R.string.search_palettes)) },
+                            colors = paletaTextFieldColors(),
+                        )
+                    }
+
+                    item {
+                        ColorCountDropdown(
+                            label = stringResource(id = R.string.filter_exact_colors),
+                            selectedCount = colorCountFilter,
+                            onSelected = { colorCountFilter = it },
+                            allowAny = true,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    }
+
+                    item {
+                        Row(
+                            modifier = Modifier.horizontalScroll(rememberScrollState()),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            SortChip(stringResource(id = R.string.sort_newest), sortMode == PaletteSortMode.NEWEST.name) { sortMode = PaletteSortMode.NEWEST.name }
+                            SortChip(stringResource(id = R.string.sort_oldest), sortMode == PaletteSortMode.OLDEST.name) { sortMode = PaletteSortMode.OLDEST.name }
+                            SortChip(stringResource(id = R.string.sort_name), sortMode == PaletteSortMode.NAME_ASC.name) { sortMode = PaletteSortMode.NAME_ASC.name }
+                            SortChip(stringResource(id = R.string.sort_name_desc), sortMode == PaletteSortMode.NAME_DESC.name) { sortMode = PaletteSortMode.NAME_DESC.name }
+                            SortChip(stringResource(id = R.string.sort_colors_asc), sortMode == PaletteSortMode.COLORS_ASC.name) { sortMode = PaletteSortMode.COLORS_ASC.name }
+                            SortChip(stringResource(id = R.string.sort_colors_desc), sortMode == PaletteSortMode.COLORS_DESC.name) { sortMode = PaletteSortMode.COLORS_DESC.name }
+                        }
+                    }
+
+                    item {
+                        Row(
+                            modifier = Modifier.horizontalScroll(rememberScrollState()),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            PaletteExportFormat.entries.forEach { format ->
+                                SortChip(
+                                    title = format.name,
+                                    selected = selectedFormat == format.name,
+                                    onClick = { selectedFormat = format.name },
                                 )
                             }
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            ) {
-                                PaletaGhostButton(
+                        }
+                    }
+
+                    if (visiblePalettes.isEmpty()) {
+                        item {
+                            PaletaCard(modifier = Modifier.fillMaxWidth()) {
+                                PaletaSectionTitle(
+                                    title = stringResource(id = R.string.empty_palettes),
+                                    subtitle = stringResource(id = R.string.empty_palettes_subtitle),
+                                )
+                                Row(
                                     modifier = Modifier.fillMaxWidth(),
-                                    text = stringResource(id = R.string.generator_image_page),
-                                    onClick = onOpenImageGenerator,
-                                )
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                ) {
+                                    PaletaGhostButton(
+                                        modifier = Modifier.weight(1f),
+                                        text = stringResource(id = R.string.generator_random_page),
+                                        onClick = onOpenRandomGenerator,
+                                    )
+                                    PaletaGhostButton(
+                                        modifier = Modifier.weight(1f),
+                                        text = stringResource(id = R.string.generator_image_page),
+                                        onClick = onOpenImageGenerator,
+                                    )
+                                }
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                ) {
+                                    PaletaGhostButton(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        text = stringResource(id = R.string.new_palette),
+                                        onClick = onCreateClick,
+                                    )
+                                }
                             }
                         }
-                    }
-                } else {
-                    items(visiblePalettes, key = { it.id }) { palette ->
-                        PaletteCard(
-                            palette = palette,
-                            onEditClick = onEditClick,
-                            onDeleteClick = { pendingDelete = palette },
-                            onCopyClick = {
-                                clipboard.setText(AnnotatedString(palette.colors.joinToString("\n")))
-                                statusMessage = context.getString(R.string.copy_palette_success)
-                                localError = null
-                            },
-                            onExportClick = {
-                                onExportPalette(
-                                    palette,
-                                    exportFormat.ext,
-                                    { payload ->
-                                        pendingExport = payload
-                                        createDocumentLauncher.launch(payload.fileName)
-                                    },
-                                    { error ->
-                                        localError = error
-                                    },
-                                )
-                            },
-                        )
+                    } else {
+                        items(visiblePalettes, key = { it.id }) { palette ->
+                            PaletteCard(
+                                palette = palette,
+                                onEditClick = onEditClick,
+                                onDeleteClick = { pendingDelete = palette },
+                                onCopyClick = {
+                                    clipboard.setText(AnnotatedString(palette.colors.joinToString("\n")))
+                                    statusMessage = context.getString(R.string.copy_palette_success)
+                                    localError = null
+                                },
+                                onExportClick = {
+                                    onExportPalette(
+                                        palette,
+                                        exportFormat.ext,
+                                        { payload ->
+                                            pendingExport = payload
+                                            createDocumentLauncher.launch(payload.fileName)
+                                        },
+                                        { error ->
+                                            localError = error
+                                        },
+                                    )
+                                },
+                            )
+                        }
                     }
                 }
 
