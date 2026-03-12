@@ -1,13 +1,5 @@
 R_DEF: Internal format may change without notice
 local
-color background
-color onBackground
-color onPrimary
-color onPrimaryContainer
-color onSurface
-color primary
-color primaryContainer
-color surface
 string app_name
 string auth_enter_email
 string auth_error_change_password
@@ -48,6 +40,7 @@ string copy_palette_success
 string create_palette
 string created_at
 string current_password
+string default_palette_name
 string delete
 string delete_palette
 string delete_palette_confirm_message
@@ -57,6 +50,15 @@ string edit_profile
 string email_hint
 string empty_palettes
 string empty_palettes_subtitle
+string error_creating
+string error_deleting
+string error_generating
+string error_generating_from_recent
+string error_loading
+string error_login_required
+string error_palette_colors_required
+string error_renaming
+string error_saving
 string export_action
 string export_canceled
 string export_error_generic

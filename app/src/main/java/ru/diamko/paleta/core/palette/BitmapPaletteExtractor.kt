@@ -1,23 +1,11 @@
 package ru.diamko.paleta.core.palette
 
-import android.content.ContentResolver
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.Color
-import android.net.Uri
 import kotlin.math.abs
 import kotlin.random.Random
 
 object BitmapPaletteExtractor {
-    fun extractFromUri(
-        contentResolver: ContentResolver,
-        imageUri: Uri,
-        colorCount: Int,
-    ): List<String> {
-        val bitmap = decodeBitmap(contentResolver, imageUri) ?: return emptyList()
-        return extractFromBitmap(bitmap, colorCount)
-    }
-
     fun extractFromBitmap(
         bitmap: Bitmap,
         colorCount: Int,
@@ -54,39 +42,6 @@ object BitmapPaletteExtractor {
         val b: Float,
         val count: Int,
     )
-
-    private fun decodeBitmap(contentResolver: ContentResolver, uri: Uri): Bitmap? {
-        val bounds = BitmapFactory.Options().apply {
-            inJustDecodeBounds = true
-        }
-        contentResolver.openInputStream(uri)?.use { stream ->
-            BitmapFactory.decodeStream(stream, null, bounds)
-        }
-        if (bounds.outWidth <= 0 || bounds.outHeight <= 0) return null
-
-        val sampleSize = calculateInSampleSize(
-            width = bounds.outWidth,
-            height = bounds.outHeight,
-            maxSize = 512,
-        )
-        val options = BitmapFactory.Options().apply {
-            inSampleSize = sampleSize
-            inPreferredConfig = Bitmap.Config.ARGB_8888
-        }
-        return contentResolver.openInputStream(uri)?.use { stream ->
-            BitmapFactory.decodeStream(stream, null, options)
-        }
-    }
-
-    private fun calculateInSampleSize(width: Int, height: Int, maxSize: Int): Int {
-        var sampleSize = 1
-        var halfWidth = width / 2
-        var halfHeight = height / 2
-        while ((halfWidth / sampleSize) >= maxSize || (halfHeight / sampleSize) >= maxSize) {
-            sampleSize *= 2
-        }
-        return sampleSize.coerceAtLeast(1)
-    }
 
     private fun samplePixels(bitmap: Bitmap): List<PixelRgb> {
         val maxSamples = 9_000

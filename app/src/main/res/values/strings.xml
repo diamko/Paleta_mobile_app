@@ -159,6 +159,17 @@
     <string name="file_saved">File saved: %1$s</string>
     <string name="export_error_generic">Export error</string>
 
+    <string name="error_loading">Loading failed</string>
+    <string name="error_login_required">You need to log in</string>
+    <string name="error_creating">Failed to create palette</string>
+    <string name="error_renaming">Failed to rename palette</string>
+    <string name="error_saving">Failed to save palette</string>
+    <string name="error_deleting">Failed to delete palette</string>
+    <string name="error_generating">Failed to generate palette</string>
+    <string name="error_generating_from_recent">Failed to generate from recent image</string>
+    <string name="error_palette_colors_required">Palette colors are required</string>
+    <string name="default_palette_name">My palette</string>
+
     <string name="back">Back</string>
     <string name="loading">Loading...</string>
 

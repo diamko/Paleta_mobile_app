@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import ru.diamko.paleta.R
 import ru.diamko.paleta.core.di.AppContainer
 import ru.diamko.paleta.domain.model.Palette
 import ru.diamko.paleta.domain.model.PaletteExportFile
@@ -37,6 +38,7 @@ class PaletteViewModel(
     private val generatePaletteFromImageUseCase: GeneratePaletteFromImageUseCase,
     private val generatePaletteFromImageUrlUseCase: GeneratePaletteFromImageUrlUseCase,
     private val exportPaletteUseCase: ExportPaletteUseCase,
+    private val getString: (Int) -> String,
 ) : ViewModel() {
 
     private var isGuest: Boolean = false
@@ -71,7 +73,7 @@ class PaletteViewModel(
                     _uiState.update { it.copy(isLoading = false, palettes = palettes, error = null) }
                 }
                 .onFailure { error ->
-                    _uiState.update { it.copy(isLoading = false, error = error.message ?: "Ошибка загрузки") }
+                    _uiState.update { it.copy(isLoading = false, error = error.message ?: getString(R.string.error_loading)) }
                 }
         }
     }
@@ -91,7 +93,7 @@ class PaletteViewModel(
 
     fun createPalette(name: String, colors: List<String>, onDone: () -> Unit = {}) {
         if (isGuest) {
-            _uiState.update { it.copy(isLoading = false, error = "Нужно войти в аккаунт") }
+            _uiState.update { it.copy(isLoading = false, error = getString(R.string.error_login_required)) }
             return
         }
         viewModelScope.launch {
@@ -110,14 +112,14 @@ class PaletteViewModel(
                     onDone()
                 }
                 .onFailure { error ->
-                    _uiState.update { it.copy(isLoading = false, error = error.message ?: "Ошибка создания") }
+                    _uiState.update { it.copy(isLoading = false, error = error.message ?: getString(R.string.error_creating)) }
                 }
         }
     }
 
     fun renamePalette(id: Long, name: String, onDone: () -> Unit = {}) {
         if (isGuest) {
-            _uiState.update { it.copy(isLoading = false, error = "Нужно войти в аккаунт") }
+            _uiState.update { it.copy(isLoading = false, error = getString(R.string.error_login_required)) }
             return
         }
         viewModelScope.launch {
@@ -128,7 +130,7 @@ class PaletteViewModel(
                     onDone()
                 }
                 .onFailure { error ->
-                    _uiState.update { it.copy(isLoading = false, error = error.message ?: "Ошибка переименования") }
+                    _uiState.update { it.copy(isLoading = false, error = error.message ?: getString(R.string.error_renaming)) }
                 }
         }
     }
@@ -140,7 +142,7 @@ class PaletteViewModel(
         onDone: () -> Unit = {},
     ) {
         if (isGuest) {
-            _uiState.update { it.copy(isLoading = false, error = "Нужно войти в аккаунт") }
+            _uiState.update { it.copy(isLoading = false, error = getString(R.string.error_login_required)) }
             return
         }
         viewModelScope.launch {
@@ -148,11 +150,11 @@ class PaletteViewModel(
             runCatching {
                 val desiredName = newName.trim()
                 if (desiredName.isBlank()) {
-                    throw IllegalArgumentException("Palette name cannot be empty")
+                    throw IllegalArgumentException(getString(R.string.palette_name_required))
                 }
                 val normalizedColors = newColors.map { it.trim() }
                 if (normalizedColors.isEmpty()) {
-                    throw IllegalArgumentException("Palette colors are required")
+                    throw IllegalArgumentException(getString(R.string.error_palette_colors_required))
                 }
 
                 val current = findPaletteById(id)
@@ -187,14 +189,14 @@ class PaletteViewModel(
                     onDone()
                 }
                 .onFailure { error ->
-                    _uiState.update { it.copy(isLoading = false, error = error.message ?: "РћС€РёР±РєР° СЃРѕС…СЂР°РЅРµРЅРёСЏ") }
+                    _uiState.update { it.copy(isLoading = false, error = error.message ?: getString(R.string.error_saving)) }
                 }
         }
     }
 
     fun deletePalette(id: Long, onDone: () -> Unit = {}) {
         if (isGuest) {
-            _uiState.update { it.copy(isLoading = false, error = "Нужно войти в аккаунт") }
+            _uiState.update { it.copy(isLoading = false, error = getString(R.string.error_login_required)) }
             return
         }
         viewModelScope.launch {
@@ -205,7 +207,7 @@ class PaletteViewModel(
                     onDone()
                 }
                 .onFailure { error ->
-                    _uiState.update { it.copy(isLoading = false, error = error.message ?: "Ошибка удаления") }
+                    _uiState.update { it.copy(isLoading = false, error = error.message ?: getString(R.string.error_deleting)) }
                 }
         }
     }
@@ -227,7 +229,7 @@ class PaletteViewModel(
             }.onSuccess { colors ->
                 onDone(colors)
             }.onFailure { error ->
-                onError(error.message ?: "Ошибка генерации палитры")
+                onError(error.message ?: getString(R.string.error_generating))
             }
         }
     }
@@ -247,7 +249,7 @@ class PaletteViewModel(
             }.onSuccess { colors ->
                 onDone(colors)
             }.onFailure { error ->
-                onError(error.message ?: "Ошибка генерации из недавнего изображения")
+                onError(error.message ?: getString(R.string.error_generating_from_recent))
             }
         }
     }
@@ -265,7 +267,7 @@ class PaletteViewModel(
                     onDone(payload)
                 }
                 .onFailure { error ->
-                    onError(error.message ?: "Ошибка экспорта")
+                    onError(error.message ?: getString(R.string.export_error_generic))
                 }
         }
     }
@@ -290,7 +292,7 @@ class PaletteViewModel(
         requestedName: String,
         existingNames: List<String>,
     ): String {
-        val base = requestedName.trim().ifBlank { "Моя палитра" }
+        val base = requestedName.trim().ifBlank { getString(R.string.default_palette_name) }
         if (existingNames.none { it.equals(base, ignoreCase = true) }) {
             return base
         }
@@ -322,6 +324,7 @@ class PaletteViewModel(
                         generatePaletteFromImageUseCase = GeneratePaletteFromImageUseCase(container.paletteRepository),
                         generatePaletteFromImageUrlUseCase = GeneratePaletteFromImageUrlUseCase(container.paletteRepository),
                         exportPaletteUseCase = ExportPaletteUseCase(container.paletteRepository),
+                        getString = container::getString,
                     ) as T
                 }
             }

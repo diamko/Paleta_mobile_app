@@ -1292,7 +1292,6 @@ color accent_material_dark
 color accent_material_light
 color androidx_core_ripple_material_light
 color androidx_core_secondary_text_default_material_light
-color background
 color background_floating_material_dark
 color background_floating_material_light
 color background_material_dark
@@ -2015,12 +2014,6 @@ color mtrl_textinput_focused_box_stroke_color
 color mtrl_textinput_hovered_box_stroke_color
 color notification_action_color_filter
 color notification_icon_bg_color
-color onBackground
-color onPrimary
-color onPrimaryContainer
-color onSurface
-color primary
-color primaryContainer
 color primary_dark_material_dark
 color primary_dark_material_light
 color primary_material_dark
@@ -2035,7 +2028,6 @@ color secondary_text_default_material_dark
 color secondary_text_default_material_light
 color secondary_text_disabled_material_dark
 color secondary_text_disabled_material_light
-color surface
 color switch_thumb_disabled_material_dark
 color switch_thumb_disabled_material_light
 color switch_thumb_material_dark
@@ -3784,6 +3776,7 @@ string create_palette
 string created_at
 string current_password
 string default_error_message
+string default_palette_name
 string default_popup_window_title
 string delete
 string delete_palette
@@ -3796,7 +3789,16 @@ string email_hint
 string empty_palettes
 string empty_palettes_subtitle
 string error_a11y_label
+string error_creating
+string error_deleting
+string error_generating
+string error_generating_from_recent
 string error_icon_content_description
+string error_loading
+string error_login_required
+string error_palette_colors_required
+string error_renaming
+string error_saving
 string export_action
 string export_canceled
 string export_error_generic

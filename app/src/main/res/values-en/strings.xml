@@ -44,6 +44,10 @@
     <string name="auth_profile_password_code_sent">Verification code sent</string>
     <string name="auth_password_changed">Password changed successfully</string>
     <string name="auth_error_change_password">Failed to change password</string>
+    <string name="auth_invalid_username">Username must be 3-20 characters (letters, numbers, _ or .)</string>
+    <string name="auth_invalid_email">Enter a valid email address</string>
+    <string name="auth_invalid_password">Password must be 8-64 characters and include letters and numbers</string>
+    <string name="auth_passwords_not_match">Passwords do not match</string>
 
     <string name="palettes_title">My palettes</string>
     <string name="palettes_subtitle">Create, generate, copy, and export palettes</string>
@@ -106,6 +110,8 @@
     <string name="read_image_failed">Failed to read image</string>
     <string name="extract_colors_failed">Failed to extract colors from image</string>
     <string name="extracted_colors_count">Extracted colors: %1$d</string>
+    <string name="last_image_restored">Last image restored</string>
+    <string name="last_image_restore_failed">Failed to restore last image</string>
 
     <string name="recent_uploads_title">Recent uploads</string>
     <string name="recent_uploads_subtitle">Reuse images uploaded in recent days</string>
@@ -152,6 +158,17 @@
     <string name="open_file_write_error">Failed to open file for writing</string>
     <string name="file_saved">File saved: %1$s</string>
     <string name="export_error_generic">Export error</string>
+
+    <string name="error_loading">Loading failed</string>
+    <string name="error_login_required">You need to log in</string>
+    <string name="error_creating">Failed to create palette</string>
+    <string name="error_renaming">Failed to rename palette</string>
+    <string name="error_saving">Failed to save palette</string>
+    <string name="error_deleting">Failed to delete palette</string>
+    <string name="error_generating">Failed to generate palette</string>
+    <string name="error_generating_from_recent">Failed to generate from recent image</string>
+    <string name="error_palette_colors_required">Palette colors are required</string>
+    <string name="default_palette_name">My palette</string>
 
     <string name="back">Back</string>
     <string name="loading">Loading...</string>

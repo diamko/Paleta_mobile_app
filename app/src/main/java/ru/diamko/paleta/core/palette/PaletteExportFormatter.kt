@@ -68,7 +68,7 @@ object PaletteExportFormatter {
     }
 
     private fun sanitizeFileName(raw: String): String {
-        return raw.trim().replace(Regex("[^a-zA-Z0-9_\\-. ]"), "_").ifBlank { "palette" }
+        return raw.trim().replace(Regex("[^\\p{L}\\p{N}_\\-. ]"), "_").ifBlank { "palette" }
     }
 
     private fun buildJson(colors: List<String>): String {

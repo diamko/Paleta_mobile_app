@@ -18,6 +18,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -28,6 +33,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.delay
 import ru.diamko.paleta.ui.theme.BrandBlue
 import ru.diamko.paleta.ui.theme.BrandSuccess
 import ru.diamko.paleta.ui.theme.BrandViolet
@@ -189,17 +195,13 @@ fun PaletaMessageBanner(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(14.dp))
-            .background(tone.copy(alpha = 0.12f))
+            .background(tone.copy(alpha = 0.85f))
             .padding(horizontal = 12.dp, vertical = 10.dp),
     ) {
         Text(
             text = message,
             style = MaterialTheme.typography.bodyMedium,
-            color = if (isError) {
-                MaterialTheme.colorScheme.error
-            } else {
-                BrandSuccess
-            },
+            color = Color.White,
         )
     }
 }
@@ -210,8 +212,31 @@ fun BoxScope.PaletaTopBannerHost(
     info: String?,
     modifier: Modifier = Modifier,
     topPadding: Dp = 0.dp,
+    onErrorDismissed: (() -> Unit)? = null,
+    onInfoDismissed: (() -> Unit)? = null,
 ) {
-    if (error.isNullOrBlank() && info.isNullOrBlank()) return
+    var visibleError by remember { mutableStateOf<String?>(null) }
+    var visibleInfo by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(error) {
+        visibleError = error
+        if (!error.isNullOrBlank()) {
+            delay(2500)
+            visibleError = null
+            onErrorDismissed?.invoke()
+        }
+    }
+
+    LaunchedEffect(info) {
+        visibleInfo = info
+        if (!info.isNullOrBlank()) {
+            delay(2500)
+            visibleInfo = null
+            onInfoDismissed?.invoke()
+        }
+    }
+
+    if (visibleError.isNullOrBlank() && visibleInfo.isNullOrBlank()) return
     Column(
         modifier = modifier
             .align(Alignment.TopCenter)
@@ -220,11 +245,11 @@ fun BoxScope.PaletaTopBannerHost(
             .padding(top = topPadding + 8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        if (!error.isNullOrBlank()) {
-            PaletaMessageBanner(message = error, isError = true)
+        if (!visibleError.isNullOrBlank()) {
+            PaletaMessageBanner(message = visibleError!!, isError = true)
         }
-        if (!info.isNullOrBlank()) {
-            PaletaMessageBanner(message = info, isError = false)
+        if (!visibleInfo.isNullOrBlank()) {
+            PaletaMessageBanner(message = visibleInfo!!, isError = false)
         }
     }
 }

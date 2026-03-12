@@ -22,7 +22,6 @@ class NetworkModule(
     private val okHttpClient = OkHttpClient.Builder()
         .addInterceptor(AuthInterceptor(tokenStore))
         .addInterceptor(HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BASIC })
-        .authenticator(TokenAuthenticator())
         .build()
 
     private val retrofit = Retrofit.Builder()

@@ -153,6 +153,17 @@
     <string name="file_saved">Файл сохранён: %1$s</string>
     <string name="export_error_generic">Ошибка экспорта</string>
 
+    <string name="error_loading">Ошибка загрузки</string>
+    <string name="error_login_required">Нужно войти в аккаунт</string>
+    <string name="error_creating">Ошибка создания</string>
+    <string name="error_renaming">Ошибка переименования</string>
+    <string name="error_saving">Ошибка сохранения</string>
+    <string name="error_deleting">Ошибка удаления</string>
+    <string name="error_generating">Ошибка генерации палитры</string>
+    <string name="error_generating_from_recent">Ошибка генерации из недавнего изображения</string>
+    <string name="error_palette_colors_required">Необходимо указать цвета палитры</string>
+    <string name="default_palette_name">Моя палитра</string>
+
     <string name="back">Назад</string>
     <string name="loading">Загрузка...</string>
 
