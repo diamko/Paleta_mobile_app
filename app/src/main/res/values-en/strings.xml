@@ -188,6 +188,12 @@
     <string name="language_ru">RU</string>
     <string name="language_en">EN</string>
     <string name="language_switching">Applying language...</string>
+
+    <string name="theme_title">Appearance</string>
+    <string name="theme_subtitle">Switch between dark, light, or system theme</string>
+    <string name="theme_system">System</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
     <string name="edit_profile">Edit profile</string>
     <string name="faq">FAQ</string>
 

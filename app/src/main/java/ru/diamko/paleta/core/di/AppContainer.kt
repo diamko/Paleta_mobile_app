@@ -1,11 +1,15 @@
 package ru.diamko.paleta.core.di
 
 import android.content.Context
+import android.content.res.Configuration
+import androidx.appcompat.app.AppCompatDelegate
 import ru.diamko.paleta.BuildConfig
 import ru.diamko.paleta.core.network.NetworkModule
 import ru.diamko.paleta.core.storage.DataStoreLocaleStore
+import ru.diamko.paleta.core.storage.DataStoreThemeStore
 import ru.diamko.paleta.core.storage.DataStoreTokenStore
 import ru.diamko.paleta.core.storage.LocaleStore
+import ru.diamko.paleta.core.storage.ThemeStore
 import ru.diamko.paleta.core.storage.TokenStore
 import ru.diamko.paleta.data.repository.FakeAuthRepository
 import ru.diamko.paleta.data.repository.FakePaletteRepository
@@ -20,7 +24,13 @@ class AppContainer(
 ) {
     private val appContext = context.applicationContext
 
-    fun getString(resId: Int): String = appContext.getString(resId)
+    fun getString(resId: Int): String {
+        val locales = AppCompatDelegate.getApplicationLocales()
+        if (locales.isEmpty) return appContext.getString(resId)
+        val config = Configuration(appContext.resources.configuration)
+        config.setLocales(android.os.LocaleList(locales[0]!!))
+        return appContext.createConfigurationContext(config).getString(resId)
+    }
 
     val tokenStore: TokenStore by lazy {
         DataStoreTokenStore(appContext)
@@ -28,6 +38,10 @@ class AppContainer(
 
     val localeStore: LocaleStore by lazy {
         DataStoreLocaleStore(appContext)
+    }
+
+    val themeStore: ThemeStore by lazy {
+        DataStoreThemeStore(appContext)
     }
 
     private val mode: RepositoryMode by lazy {

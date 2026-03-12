@@ -182,6 +182,11 @@
     <string name="source_random_subtitle">Generate random palettes and tune harmony</string>
     <string name="source_subtitle">Random generation or color extraction from an image</string>
     <string name="source_title">Palette source</string>
+    <string name="theme_dark">Dark</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_subtitle">Switch between dark, light, or system theme</string>
+    <string name="theme_system">System</string>
+    <string name="theme_title">Appearance</string>
     <string name="update_password">Update password</string>
     <string name="use_action">Use</string>
     <string name="username_hint">Username</string>

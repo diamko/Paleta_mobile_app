@@ -43,8 +43,12 @@
     <string name="auth_error_update_profile">Не удалось обновить профиль</string>
     <string name="auth_fill_all_fields">Заполните все поля</string>
     <string name="auth_fill_login_password">Заполните логин и пароль</string>
+    <string name="auth_invalid_email">Введите корректный email</string>
+    <string name="auth_invalid_password">Пароль должен быть 8–64 символов и содержать буквы и цифры</string>
+    <string name="auth_invalid_username">Имя пользователя должно быть 3–20 символов (буквы, цифры, _ или .)</string>
     <string name="auth_password_changed">Пароль успешно изменён</string>
     <string name="auth_password_updated_login_again">Пароль обновлён. Войдите с новым паролем</string>
+    <string name="auth_passwords_not_match">Пароли не совпадают</string>
     <string name="auth_profile_password_code_sent">Код подтверждения отправлен</string>
     <string name="auth_profile_updated">Профиль обновлён</string>
     <string name="auth_reset_code_sent_if_exists">Если email найден, код отправлен</string>
@@ -368,6 +372,11 @@
     <string msgid="2561197295334830845" name="switch_role">"Переключатель"</string>
     <string msgid="1672349317127674378" name="tab">"Вкладка"</string>
     <string msgid="5946805113151406391" name="template_percent">"Процентов: <ns1:g id="PERCENTAGE">%1$d</ns1:g>."</string>
+    <string name="theme_dark">Тёмная</string>
+    <string name="theme_light">Светлая</string>
+    <string name="theme_subtitle">Тёмная, светлая или как в системе</string>
+    <string name="theme_system">Системная</string>
+    <string name="theme_title">Тема оформления</string>
     <string msgid="3765533235322692011" name="tooltip_description">"Подсказка"</string>
     <string msgid="3124740595719787496" name="tooltip_label">"Показать подсказку"</string>
     <string name="update_password">Обновить пароль</string>

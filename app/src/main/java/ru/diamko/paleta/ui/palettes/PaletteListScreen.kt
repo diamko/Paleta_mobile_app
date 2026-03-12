@@ -2,6 +2,7 @@ package ru.diamko.paleta.ui.palettes
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -20,12 +21,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -41,6 +44,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
@@ -61,6 +65,10 @@ import ru.diamko.paleta.ui.components.PaletaPrimaryButton
 import ru.diamko.paleta.ui.components.PaletaSectionTitle
 import ru.diamko.paleta.ui.components.PaletaTopBannerHost
 import ru.diamko.paleta.ui.components.paletaTextFieldColors
+import ru.diamko.paleta.ui.theme.BrandBlue
+import ru.diamko.paleta.ui.theme.BrandCoral
+import ru.diamko.paleta.ui.theme.BrandSuccess
+import ru.diamko.paleta.ui.theme.BrandViolet
 
 private enum class PaletteSortMode {
     NEWEST,
@@ -224,14 +232,28 @@ fun PaletteListScreen(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                             ) {
-                                PaletaPrimaryButton(
+                                PaletaHomeActionButton(
                                     modifier = Modifier.weight(1f),
                                     text = stringResource(id = R.string.generator_random_page),
+                                    containerColor = BrandViolet.copy(alpha = 0.10f),
+                                    borderBrush = Brush.horizontalGradient(
+                                        listOf(
+                                            BrandViolet.copy(alpha = 0.70f),
+                                            BrandBlue.copy(alpha = 0.70f),
+                                        ),
+                                    ),
                                     onClick = onOpenRandomGenerator,
                                 )
-                                PaletaGhostButton(
+                                PaletaHomeActionButton(
                                     modifier = Modifier.weight(1f),
                                     text = stringResource(id = R.string.generator_image_page),
+                                    containerColor = BrandBlue.copy(alpha = 0.10f),
+                                    borderBrush = Brush.horizontalGradient(
+                                        listOf(
+                                            BrandBlue.copy(alpha = 0.70f),
+                                            BrandCoral.copy(alpha = 0.70f),
+                                        ),
+                                    ),
                                     onClick = onOpenImageGenerator,
                                 )
                             }
@@ -239,9 +261,16 @@ fun PaletteListScreen(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                             ) {
-                                PaletaGhostButton(
+                                PaletaHomeActionButton(
                                     modifier = Modifier.weight(1f),
                                     text = stringResource(id = R.string.new_palette),
+                                    containerColor = BrandSuccess.copy(alpha = 0.10f),
+                                    borderBrush = Brush.horizontalGradient(
+                                        listOf(
+                                            BrandSuccess.copy(alpha = 0.70f),
+                                            BrandViolet.copy(alpha = 0.70f),
+                                        ),
+                                    ),
                                     onClick = onCreateClick,
                                 )
                             }
@@ -423,6 +452,36 @@ private fun SortChip(
             selectedBorderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
         ),
     )
+}
+
+@Composable
+private fun PaletaHomeActionButton(
+    text: String,
+    containerColor: Color,
+    borderBrush: Brush,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+) {
+    OutlinedButton(
+        modifier = modifier,
+        enabled = enabled,
+        onClick = onClick,
+        shape = RoundedCornerShape(18.dp),
+        border = BorderStroke(width = 1.5.dp, brush = borderBrush),
+        colors = ButtonDefaults.outlinedButtonColors(
+            containerColor = containerColor,
+            contentColor = MaterialTheme.colorScheme.onSurface,
+            disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+            disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+        ),
+        contentPadding = PaddingValues(horizontal = 18.dp, vertical = 14.dp),
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelLarge,
+        )
+    }
 }
 
 @Composable

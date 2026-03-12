@@ -4110,6 +4110,11 @@ string status_bar_notification_info_overflow
 string switch_role
 string tab
 string template_percent
+string theme_dark
+string theme_light
+string theme_subtitle
+string theme_system
+string theme_title
 string tooltip_description
 string tooltip_label
 string update_password

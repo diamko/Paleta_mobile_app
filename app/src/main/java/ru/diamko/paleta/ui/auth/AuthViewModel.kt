@@ -50,6 +50,13 @@ class AuthViewModel(
         restoreSession()
     }
 
+    private fun resolveErrorMessage(error: Throwable, fallbackResId: Int): String {
+        return when (error) {
+            is IllegalArgumentException, is IllegalStateException -> error.message ?: getString(fallbackResId)
+            else -> getString(fallbackResId)
+        }
+    }
+
     fun login(login: String, password: String) {
         val loginTrimmed = login.trim()
         if (loginTrimmed.isBlank() || password.isBlank()) {
@@ -88,7 +95,7 @@ class AuthViewModel(
                         it.copy(
                             isCheckingSession = false,
                             isLoading = false,
-                            error = error.message ?: getString(R.string.auth_error_login),
+                            error = resolveErrorMessage(error, R.string.auth_error_login),
                         )
                     }
                 }
@@ -133,7 +140,7 @@ class AuthViewModel(
                         it.copy(
                             isCheckingSession = false,
                             isLoading = false,
-                            error = error.message ?: getString(R.string.auth_error_register),
+                            error = resolveErrorMessage(error, R.string.auth_error_register),
                         )
                     }
                 }
@@ -168,7 +175,7 @@ class AuthViewModel(
                     _uiState.update {
                         it.copy(
                             isLoading = false,
-                            error = error.message ?: getString(R.string.auth_error_send_code),
+                            error = resolveErrorMessage(error, R.string.auth_error_send_code),
                         )
                     }
                 }
@@ -217,7 +224,7 @@ class AuthViewModel(
                     _uiState.update {
                         it.copy(
                             isLoading = false,
-                            error = error.message ?: getString(R.string.auth_error_update_password),
+                            error = resolveErrorMessage(error, R.string.auth_error_update_password),
                         )
                     }
                 }
@@ -263,7 +270,7 @@ class AuthViewModel(
                     _uiState.update {
                         it.copy(
                             isLoading = false,
-                            error = error.message ?: getString(R.string.auth_error_update_profile),
+                            error = resolveErrorMessage(error, R.string.auth_error_update_profile),
                         )
                     }
                 }
@@ -288,7 +295,7 @@ class AuthViewModel(
                     _uiState.update {
                         it.copy(
                             isLoading = false,
-                            error = error.message ?: getString(R.string.auth_error_send_code),
+                            error = resolveErrorMessage(error, R.string.auth_error_send_code),
                         )
                     }
                 }
@@ -331,7 +338,7 @@ class AuthViewModel(
                     _uiState.update {
                         it.copy(
                             isLoading = false,
-                            error = error.message ?: getString(R.string.auth_error_change_password),
+                            error = resolveErrorMessage(error, R.string.auth_error_change_password),
                         )
                     }
                 }

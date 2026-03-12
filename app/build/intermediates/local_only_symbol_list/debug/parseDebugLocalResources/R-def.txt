@@ -182,6 +182,11 @@ string source_image_subtitle
 string source_random_subtitle
 string source_subtitle
 string source_title
+string theme_dark
+string theme_light
+string theme_subtitle
+string theme_system
+string theme_title
 string update_password
 string use_action
 string username_hint

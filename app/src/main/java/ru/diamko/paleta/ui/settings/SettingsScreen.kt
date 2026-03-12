@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -34,6 +36,8 @@ fun SettingsScreen(
     authState: AuthUiState,
     currentLanguageTag: String,
     isApplyingLanguage: Boolean,
+    currentTheme: Boolean?,
+    onChangeTheme: (Boolean?) -> Unit,
     onChangeLanguage: (String) -> Unit,
     onOpenProfile: () -> Unit,
     onOpenPasswordChange: () -> Unit,
@@ -58,6 +62,7 @@ fun SettingsScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
                     .padding(paddingValues)
                     .padding(horizontal = 16.dp, vertical = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -73,6 +78,40 @@ fun SettingsScreen(
                             fontWeight = FontWeight.SemiBold,
                         )
                         Text(text = authState.user?.email ?: "-")
+                    }
+
+                    PaletaSectionTitle(
+                        title = stringResource(id = R.string.theme_title),
+                        subtitle = stringResource(id = R.string.theme_subtitle),
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        FilterChip(
+                            selected = currentTheme == null,
+                            onClick = { onChangeTheme(null) },
+                            label = { Text(stringResource(id = R.string.theme_system)) },
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = Color(0x1A1976D2),
+                            ),
+                        )
+                        FilterChip(
+                            selected = currentTheme == false,
+                            onClick = { onChangeTheme(false) },
+                            label = { Text(stringResource(id = R.string.theme_light)) },
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = Color(0x1A1976D2),
+                            ),
+                        )
+                        FilterChip(
+                            selected = currentTheme == true,
+                            onClick = { onChangeTheme(true) },
+                            label = { Text(stringResource(id = R.string.theme_dark)) },
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = Color(0x1A1976D2),
+                            ),
+                        )
                     }
 
                     PaletaSectionTitle(

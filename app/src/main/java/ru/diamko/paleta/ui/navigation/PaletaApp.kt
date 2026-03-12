@@ -52,6 +52,8 @@ import ru.diamko.paleta.ui.settings.SettingsScreen
 @Composable
 fun PaletaApp(
     container: AppContainer,
+    currentTheme: Boolean?,
+    onChangeTheme: (Boolean?) -> Unit,
 ) {
     val context = LocalContext.current
     val navController = rememberNavController()
@@ -284,6 +286,8 @@ fun PaletaApp(
                 authState = authState,
                 currentLanguageTag = currentLanguageTag,
                 isApplyingLanguage = isApplyingLanguage,
+                currentTheme = currentTheme,
+                onChangeTheme = onChangeTheme,
                 onChangeLanguage = { languageTag ->
                     val safeTag = if (languageTag == "en") "en" else "ru"
                     if (safeTag != currentLanguageTag && !isApplyingLanguage) {
