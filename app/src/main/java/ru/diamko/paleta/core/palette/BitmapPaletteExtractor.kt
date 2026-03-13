@@ -45,14 +45,18 @@ object BitmapPaletteExtractor {
 
     private fun samplePixels(bitmap: Bitmap): List<PixelRgb> {
         val maxSamples = 9_000
-        val stride = maxOf(1, kotlin.math.sqrt((bitmap.width * bitmap.height / maxSamples).toDouble()).toInt())
+        val w = bitmap.width
+        val h = bitmap.height
+        val stride = maxOf(1, kotlin.math.sqrt((w * h / maxSamples).toDouble()).toInt())
         val pixels = ArrayList<PixelRgb>(maxSamples)
 
+        val rowBuffer = IntArray(w)
         var y = 0
-        while (y < bitmap.height) {
+        while (y < h) {
+            bitmap.getPixels(rowBuffer, 0, w, 0, y, w, 1)
             var x = 0
-            while (x < bitmap.width) {
-                val color = bitmap.getPixel(x, y)
+            while (x < w) {
+                val color = rowBuffer[x]
                 val alpha = Color.alpha(color)
                 if (alpha >= 32) {
                     val r = Color.red(color).toFloat()
@@ -73,10 +77,11 @@ object BitmapPaletteExtractor {
         return buildList {
             val fallbackStride = maxOf(1, stride / 2)
             var fy = 0
-            while (fy < bitmap.height) {
+            while (fy < h) {
+                bitmap.getPixels(rowBuffer, 0, w, 0, fy, w, 1)
                 var fx = 0
-                while (fx < bitmap.width) {
-                    val c = bitmap.getPixel(fx, fy)
+                while (fx < w) {
+                    val c = rowBuffer[fx]
                     if (Color.alpha(c) >= 32) {
                         add(
                             PixelRgb(

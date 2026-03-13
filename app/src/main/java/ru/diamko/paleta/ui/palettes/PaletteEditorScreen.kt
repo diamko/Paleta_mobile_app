@@ -1,13 +1,17 @@
 package ru.diamko.paleta.ui.palettes
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -17,6 +21,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -28,16 +34,20 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 import ru.diamko.paleta.R
 import ru.diamko.paleta.core.palette.ColorTools
 import ru.diamko.paleta.core.palette.HexColors
+import ru.diamko.paleta.core.palette.PaletteExportFormat
 import ru.diamko.paleta.core.palette.RandomPaletteGenerator
+import ru.diamko.paleta.domain.model.PaletteExportFile
 import ru.diamko.paleta.ui.components.ColorCountDropdown
 import ru.diamko.paleta.ui.components.ColorWheelPicker
 import ru.diamko.paleta.ui.components.PaletaCard
@@ -59,6 +69,7 @@ fun PaletteEditorScreen(
     onRequireLogin: () -> Unit,
 ) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     val existing = paletteId?.let { paletteViewModel.paletteById(it) }
     val isCreateMode = existing == null
 
@@ -72,6 +83,31 @@ fun PaletteEditorScreen(
     }
     var localError by remember { mutableStateOf<String?>(null) }
     var selectedColorIndex by remember(existing?.id) { mutableStateOf(0) }
+    var selectedFormat by remember { mutableStateOf(PaletteExportFormat.JSON) }
+    var pendingExport by remember { mutableStateOf<PaletteExportFile?>(null) }
+    var isBusy by remember { mutableStateOf(false) }
+
+    val createDocumentLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("*/*"),
+    ) { outputUri ->
+        val payload = pendingExport ?: return@rememberLauncherForActivityResult
+        if (outputUri == null) {
+            localError = context.getString(R.string.export_canceled)
+            pendingExport = null
+            return@rememberLauncherForActivityResult
+        }
+        scope.launch {
+            writeExportFile(context, outputUri, payload)
+                .onSuccess {
+                    localError = null
+                    pendingExport = null
+                }
+                .onFailure { error ->
+                    localError = error.message ?: context.getString(R.string.export_error_generic)
+                    pendingExport = null
+                }
+        }
+    }
 
     LaunchedEffect(Unit) {
         if (paletteViewModel.uiState.value.palettes.isEmpty()) {
@@ -261,6 +297,55 @@ fun PaletteEditorScreen(
                         )
                     }
 
+                    PaletaSectionTitle(
+                        title = stringResource(id = R.string.export_title),
+                        subtitle = stringResource(id = R.string.export_subtitle),
+                    )
+                    Row(
+                        modifier = Modifier.horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        PaletteExportFormat.entries.forEach { format ->
+                            FilterChip(
+                                selected = selectedFormat == format,
+                                onClick = { selectedFormat = format },
+                                label = { Text(format.name) },
+                                shape = RoundedCornerShape(50),
+                                colors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+                                    selectedLabelColor = MaterialTheme.colorScheme.primary,
+                                ),
+                            )
+                        }
+                    }
+                    PaletaPrimaryButton(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = stringResource(id = R.string.export_file),
+                        enabled = !isBusy && parsedColors.isNotEmpty(),
+                        onClick = {
+                            val colors = HexColors.normalize(parsedColors)
+                            if (colors == null) {
+                                localError = context.getString(R.string.palette_invalid_hex_count)
+                                return@PaletaPrimaryButton
+                            }
+                            isBusy = true
+                            paletteViewModel.exportPalette(
+                                name = name.ifBlank { context.getString(R.string.palette_editor_title) },
+                                colors = colors,
+                                format = selectedFormat.ext,
+                                onDone = { payload ->
+                                    isBusy = false
+                                    pendingExport = payload
+                                    createDocumentLauncher.launch(payload.fileName)
+                                },
+                                onError = { error ->
+                                    isBusy = false
+                                    localError = error
+                                },
+                            )
+                        },
+                    )
+
                     if (isCreateMode) {
                         PaletaPrimaryButton(
                             modifier = Modifier.fillMaxWidth(),
@@ -301,7 +386,7 @@ fun PaletteEditorScreen(
                                     return@PaletaPrimaryButton
                                 }
                                 paletteViewModel.savePaletteChanges(
-                                    id = existing.id,
+                                    id = existing!!.id,
                                     newName = name,
                                     newColors = parsed,
                                 ) {
@@ -318,7 +403,7 @@ fun PaletteEditorScreen(
                                     localError = context.getString(R.string.login_to_save_palette)
                                     onRequireLogin()
                                 } else {
-                                    paletteViewModel.deletePalette(existing.id) {
+                                    paletteViewModel.deletePalette(existing!!.id) {
                                         onBack()
                                     }
                                 }

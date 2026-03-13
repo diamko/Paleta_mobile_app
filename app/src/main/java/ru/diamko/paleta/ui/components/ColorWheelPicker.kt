@@ -13,10 +13,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -58,8 +61,13 @@ fun ColorWheelPicker(
         }
     }
 
-    val wheelBitmap = remember(wheelSize) {
-        createHueSaturationWheelBitmap(wheelSize)
+    var wheelBitmap by remember { mutableStateOf<Bitmap?>(null) }
+    LaunchedEffect(wheelSize) {
+        if (wheelSize.width > 0 && wheelSize.height > 0) {
+            wheelBitmap = withContext(Dispatchers.Default) {
+                createHueSaturationWheelBitmap(wheelSize)
+            }
+        }
     }
 
     fun updateFromPoint(point: Offset) {
@@ -147,24 +155,29 @@ private fun createHueSaturationWheelBitmap(size: IntSize): Bitmap? {
     val radius = min(width, height) / 2f
     if (radius <= 0f) return null
 
-    val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+    val pixels = IntArray(width * height)
     val centerX = width / 2f
     val centerY = height / 2f
+    val hsv = FloatArray(3)
+    hsv[2] = 1f
 
     for (y in 0 until height) {
+        val dy = y - centerY
+        val offset = y * width
         for (x in 0 until width) {
             val dx = x - centerX
-            val dy = y - centerY
             val distance = sqrt(dx * dx + dy * dy)
             if (distance > radius) {
-                bitmap.setPixel(x, y, AndroidColor.TRANSPARENT)
+                pixels[offset + x] = AndroidColor.TRANSPARENT
                 continue
             }
-            val hue = ((Math.toDegrees(atan2(dy.toDouble(), dx.toDouble())) + 360.0) % 360.0).toFloat()
-            val sat = (distance / radius).coerceIn(0f, 1f)
-            bitmap.setPixel(x, y, AndroidColor.HSVToColor(floatArrayOf(hue, sat, 1f)))
+            hsv[0] = ((Math.toDegrees(atan2(dy.toDouble(), dx.toDouble())) + 360.0) % 360.0).toFloat()
+            hsv[1] = (distance / radius).coerceIn(0f, 1f)
+            pixels[offset + x] = AndroidColor.HSVToColor(hsv)
         }
     }
 
+    val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+    bitmap.setPixels(pixels, 0, width, 0, 0, width, height)
     return bitmap
 }

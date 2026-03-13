@@ -58,7 +58,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -207,7 +206,12 @@ fun PaletteGenerateScreen(
                     return@generateFromImage
                 }
                 applyPalette(colors, context.getString(R.string.extracted_colors_count, colors.size))
-                markerPositions = estimateInitialMarkerPositions(bitmap, colors)
+                scope.launch {
+                    val markers = withContext(Dispatchers.Default) {
+                        estimateInitialMarkerPositions(bitmap, colors)
+                    }
+                    markerPositions = markers
+                }
             },
             onError = { error ->
                 isBusy = false
@@ -265,7 +269,12 @@ fun PaletteGenerateScreen(
                         return@generateFromImage
                     }
                     applyPalette(colors, context.getString(R.string.extracted_colors_count, colors.size))
-                    markerPositions = estimateInitialMarkerPositions(bitmap, colors)
+                    scope.launch {
+                        val markers = withContext(Dispatchers.Default) {
+                            estimateInitialMarkerPositions(bitmap, colors)
+                        }
+                        markerPositions = markers
+                    }
                 },
                 onError = { error ->
                     isBusy = false
@@ -540,6 +549,8 @@ fun PaletteGenerateScreen(
                                 .background(MaterialTheme.colorScheme.surfaceVariant)
                                 .onSizeChanged { imageBoxSize = it }
                                 .pointerInput(bitmap, fitMetrics) {
+                                    val markerCircleSizePx = 24.dp.toPx()
+                                    val markerHitPaddingPx = 16.dp.toPx()
                                     awaitEachGesture {
                                         val metrics = fitMetrics ?: return@awaitEachGesture
                                         val down = awaitFirstDown(requireUnconsumed = false)
@@ -547,6 +558,8 @@ fun PaletteGenerateScreen(
                                             position = down.position,
                                             markerPositions = markerPositions,
                                             metrics = metrics,
+                                            circleSizePx = markerCircleSizePx,
+                                            hitPaddingPx = markerHitPaddingPx,
                                         ) ?: return@awaitEachGesture
                                         val currentSelectedIndex = selectedColorIndex
                                             .coerceIn(0, max(0, paletteColors.lastIndex))
@@ -612,15 +625,16 @@ fun PaletteGenerateScreen(
                                         ColorTools.hexToColorInt(it)?.let(::Color)
                                     } ?: Color.Gray
 
+                                    val markerSize = if (isDraggingPipette && index == safeSelectedIndex) 26.dp else 24.dp
                                     Box(
                                         modifier = Modifier
                                             .offset {
                                                 IntOffset(
-                                                    x = markerX.roundToInt(),
-                                                    y = markerY.roundToInt(),
+                                                    x = markerX.roundToInt() - (markerSize / 2).roundToPx(),
+                                                    y = markerY.roundToInt() - (markerSize / 2).roundToPx(),
                                                 )
                                             }
-                                            .size(34.dp)
+                                            .size(markerSize)
                                             .clickable(enabled = false) {
                                                 selectedColorIndex = index
                                                 statusMessage = context.getString(R.string.pipette_selected, index + 1)
@@ -648,9 +662,16 @@ fun PaletteGenerateScreen(
                                 ColorLoupe(
                                     modifier = Modifier
                                         .offset {
+                                            val loupeSize = IntSize(
+                                                width = 72.dp.roundToPx(),
+                                                height = 86.dp.roundToPx(),
+                                            )
                                             calculateLoupeOffset(
                                                 anchor = touch,
                                                 containerSize = imageBoxSize,
+                                                loupeSize = loupeSize,
+                                                verticalMargin = 72.dp.roundToPx(),
+                                                horizontalMargin = 48.dp.roundToPx(),
                                             )
                                         },
                                     bitmap = bitmap,
@@ -930,34 +951,18 @@ private fun PipetteMarker(
     dragging: Boolean,
 ) {
     val accent = if (selected) MaterialTheme.colorScheme.primary else Color.White
-    Box(modifier = Modifier.fillMaxSize()) {
-        Canvas(
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .size(10.dp),
-        ) {
-            val triangle = Path().apply {
-                moveTo(0f, 0f)
-                lineTo(size.width, 0f)
-                lineTo(0f, size.height)
-                close()
-            }
-            drawPath(triangle, color = accent)
-        }
-        Box(
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .offset(x = 3.dp, y = 3.dp)
-                .size(if (dragging) 26.dp else 24.dp)
-                .clip(CircleShape)
-                .background(color)
-                .border(
-                    width = if (selected) 3.dp else 2.dp,
-                    color = accent,
-                    shape = CircleShape,
-                ),
-        )
-    }
+    val circleSize = if (dragging) 26.dp else 24.dp
+    Box(
+        modifier = Modifier
+            .size(circleSize)
+            .clip(CircleShape)
+            .background(color)
+            .border(
+                width = if (selected) 3.dp else 2.dp,
+                color = accent,
+                shape = CircleShape,
+            ),
+    )
 }
 
 @Composable
@@ -1025,15 +1030,6 @@ private fun ColorLoupe(
             textAlign = TextAlign.Center,
         )
 
-        Canvas(modifier = Modifier.size(10.dp, 8.dp)) {
-            val tail = Path().apply {
-                moveTo(size.width / 2f, size.height)
-                lineTo(0f, 0f)
-                lineTo(size.width, 0f)
-                close()
-            }
-            drawPath(tail, color = Color.White.copy(alpha = 0.9f))
-        }
     }
 }
 
@@ -1087,19 +1083,16 @@ private fun findMarkerIndexAtPosition(
     position: Offset,
     markerPositions: List<Offset?>,
     metrics: ImageFitMetrics,
+    circleSizePx: Float,
+    hitPaddingPx: Float,
 ): Int? {
-    val circleOffset = 3f
-    val circleSize = 24f
-    val hitPadding = 2f
     return markerPositions.indices
         .reversed()
         .firstOrNull { index ->
             val marker = markerPositions[index] ?: return@firstOrNull false
-            val markerLeft = metrics.left + marker.x * metrics.width
-            val markerTop = metrics.top + marker.y * metrics.height
-            val centerX = markerLeft + circleOffset + circleSize / 2f
-            val centerY = markerTop + circleOffset + circleSize / 2f
-            val radius = circleSize / 2f + hitPadding
+            val centerX = metrics.left + marker.x * metrics.width
+            val centerY = metrics.top + marker.y * metrics.height
+            val radius = circleSizePx / 2f + hitPaddingPx
             val dx = position.x - centerX
             val dy = position.y - centerY
             dx * dx + dy * dy <= radius * radius
@@ -1109,28 +1102,39 @@ private fun findMarkerIndexAtPosition(
 private fun calculateLoupeOffset(
     anchor: Offset,
     containerSize: IntSize,
+    loupeSize: IntSize,
+    verticalMargin: Int,
+    horizontalMargin: Int,
 ): IntOffset {
-    val loupeWidth = 72
-    val loupeHeight = 86
-    val margin = 24
-
-    var x = anchor.x.roundToInt() - loupeWidth - margin
-    var y = anchor.y.roundToInt() - loupeHeight - margin
-
-    if (x < 0) {
-        x = anchor.x.roundToInt() + margin
-    }
-    if (y < 0) {
-        y = anchor.y.roundToInt() + margin
-    }
+    val loupeWidth = loupeSize.width
+    val loupeHeight = loupeSize.height
 
     val maxX = (containerSize.width - loupeWidth).coerceAtLeast(0)
     val maxY = (containerSize.height - loupeHeight).coerceAtLeast(0)
 
-    return IntOffset(
-        x = x.coerceIn(0, maxX),
-        y = y.coerceIn(0, maxY),
-    )
+    val ax = anchor.x.roundToInt()
+    val ay = anchor.y.roundToInt()
+
+    // Center horizontally over the touch point
+    var x = (ax - loupeWidth / 2).coerceIn(0, maxX)
+
+    // Prefer above the finger; fall back to below
+    var y = ay - loupeHeight - verticalMargin
+    if (y < 0) {
+        y = ay + verticalMargin
+    }
+
+    // If still off-screen vertically, try to the side
+    if (y > maxY) {
+        y = (ay - loupeHeight / 2).coerceIn(0, maxY)
+        x = if (ax > containerSize.width / 2) {
+            (ax - loupeWidth - horizontalMargin).coerceAtLeast(0)
+        } else {
+            (ax + horizontalMargin).coerceAtMost(maxX)
+        }
+    }
+
+    return IntOffset(x = x, y = y)
 }
 
 private fun estimateInitialMarkerPositions(
@@ -1149,15 +1153,19 @@ private fun estimateInitialMarkerPositions(
         val b: Int,
     )
 
-    val stepX = max(1, bitmap.width / 160)
-    val stepY = max(1, bitmap.height / 160)
+    val w = bitmap.width
+    val h = bitmap.height
+    val stepX = max(1, w / 160)
+    val stepY = max(1, h / 160)
     val samples = ArrayList<SamplePoint>()
 
+    val rowBuffer = IntArray(w)
     var y = 0
-    while (y < bitmap.height) {
+    while (y < h) {
+        bitmap.getPixels(rowBuffer, 0, w, 0, y, w, 1)
         var x = 0
-        while (x < bitmap.width) {
-            val color = bitmap.getPixel(x, y)
+        while (x < w) {
+            val color = rowBuffer[x]
             samples.add(
                 SamplePoint(
                     x = x,
@@ -1173,8 +1181,8 @@ private fun estimateInitialMarkerPositions(
     }
 
     if (samples.isEmpty()) {
-        val centerX = bitmap.width / 2
-        val centerY = bitmap.height / 2
+        val centerX = w / 2
+        val centerY = h / 2
         val c = bitmap.getPixel(centerX, centerY)
         samples.add(
             SamplePoint(
