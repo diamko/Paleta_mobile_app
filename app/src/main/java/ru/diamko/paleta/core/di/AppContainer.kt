@@ -10,9 +10,11 @@ import ru.diamko.paleta.core.network.NetworkMonitor
 import ru.diamko.paleta.core.storage.DataStoreLocaleStore
 import ru.diamko.paleta.core.storage.DataStoreThemeStore
 import ru.diamko.paleta.core.storage.DataStoreTokenStore
+import ru.diamko.paleta.core.storage.DataStoreUserStore
 import ru.diamko.paleta.core.storage.LocaleStore
 import ru.diamko.paleta.core.storage.ThemeStore
 import ru.diamko.paleta.core.storage.TokenStore
+import ru.diamko.paleta.core.storage.UserStore
 import ru.diamko.paleta.data.local.PaletaDatabase
 import ru.diamko.paleta.data.repository.FakeAuthRepository
 import ru.diamko.paleta.data.repository.FakePaletteRepository
@@ -69,9 +71,13 @@ class AppContainer(
         NetworkMonitor(appContext)
     }
 
+    val userStore: UserStore by lazy {
+        DataStoreUserStore(appContext)
+    }
+
     val authRepository: AuthRepository by lazy {
         when (mode) {
-            RepositoryMode.REMOTE -> RemoteAuthRepository(networkModule.authApi, tokenStore)
+            RepositoryMode.REMOTE -> RemoteAuthRepository(networkModule.authApi, tokenStore, userStore)
             RepositoryMode.FAKE -> FakeAuthRepository(tokenStore)
         }
     }

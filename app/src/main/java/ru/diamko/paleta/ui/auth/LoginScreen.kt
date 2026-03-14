@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -26,7 +27,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import ru.diamko.paleta.R
@@ -61,26 +61,28 @@ fun LoginScreen(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 Spacer(modifier = Modifier.height(6.dp))
-                Image(
-                    painter = painterResource(id = R.drawable.paleta_logo),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(88.dp)
-                        .align(Alignment.CenterHorizontally),
-                )
-                Text(
-                    text = stringResource(id = R.string.app_name),
+                Row(
                     modifier = Modifier.align(Alignment.CenterHorizontally),
-                    style = MaterialTheme.typography.displayMedium.copy(
-                        brush = Brush.horizontalGradient(
-                            colors = listOf(
-                                MaterialTheme.colorScheme.primary,
-                                MaterialTheme.colorScheme.secondary,
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.paleta_logo),
+                        contentDescription = null,
+                        modifier = Modifier.size(60.dp),
+                    )
+                    Text(
+                        text = stringResource(id = R.string.app_name),
+                        style = MaterialTheme.typography.displayMedium.copy(
+                            brush = Brush.horizontalGradient(
+                                colors = listOf(
+                                    MaterialTheme.colorScheme.primary,
+                                    MaterialTheme.colorScheme.secondary,
+                                ),
                             ),
                         ),
-                    ),
-                    textAlign = TextAlign.Center,
-                )
+                    )
+                }
 
                 PaletaCard(modifier = Modifier.fillMaxWidth()) {
                     PaletaSectionTitle(

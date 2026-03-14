@@ -4,6 +4,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import ru.diamko.paleta.core.network.NetworkError
 import ru.diamko.paleta.core.storage.TokenStore
+import ru.diamko.paleta.core.storage.UserStore
 import ru.diamko.paleta.data.remote.api.AuthApi
 import ru.diamko.paleta.data.remote.dto.ApiEnvelope
 import ru.diamko.paleta.data.remote.dto.AuthDataDto
@@ -20,6 +21,7 @@ import ru.diamko.paleta.domain.repository.AuthRepository
 class RemoteAuthRepository(
     private val authApi: AuthApi,
     private val tokenStore: TokenStore,
+    private val userStore: UserStore,
 ) : AuthRepository {
 
     override suspend fun login(login: String, password: String): User = withContext(Dispatchers.IO) {
@@ -31,7 +33,9 @@ class RemoteAuthRepository(
         )
         val data = envelope.unwrapAuth("Не удалось выполнить вход")
         tokenStore.saveTokens(data.tokens.access_token, data.tokens.refresh_token)
-        data.user.toDomain()
+        val user = data.user.toDomain()
+        userStore.saveUser(user)
+        user
     }
 
     override suspend fun register(username: String, email: String, password: String): User = withContext(Dispatchers.IO) {
@@ -44,7 +48,9 @@ class RemoteAuthRepository(
         )
         val data = envelope.unwrapAuth("Не удалось выполнить регистрацию")
         tokenStore.saveTokens(data.tokens.access_token, data.tokens.refresh_token)
-        data.user.toDomain()
+        val user = data.user.toDomain()
+        userStore.saveUser(user)
+        user
     }
 
     override suspend fun requestPasswordResetCode(email: String) = withContext(Dispatchers.IO) {
@@ -83,7 +89,9 @@ class RemoteAuthRepository(
                 current_password = currentPassword,
             ),
         )
-        envelope.unwrapUser("Не удалось обновить профиль").toDomain()
+        val user = envelope.unwrapUser("Не удалось обновить профиль").toDomain()
+        userStore.saveUser(user)
+        user
     }
 
     override suspend fun sendProfilePasswordCode() = withContext(Dispatchers.IO) {
@@ -109,14 +117,24 @@ class RemoteAuthRepository(
     override suspend fun logout() = withContext(Dispatchers.IO) {
         runCatching { authApi.logout() }
         tokenStore.clear()
+        userStore.clearUser()
     }
 
     override suspend fun currentUser(): User? = withContext(Dispatchers.IO) {
         val access = tokenStore.readAccessToken() ?: return@withContext null
         if (access.isBlank()) return@withContext null
 
-        val envelope = authApi.me()
-        envelope.unwrapUser("Не удалось получить профиль").toDomain()
+        runCatching { authApi.me().unwrapUser("Не удалось получить профиль").toDomain() }
+            .onSuccess { user ->
+                userStore.saveUser(user)
+                return@withContext user
+            }
+            .onFailure {
+                // Офлайн или сервер недоступен — вернуть кэшированного пользователя
+                val cached = userStore.readUser()
+                if (cached != null) return@withContext cached
+            }
+        return@withContext null
     }
 
     private fun ApiEnvelope<AuthDataDto>.unwrapAuth(defaultMessage: String): AuthDataDto {
