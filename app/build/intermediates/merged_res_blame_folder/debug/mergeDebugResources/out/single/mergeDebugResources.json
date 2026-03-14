@@ -1,30 +1,98 @@
 [
     {
-        "merged": "ru.diamko.paleta.app-debug-76:/xml_data_extraction_rules.xml.flat",
-        "source": "ru.diamko.paleta.app-main-78:/xml/data_extraction_rules.xml"
+        "merged": "ru.diamko.paleta.app-debug-76:/mipmap-mdpi_ic_launcher_round.png.flat",
+        "source": "ru.diamko.paleta.app-main-78:/mipmap-mdpi/ic_launcher_round.png"
     },
     {
-        "merged": "ru.diamko.paleta.app-debug-76:/xml_network_security_config.xml.flat",
-        "source": "ru.diamko.paleta.app-debug-77:/xml/network_security_config.xml"
+        "merged": "/home/di/.gradle/daemon/8.13/ru.diamko.paleta.app-debug-76:/drawable-xxxhdpi_paleta_logo.png.flat",
+        "source": "/home/di/.gradle/daemon/8.13/ru.diamko.paleta.app-main-78:/drawable-xxxhdpi/paleta_logo.png"
     },
     {
-        "merged": "ru.diamko.paleta.app-debug-76:/drawable_ic_launcher_foreground.xml.flat",
-        "source": "ru.diamko.paleta.app-main-78:/drawable/ic_launcher_foreground.xml"
+        "merged": "ru.diamko.paleta.app-debug-76:/mipmap-mdpi_ic_launcher.png.flat",
+        "source": "ru.diamko.paleta.app-main-78:/mipmap-mdpi/ic_launcher.png"
+    },
+    {
+        "merged": "/home/di/.gradle/daemon/8.13/ru.diamko.paleta.app-debug-76:/xml_data_extraction_rules.xml.flat",
+        "source": "/home/di/.gradle/daemon/8.13/ru.diamko.paleta.app-main-78:/xml/data_extraction_rules.xml"
+    },
+    {
+        "merged": "ru.diamko.paleta.app-debug-76:/mipmap-xhdpi_ic_launcher_foreground.png.flat",
+        "source": "ru.diamko.paleta.app-main-78:/mipmap-xhdpi/ic_launcher_foreground.png"
+    },
+    {
+        "merged": "ru.diamko.paleta.app-debug-76:/mipmap-xxhdpi_ic_launcher.png.flat",
+        "source": "ru.diamko.paleta.app-main-78:/mipmap-xxhdpi/ic_launcher.png"
+    },
+    {
+        "merged": "ru.diamko.paleta.app-debug-76:/mipmap-xhdpi_ic_launcher.png.flat",
+        "source": "ru.diamko.paleta.app-main-78:/mipmap-xhdpi/ic_launcher.png"
+    },
+    {
+        "merged": "ru.diamko.paleta.app-debug-76:/mipmap-xxhdpi_ic_launcher_foreground.png.flat",
+        "source": "ru.diamko.paleta.app-main-78:/mipmap-xxhdpi/ic_launcher_foreground.png"
+    },
+    {
+        "merged": "ru.diamko.paleta.app-debug-76:/mipmap-mdpi_ic_launcher_foreground.png.flat",
+        "source": "ru.diamko.paleta.app-main-78:/mipmap-mdpi/ic_launcher_foreground.png"
+    },
+    {
+        "merged": "ru.diamko.paleta.app-debug-76:/mipmap-hdpi_ic_launcher_foreground.png.flat",
+        "source": "ru.diamko.paleta.app-main-78:/mipmap-hdpi/ic_launcher_foreground.png"
     },
     {
         "merged": "ru.diamko.paleta.app-debug-76:/mipmap-anydpi-v26_ic_launcher_round.xml.flat",
         "source": "ru.diamko.paleta.app-main-78:/mipmap-anydpi-v26/ic_launcher_round.xml"
     },
     {
-        "merged": "ru.diamko.paleta.app-debug-76:/drawable-xxxhdpi_paleta_logo.png.flat",
-        "source": "ru.diamko.paleta.app-main-78:/drawable-xxxhdpi/paleta_logo.png"
+        "merged": "ru.diamko.paleta.app-debug-76:/mipmap-xxxhdpi_ic_launcher_foreground.png.flat",
+        "source": "ru.diamko.paleta.app-main-78:/mipmap-xxxhdpi/ic_launcher_foreground.png"
+    },
+    {
+        "merged": "/home/di/.gradle/daemon/8.13/ru.diamko.paleta.app-debug-76:/xml_network_security_config.xml.flat",
+        "source": "/home/di/.gradle/daemon/8.13/ru.diamko.paleta.app-debug-77:/xml/network_security_config.xml"
+    },
+    {
+        "merged": "/home/di/.gradle/daemon/8.13/ru.diamko.paleta.app-debug-76:/mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "/home/di/.gradle/daemon/8.13/ru.diamko.paleta.app-main-78:/mipmap-anydpi-v26/ic_launcher.xml"
+    },
+    {
+        "merged": "/home/di/.gradle/daemon/8.13/ru.diamko.paleta.app-debug-76:/drawable_ic_launcher_foreground.xml.flat",
+        "source": "/home/di/.gradle/daemon/8.13/ru.diamko.paleta.app-main-78:/drawable/ic_launcher_foreground.xml"
+    },
+    {
+        "merged": "ru.diamko.paleta.app-debug-76:/mipmap-xhdpi_ic_launcher_round.png.flat",
+        "source": "ru.diamko.paleta.app-main-78:/mipmap-xhdpi/ic_launcher_round.png"
+    },
+    {
+        "merged": "ru.diamko.paleta.app-debug-76:/mipmap-hdpi_ic_launcher_round.png.flat",
+        "source": "ru.diamko.paleta.app-main-78:/mipmap-hdpi/ic_launcher_round.png"
+    },
+    {
+        "merged": "/home/di/.gradle/daemon/8.13/ru.diamko.paleta.app-debug-76:/mipmap-anydpi-v26_ic_launcher_round.xml.flat",
+        "source": "/home/di/.gradle/daemon/8.13/ru.diamko.paleta.app-main-78:/mipmap-anydpi-v26/ic_launcher_round.xml"
+    },
+    {
+        "merged": "ru.diamko.paleta.app-debug-76:/mipmap-xxxhdpi_ic_launcher.png.flat",
+        "source": "ru.diamko.paleta.app-main-78:/mipmap-xxxhdpi/ic_launcher.png"
+    },
+    {
+        "merged": "ru.diamko.paleta.app-debug-76:/mipmap-hdpi_ic_launcher.png.flat",
+        "source": "ru.diamko.paleta.app-main-78:/mipmap-hdpi/ic_launcher.png"
+    },
+    {
+        "merged": "ru.diamko.paleta.app-debug-76:/mipmap-xxhdpi_ic_launcher_round.png.flat",
+        "source": "ru.diamko.paleta.app-main-78:/mipmap-xxhdpi/ic_launcher_round.png"
+    },
+    {
+        "merged": "ru.diamko.paleta.app-debug-76:/mipmap-xxxhdpi_ic_launcher_round.png.flat",
+        "source": "ru.diamko.paleta.app-main-78:/mipmap-xxxhdpi/ic_launcher_round.png"
+    },
+    {
+        "merged": "/home/di/.gradle/daemon/8.13/ru.diamko.paleta.app-debug-76:/xml_backup_rules.xml.flat",
+        "source": "/home/di/.gradle/daemon/8.13/ru.diamko.paleta.app-main-78:/xml/backup_rules.xml"
     },
     {
         "merged": "ru.diamko.paleta.app-debug-76:/mipmap-anydpi-v26_ic_launcher.xml.flat",
         "source": "ru.diamko.paleta.app-main-78:/mipmap-anydpi-v26/ic_launcher.xml"
-    },
-    {
-        "merged": "ru.diamko.paleta.app-debug-76:/xml_backup_rules.xml.flat",
-        "source": "ru.diamko.paleta.app-main-78:/xml/backup_rules.xml"
     }
 ]
