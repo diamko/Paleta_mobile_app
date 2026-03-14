@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "ru.diamko.paleta.app-mergeDebugResources-67:/values-v16/values-v16.xml",
+            "outputFile": "ru.diamko.paleta.app-mergeDebugResources-74:/values-v16/values-v16.xml",
             "map": [
                 {
-                    "source": "/home/di/.gradle/caches/8.13/transforms/5beaad276d285ed2803ce5113864b795/transformed/appcompat-1.7.0/res/values-v16/values-v16.xml",
+                    "source": "/home/di/.gradle/caches/8.13/transforms/02d7755d4079e7f9da2be38fd8ebae33/transformed/appcompat-1.7.0/res/values-v16/values-v16.xml",
                     "from": {
                         "startLines": "2",
                         "startColumns": "4",

@@ -298,6 +298,7 @@
     <string name="new_palette">Новая палитра</string>
     <string name="new_password">Новый пароль</string>
     <string msgid="6610465462668679431" name="not_selected">"Не выбрано"</string>
+    <string name="offline_banner">Офлайн-режим — изменения сохранятся при подключении</string>
     <string name="open_file_write_error">Не удалось открыть файл для записи</string>
     <string name="palette_color_count">Количество цветов: %1$d</string>
     <string name="palette_colors_hint">HEX цвета через запятую, например #112233,#AABBCC,#FFFFFF</string>

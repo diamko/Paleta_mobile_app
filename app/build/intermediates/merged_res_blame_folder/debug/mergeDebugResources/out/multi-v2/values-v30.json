@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "ru.diamko.paleta.app-mergeDebugResources-67:/values-v30/values-v30.xml",
+            "outputFile": "ru.diamko.paleta.app-mergeDebugResources-74:/values-v30/values-v30.xml",
             "map": [
                 {
-                    "source": "/home/di/.gradle/caches/8.13/transforms/9d17caa0a29036671291698d8f26dcb4/transformed/jetified-material3-release/res/values-v30/values-v30.xml",
+                    "source": "/home/di/.gradle/caches/8.13/transforms/3b32d3d39e44c3a1b2d5fd7e687f16df/transformed/jetified-material3-release/res/values-v30/values-v30.xml",
                     "from": {
                         "startLines": "2",
                         "startColumns": "4",

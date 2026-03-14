@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "ru.diamko.paleta.app-mergeDebugResources-67:/values-sw600dp-v13/values-sw600dp-v13.xml",
+            "outputFile": "ru.diamko.paleta.app-mergeDebugResources-74:/values-sw600dp-v13/values-sw600dp-v13.xml",
             "map": [
                 {
-                    "source": "/home/di/.gradle/caches/8.13/transforms/5beaad276d285ed2803ce5113864b795/transformed/appcompat-1.7.0/res/values-sw600dp-v13/values-sw600dp-v13.xml",
+                    "source": "/home/di/.gradle/caches/8.13/transforms/02d7755d4079e7f9da2be38fd8ebae33/transformed/appcompat-1.7.0/res/values-sw600dp-v13/values-sw600dp-v13.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9",
                         "startColumns": "4,4,4,4,4,4,4,4",
@@ -14,7 +14,7 @@
                     }
                 },
                 {
-                    "source": "/home/di/.gradle/caches/8.13/transforms/c33dd5de804d23f7a635a15ad8f14b4d/transformed/material-1.12.0/res/values-sw600dp-v13/values-sw600dp-v13.xml",
+                    "source": "/home/di/.gradle/caches/8.13/transforms/33428428f0926a9b059c28978da32551/transformed/material-1.12.0/res/values-sw600dp-v13/values-sw600dp-v13.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,10,11,12,13,14",
                         "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4",

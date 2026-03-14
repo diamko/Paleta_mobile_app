@@ -1,5 +1,10 @@
 R_DEF: Internal format may change without notice
 local
+color ic_launcher_background
+drawable ic_launcher_foreground
+drawable paleta_logo
+mipmap ic_launcher
+mipmap ic_launcher_round
 string app_name
 string auth_enter_email
 string auth_error_change_password
@@ -123,6 +128,7 @@ string login_to_save_palette
 string logout
 string new_palette
 string new_password
+string offline_banner
 string open_file_write_error
 string palette_color_count
 string palette_colors_hint
