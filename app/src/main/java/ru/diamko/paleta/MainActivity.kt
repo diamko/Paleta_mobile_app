@@ -11,7 +11,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import kotlinx.coroutines.launch
-import ru.diamko.paleta.core.di.AppContainer
 import ru.diamko.paleta.ui.navigation.PaletaApp
 import ru.diamko.paleta.ui.theme.PaletaTheme
 
@@ -19,7 +18,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val container = AppContainer(applicationContext)
+        val container = (application as PaletaApplication).container
 
         setContent {
             val scope = rememberCoroutineScope()

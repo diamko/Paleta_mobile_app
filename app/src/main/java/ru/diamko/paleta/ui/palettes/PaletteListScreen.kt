@@ -2,6 +2,7 @@ package ru.diamko.paleta.ui.palettes
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
@@ -48,6 +49,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -176,11 +178,21 @@ fun PaletteListScreen(
                         titleContentColor = MaterialTheme.colorScheme.onBackground,
                     ),
                     title = {
-                        Text(
-                            text = stringResource(id = R.string.palettes_title),
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        ) {
+                            Image(
+                                painter = painterResource(id = R.drawable.paleta_logo),
+                                contentDescription = null,
+                                modifier = Modifier.size(28.dp),
+                            )
+                            Text(
+                                text = stringResource(id = R.string.palettes_title),
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold,
+                            )
+                        }
                     },
                     actions = {
                         PaletaGhostButton(
@@ -222,6 +234,27 @@ fun PaletteListScreen(
                     contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
+                    if (state.isOffline) {
+                        item {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(
+                                        color = MaterialTheme.colorScheme.errorContainer,
+                                        shape = RoundedCornerShape(12.dp),
+                                    )
+                                    .padding(horizontal = 16.dp, vertical = 10.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            ) {
+                                Text(
+                                    text = stringResource(id = R.string.offline_banner),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onErrorContainer,
+                                )
+                            }
+                        }
+                    }
                     item {
                         PaletaCard(modifier = Modifier.fillMaxWidth()) {
                             PaletaSectionTitle(
@@ -507,16 +540,22 @@ private fun PaletteCard(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
 
+        val parsedColors = remember(palette.colors) {
+            palette.colors.map { hex ->
+                runCatching { Color(android.graphics.Color.parseColor(hex)) }.getOrDefault(Color.Gray)
+            }
+        }
+
         Row(
             modifier = Modifier.horizontalScroll(rememberScrollState()),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            palette.colors.forEach { hex ->
+            parsedColors.forEach { color ->
                 Box(
                     modifier = Modifier
                         .size(34.dp)
                         .clip(RoundedCornerShape(10.dp))
-                        .background(runCatching { Color(android.graphics.Color.parseColor(hex)) }.getOrDefault(Color.Gray)),
+                        .background(color),
                 )
             }
         }

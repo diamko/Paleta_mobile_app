@@ -167,6 +167,7 @@
     <string name="error_generating_from_recent">Ошибка генерации из недавнего изображения</string>
     <string name="error_palette_colors_required">Необходимо указать цвета палитры</string>
     <string name="default_palette_name">Моя палитра</string>
+    <string name="offline_banner">Офлайн-режим — изменения сохранятся при подключении</string>
 
     <string name="back">Назад</string>
     <string name="loading">Загрузка...</string>

@@ -6,13 +6,18 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import ru.diamko.paleta.R
 import ru.diamko.paleta.core.di.AppContainer
+import ru.diamko.paleta.core.network.NetworkMonitor
+import ru.diamko.paleta.data.repository.OfflinePaletteRepository
 import ru.diamko.paleta.domain.model.Palette
 import ru.diamko.paleta.domain.model.PaletteExportFile
 import ru.diamko.paleta.domain.model.RecentUpload
+import ru.diamko.paleta.domain.repository.PaletteRepository
 import ru.diamko.paleta.domain.usecase.CreatePaletteUseCase
 import ru.diamko.paleta.domain.usecase.DeletePaletteUseCase
 import ru.diamko.paleta.domain.usecase.ExportPaletteUseCase
@@ -22,11 +27,13 @@ import ru.diamko.paleta.domain.usecase.GetPalettesUseCase
 import ru.diamko.paleta.domain.usecase.GetRecentUploadsUseCase
 import ru.diamko.paleta.domain.usecase.RenamePaletteUseCase
 
+@androidx.compose.runtime.Immutable
 data class PaletteUiState(
     val isLoading: Boolean = false,
     val palettes: List<Palette> = emptyList(),
     val recentUploads: List<RecentUpload> = emptyList(),
     val error: String? = null,
+    val isOffline: Boolean = false,
 )
 
 class PaletteViewModel(
@@ -39,12 +46,34 @@ class PaletteViewModel(
     private val generatePaletteFromImageUrlUseCase: GeneratePaletteFromImageUrlUseCase,
     private val exportPaletteUseCase: ExportPaletteUseCase,
     private val getString: (Int) -> String,
+    private val networkMonitor: NetworkMonitor?,
+    private val paletteRepository: PaletteRepository?,
 ) : ViewModel() {
 
     private var isGuest: Boolean = false
 
     private val _uiState = MutableStateFlow(PaletteUiState())
     val uiState: StateFlow<PaletteUiState> = _uiState.asStateFlow()
+
+    init {
+        networkMonitor?.let { monitor ->
+            viewModelScope.launch {
+                monitor.isOnline
+                    .map { it }
+                    .distinctUntilChanged()
+                    .collect { online ->
+                        _uiState.update { it.copy(isOffline = !online) }
+                        if (online && !isGuest) {
+                            val repo = paletteRepository
+                            if (repo is OfflinePaletteRepository) {
+                                repo.syncPendingChanges()
+                            }
+                            loadPalettes()
+                        }
+                    }
+            }
+        }
+    }
 
     fun setGuestMode(isGuest: Boolean, isAuthenticated: Boolean) {
         this.isGuest = isGuest
@@ -325,6 +354,8 @@ class PaletteViewModel(
                         generatePaletteFromImageUrlUseCase = GeneratePaletteFromImageUrlUseCase(container.paletteRepository),
                         exportPaletteUseCase = ExportPaletteUseCase(container.paletteRepository),
                         getString = container::getString,
+                        networkMonitor = container.networkMonitor,
+                        paletteRepository = container.paletteRepository,
                     ) as T
                 }
             }

@@ -22,6 +22,7 @@ import ru.diamko.paleta.domain.usecase.ResetPasswordUseCase
 import ru.diamko.paleta.domain.usecase.SendProfilePasswordCodeUseCase
 import ru.diamko.paleta.domain.usecase.UpdateProfileUseCase
 
+@androidx.compose.runtime.Immutable
 data class AuthUiState(
     val isCheckingSession: Boolean = true,
     val isLoading: Boolean = false,

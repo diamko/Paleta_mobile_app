@@ -169,6 +169,7 @@
     <string name="error_generating_from_recent">Failed to generate from recent image</string>
     <string name="error_palette_colors_required">Palette colors are required</string>
     <string name="default_palette_name">My palette</string>
+    <string name="offline_banner">Offline mode — changes will sync when connected</string>
 
     <string name="back">Back</string>
     <string name="loading">Loading...</string>
