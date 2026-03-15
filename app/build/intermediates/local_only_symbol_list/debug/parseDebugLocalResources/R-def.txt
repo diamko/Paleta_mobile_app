@@ -158,6 +158,7 @@ string profile_title
 string random_color
 string random_palette_generated
 string read_image_failed
+string recalculate
 string recent_uploads_subtitle
 string recent_uploads_title
 string register_button

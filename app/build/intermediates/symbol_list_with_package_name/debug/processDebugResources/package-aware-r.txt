@@ -4076,6 +4076,7 @@ string random_palette_generated
 string range_end
 string range_start
 string read_image_failed
+string recalculate
 string recent_uploads_subtitle
 string recent_uploads_title
 string register_button
