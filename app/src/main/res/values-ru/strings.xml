@@ -103,6 +103,7 @@
     <string name="source_image_subtitle">Извлекайте цвета из изображения и недавних загрузок</string>
     <string name="generate_random">Генерировать</string>
     <string name="pick_image">Из изображения</string>
+    <string name="recalculate">Пересчитать</string>
     <string name="color_count_hint">Количество цветов (3-15)</string>
     <string name="color_count_any">Любое количество цветов</string>
     <string name="random_palette_generated">Сгенерирована случайная палитра</string>

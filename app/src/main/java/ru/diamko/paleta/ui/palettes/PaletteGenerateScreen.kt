@@ -315,6 +315,45 @@ fun PaletteGenerateScreen(
         }
     }
 
+    fun recalculateFromCurrentImage() {
+        val currentBitmap = imageBitmap ?: return
+        scope.launch {
+            val bytes = lastImageStorage.read()
+            if (bytes == null || bytes.isEmpty()) return@launch
+            isBusy = true
+            localError = null
+            statusMessage = context.getString(R.string.extracting_colors)
+            paletteColors = emptyList()
+            markerPositions = emptyList()
+            selectedColorIndex = 0
+            loupeTouchPosition = null
+            loupeSample = null
+            paletteViewModel.generateFromImage(
+                fileName = "last_image.jpg",
+                imageBytes = bytes,
+                colorCount = paletteSize(),
+                onDone = { colors ->
+                    isBusy = false
+                    if (colors.isEmpty()) {
+                        localError = context.getString(R.string.extract_colors_failed)
+                        return@generateFromImage
+                    }
+                    applyPalette(colors, context.getString(R.string.extracted_colors_count, colors.size))
+                    scope.launch {
+                        val markers = withContext(Dispatchers.Default) {
+                            estimateInitialMarkerPositions(currentBitmap, colors)
+                        }
+                        markerPositions = markers
+                    }
+                },
+                onError = { error ->
+                    isBusy = false
+                    localError = error
+                },
+            )
+        }
+    }
+
     val createDocumentLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("*/*"),
     ) { outputUri ->
@@ -484,11 +523,19 @@ fun PaletteGenerateScreen(
                             )
                         } else {
                             PaletaPrimaryButton(
-                                modifier = Modifier.fillMaxWidth(),
+                                modifier = if (imageBitmap != null) Modifier.weight(1f) else Modifier.fillMaxWidth(),
                                 text = stringResource(id = R.string.pick_image),
                                 onClick = { pickImageLauncher.launch("image/*") },
                                 enabled = !isBusy,
                             )
+                            if (imageBitmap != null) {
+                                PaletaGhostButton(
+                                    modifier = Modifier.weight(1f),
+                                    text = stringResource(id = R.string.recalculate),
+                                    onClick = { recalculateFromCurrentImage() },
+                                    enabled = !isBusy,
+                                )
+                            }
                         }
                     }
 

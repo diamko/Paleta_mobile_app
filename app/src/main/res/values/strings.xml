@@ -103,6 +103,7 @@
     <string name="source_image_subtitle">Extract colors from image and recent uploads</string>
     <string name="generate_random">Generate</string>
     <string name="pick_image">From image</string>
+    <string name="recalculate">Recalculate</string>
     <string name="color_count_hint">Number of colors (3-15)</string>
     <string name="color_count_any">Any number of colors</string>
     <string name="random_palette_generated">Random palette generated</string>
