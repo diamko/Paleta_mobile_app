@@ -62,10 +62,10 @@ fun ColorWheelPicker(
     }
 
     var wheelBitmap by remember { mutableStateOf<Bitmap?>(null) }
-    LaunchedEffect(wheelSize, value) {
+    LaunchedEffect(wheelSize) {
         if (wheelSize.width > 0 && wheelSize.height > 0) {
             wheelBitmap = withContext(Dispatchers.Default) {
-                createHueSaturationWheelBitmap(wheelSize, value)
+                createHueSaturationWheelBitmap(wheelSize)
             }
         }
     }
@@ -96,12 +96,12 @@ fun ColorWheelPicker(
                 .fillMaxWidth()
                 .height(260.dp)
                 .onSizeChanged { wheelSize = it }
-                .pointerInput(wheelSize, value) {
+                .pointerInput(wheelSize) {
                     detectTapGestures(onTap = { point ->
                         updateFromPoint(point)
                     })
                 }
-                .pointerInput(wheelSize, value) {
+                .pointerInput(wheelSize) {
                     detectDragGestures(
                         onDragStart = { point ->
                             updateFromPoint(point)
@@ -121,6 +121,14 @@ fun ColorWheelPicker(
 
             val radius = min(size.width, size.height) / 2f
             val center = Offset(size.width / 2f, size.height / 2f)
+
+            if (value < 1f) {
+                drawCircle(
+                    color = Color.Black.copy(alpha = 1f - value),
+                    radius = radius,
+                    center = center,
+                )
+            }
             val angleRad = Math.toRadians(hue.toDouble())
             val markerX = center.x + (saturation * radius * kotlin.math.cos(angleRad).toFloat())
             val markerY = center.y + (saturation * radius * kotlin.math.sin(angleRad).toFloat())
@@ -148,7 +156,7 @@ fun ColorWheelPicker(
     }
 }
 
-private fun createHueSaturationWheelBitmap(size: IntSize, brightness: Float = 1f): Bitmap? {
+private fun createHueSaturationWheelBitmap(size: IntSize): Bitmap? {
     if (size.width <= 0 || size.height <= 0) return null
     val width = size.width
     val height = size.height
@@ -159,7 +167,7 @@ private fun createHueSaturationWheelBitmap(size: IntSize, brightness: Float = 1f
     val centerX = width / 2f
     val centerY = height / 2f
     val hsv = FloatArray(3)
-    hsv[2] = brightness.coerceIn(0f, 1f)
+    hsv[2] = 1f
 
     for (y in 0 until height) {
         val dy = y - centerY
