@@ -84,6 +84,12 @@ fun PaletaApp(
         }
     }
 
+    LaunchedEffect(authState.isCheckingSession, authState.user?.id, paletteState.isOffline) {
+        if (!authState.isCheckingSession && authState.user == null && paletteState.isOffline && !isGuest) {
+            isGuest = true
+        }
+    }
+
     LaunchedEffect(isGuest, authState.user?.id) {
         paletteViewModel.setGuestMode(
             isGuest = isGuest,

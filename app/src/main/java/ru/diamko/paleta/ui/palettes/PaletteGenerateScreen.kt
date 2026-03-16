@@ -83,6 +83,7 @@ import ru.diamko.paleta.core.palette.PaletteExportFormat
 import ru.diamko.paleta.core.palette.RandomPaletteGenerator
 import ru.diamko.paleta.core.storage.LastImageStorage
 import ru.diamko.paleta.domain.model.PaletteExportFile
+import ru.diamko.paleta.ui.components.fadingEdge
 import ru.diamko.paleta.ui.components.PaletaCard
 import ru.diamko.paleta.ui.components.PaletaGhostButton
 import ru.diamko.paleta.ui.components.PaletaGradientBackground
@@ -875,8 +876,11 @@ fun PaletteGenerateScreen(
                         title = stringResource(id = R.string.export_title),
                         subtitle = stringResource(id = R.string.export_subtitle),
                     )
+                    val exportScrollState = rememberScrollState()
                     Row(
-                        modifier = Modifier.horizontalScroll(rememberScrollState()),
+                        modifier = Modifier
+                            .horizontalScroll(exportScrollState)
+                            .fadingEdge(exportScrollState),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         PaletteExportFormat.entries.forEach { format ->

@@ -48,6 +48,7 @@ import ru.diamko.paleta.core.palette.HexColors
 import ru.diamko.paleta.core.palette.PaletteExportFormat
 import ru.diamko.paleta.core.palette.RandomPaletteGenerator
 import ru.diamko.paleta.domain.model.PaletteExportFile
+import ru.diamko.paleta.ui.components.fadingEdge
 import ru.diamko.paleta.ui.components.ColorCountDropdown
 import ru.diamko.paleta.ui.components.ColorWheelPicker
 import ru.diamko.paleta.ui.components.PaletaCard
@@ -301,8 +302,11 @@ fun PaletteEditorScreen(
                         title = stringResource(id = R.string.export_title),
                         subtitle = stringResource(id = R.string.export_subtitle),
                     )
+                    val exportScrollState = rememberScrollState()
                     Row(
-                        modifier = Modifier.horizontalScroll(rememberScrollState()),
+                        modifier = Modifier
+                            .horizontalScroll(exportScrollState)
+                            .fadingEdge(exportScrollState),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         PaletteExportFormat.entries.forEach { format ->

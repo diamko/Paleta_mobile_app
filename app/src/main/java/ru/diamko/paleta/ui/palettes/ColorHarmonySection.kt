@@ -1,5 +1,6 @@
 package ru.diamko.paleta.ui.palettes
 
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
@@ -28,6 +29,7 @@ import ru.diamko.paleta.core.palette.ColorHarmonyType
 import ru.diamko.paleta.core.palette.ColorTools
 import ru.diamko.paleta.ui.components.PaletaGhostButton
 import ru.diamko.paleta.ui.components.PaletaSectionTitle
+import ru.diamko.paleta.ui.components.fadingEdge
 
 @Composable
 fun ColorHarmonySection(
@@ -49,8 +51,11 @@ fun ColorHarmonySection(
         subtitle = stringResource(id = R.string.harmony_subtitle),
     )
 
+    val harmonyScrollState = rememberScrollState()
     Row(
-        modifier = Modifier.horizontalScroll(rememberScrollState()),
+        modifier = Modifier
+            .horizontalScroll(harmonyScrollState)
+            .fadingEdge(harmonyScrollState),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         ColorHarmonyType.entries.forEach { type ->
@@ -68,8 +73,11 @@ fun ColorHarmonySection(
     }
 
     if (generated.isNotEmpty()) {
+        val colorsScrollState = rememberScrollState()
         Row(
-            modifier = Modifier.horizontalScroll(rememberScrollState()),
+            modifier = Modifier
+                .horizontalScroll(colorsScrollState)
+                .fadingEdge(colorsScrollState),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             generated.forEach { hex ->

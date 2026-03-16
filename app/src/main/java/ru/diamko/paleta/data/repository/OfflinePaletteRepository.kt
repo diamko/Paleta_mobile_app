@@ -1,10 +1,14 @@
 package ru.diamko.paleta.data.repository
 
+import android.graphics.BitmapFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import ru.diamko.paleta.core.network.NetworkMonitor
+import ru.diamko.paleta.core.palette.BitmapPaletteExtractor
+import ru.diamko.paleta.core.palette.PaletteExportFormat
+import ru.diamko.paleta.core.palette.PaletteExportFormatter
 import ru.diamko.paleta.data.local.dao.PaletteDao
 import ru.diamko.paleta.data.local.entity.PaletteEntity
 import ru.diamko.paleta.domain.model.Palette
@@ -105,8 +109,17 @@ class OfflinePaletteRepository(
         fileName: String,
         imageBytes: ByteArray,
         colorCount: Int,
-    ): List<String> {
-        return remote.generateFromImage(fileName, imageBytes, colorCount)
+    ): List<String> = withContext(Dispatchers.IO) {
+        if (networkMonitor.isOnline.value) {
+            try {
+                return@withContext remote.generateFromImage(fileName, imageBytes, colorCount)
+            } catch (_: Exception) {
+                // Fallback to local extraction
+            }
+        }
+        val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+            ?: throw IllegalArgumentException("Cannot decode image")
+        BitmapPaletteExtractor.extractFromBitmap(bitmap, colorCount)
     }
 
     override suspend fun generateFromImageUrl(imageUrl: String, colorCount: Int): List<String> {
@@ -117,8 +130,18 @@ class OfflinePaletteRepository(
         name: String,
         colors: List<String>,
         format: String,
-    ): PaletteExportFile {
-        return remote.exportPalette(name, colors, format)
+    ): PaletteExportFile = withContext(Dispatchers.IO) {
+        if (networkMonitor.isOnline.value) {
+            try {
+                return@withContext remote.exportPalette(name, colors, format)
+            } catch (_: Exception) {
+                // Fallback to local export
+            }
+        }
+        val fmt = PaletteExportFormat.entries.firstOrNull { it.ext.equals(format, true) }
+            ?: PaletteExportFormat.JSON
+        val payload = PaletteExportFormatter.format(name, colors, fmt)
+        PaletteExportFile(fileName = payload.fileName, mimeType = payload.mimeType, bytes = payload.bytes)
     }
 
     suspend fun syncPendingChanges() = withContext(Dispatchers.IO) {
