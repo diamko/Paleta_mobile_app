@@ -31,7 +31,7 @@ fun HorizontalScrollIndicator(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .padding(top = 2.dp),
+            .padding(top = 0.dp),
         contentAlignment = Alignment.Center,
     ) {
         Box(
