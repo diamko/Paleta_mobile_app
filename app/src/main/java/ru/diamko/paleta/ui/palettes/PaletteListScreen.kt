@@ -59,7 +59,7 @@ import ru.diamko.paleta.R
 import ru.diamko.paleta.core.palette.PaletteExportFormat
 import ru.diamko.paleta.domain.model.Palette
 import ru.diamko.paleta.domain.model.PaletteExportFile
-import ru.diamko.paleta.ui.components.fadingEdge
+import ru.diamko.paleta.ui.components.HorizontalScrollIndicator
 import ru.diamko.paleta.ui.components.ColorCountDropdown
 import ru.diamko.paleta.ui.components.PaletaCard
 import ru.diamko.paleta.ui.components.PaletaGhostButton
@@ -351,9 +351,7 @@ fun PaletteListScreen(
                         item {
                             val exportScrollState = rememberScrollState()
                             Row(
-                                modifier = Modifier
-                                    .horizontalScroll(exportScrollState)
-                                    .fadingEdge(exportScrollState),
+                                modifier = Modifier.horizontalScroll(exportScrollState),
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                             ) {
                                 PaletteExportFormat.entries.forEach { format ->
@@ -364,6 +362,7 @@ fun PaletteListScreen(
                                     )
                                 }
                             }
+                            HorizontalScrollIndicator(scrollState = exportScrollState)
                         }
 
                         if (visiblePalettes.isEmpty()) {

@@ -27,9 +27,9 @@ import ru.diamko.paleta.R
 import ru.diamko.paleta.core.palette.ColorHarmony
 import ru.diamko.paleta.core.palette.ColorHarmonyType
 import ru.diamko.paleta.core.palette.ColorTools
+import ru.diamko.paleta.ui.components.HorizontalScrollIndicator
 import ru.diamko.paleta.ui.components.PaletaGhostButton
 import ru.diamko.paleta.ui.components.PaletaSectionTitle
-import ru.diamko.paleta.ui.components.fadingEdge
 
 @Composable
 fun ColorHarmonySection(
@@ -53,9 +53,7 @@ fun ColorHarmonySection(
 
     val harmonyScrollState = rememberScrollState()
     Row(
-        modifier = Modifier
-            .horizontalScroll(harmonyScrollState)
-            .fadingEdge(harmonyScrollState),
+        modifier = Modifier.horizontalScroll(harmonyScrollState),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         ColorHarmonyType.entries.forEach { type ->
@@ -71,13 +69,12 @@ fun ColorHarmonySection(
             )
         }
     }
+    HorizontalScrollIndicator(scrollState = harmonyScrollState)
 
     if (generated.isNotEmpty()) {
         val colorsScrollState = rememberScrollState()
         Row(
-            modifier = Modifier
-                .horizontalScroll(colorsScrollState)
-                .fadingEdge(colorsScrollState),
+            modifier = Modifier.horizontalScroll(colorsScrollState),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             generated.forEach { hex ->
