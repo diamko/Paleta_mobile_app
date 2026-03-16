@@ -62,10 +62,10 @@ fun ColorWheelPicker(
     }
 
     var wheelBitmap by remember { mutableStateOf<Bitmap?>(null) }
-    LaunchedEffect(wheelSize) {
+    LaunchedEffect(wheelSize, value) {
         if (wheelSize.width > 0 && wheelSize.height > 0) {
             wheelBitmap = withContext(Dispatchers.Default) {
-                createHueSaturationWheelBitmap(wheelSize)
+                createHueSaturationWheelBitmap(wheelSize, value)
             }
         }
     }
@@ -148,7 +148,7 @@ fun ColorWheelPicker(
     }
 }
 
-private fun createHueSaturationWheelBitmap(size: IntSize): Bitmap? {
+private fun createHueSaturationWheelBitmap(size: IntSize, brightness: Float = 1f): Bitmap? {
     if (size.width <= 0 || size.height <= 0) return null
     val width = size.width
     val height = size.height
@@ -159,7 +159,7 @@ private fun createHueSaturationWheelBitmap(size: IntSize): Bitmap? {
     val centerX = width / 2f
     val centerY = height / 2f
     val hsv = FloatArray(3)
-    hsv[2] = 1f
+    hsv[2] = brightness.coerceIn(0f, 1f)
 
     for (y in 0 until height) {
         val dy = y - centerY
