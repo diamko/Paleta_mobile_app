@@ -92,6 +92,7 @@ import ru.diamko.paleta.ui.components.PaletaSectionTitle
 import ru.diamko.paleta.ui.components.PaletaTopBannerHost
 import ru.diamko.paleta.ui.components.ColorCountDropdown
 import ru.diamko.paleta.ui.components.paletaTextFieldColors
+import ru.diamko.paleta.ui.components.innerBorder
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
@@ -757,6 +758,7 @@ fun PaletteGenerateScreen(
                             paletteColors.forEachIndexed { index, hex ->
                                 val color = ColorTools.hexToColorInt(hex)?.let(::Color) ?: Color.Gray
                                 val selected = index == safeSelectedIndex
+                                val swatchShape = RoundedCornerShape(12.dp)
                                 Column(
                                     modifier = Modifier
                                         .width(92.dp)
@@ -776,12 +778,11 @@ fun PaletteGenerateScreen(
                                     Box(
                                         modifier = Modifier
                                             .size(50.dp)
-                                            .clip(RoundedCornerShape(12.dp))
-                                            .background(color)
-                                            .border(
+                                            .background(color, swatchShape)
+                                            .innerBorder(
                                                 width = 1.dp,
                                                 color = Color.White.copy(alpha = 0.8f),
-                                                shape = RoundedCornerShape(12.dp),
+                                                shape = swatchShape,
                                             ),
                                     )
                                     Text(
