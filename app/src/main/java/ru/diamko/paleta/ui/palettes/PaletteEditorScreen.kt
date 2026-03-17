@@ -208,28 +208,16 @@ fun PaletteEditorScreen(
 
                     if (parsedColors.isNotEmpty()) {
                         if (isCreateMode) {
-                            Row(
+                            ColorCountDropdown(
+                                label = stringResource(id = R.string.color_count_hint),
+                                selectedCount = createColorCount,
+                                onSelected = { selected ->
+                                    if (selected != null) {
+                                        resizeCreateColors(selected)
+                                    }
+                                },
                                 modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            ) {
-                                ColorCountDropdown(
-                                    label = stringResource(id = R.string.color_count_hint),
-                                    selectedCount = createColorCount,
-                                    onSelected = { selected ->
-                                        if (selected != null) {
-                                            resizeCreateColors(selected)
-                                        }
-                                    },
-                                    modifier = Modifier.weight(1f),
-                                )
-                                PaletaGhostButton(
-                                    text = stringResource(id = R.string.recalculate),
-                                    onClick = {
-                                        createColors = RandomPaletteGenerator.generate(createColorCount)
-                                        selectedColorIndex = 0
-                                    },
-                                )
-                            }
+                            )
                         }
 
                         FlowRow(
@@ -273,8 +261,6 @@ fun PaletteEditorScreen(
                         )
                     }
 
-                    var harmonyColors by remember { mutableStateOf(emptyList<String>()) }
-
                     if (selectedColorHex != null) {
                         ColorHarmonySection(
                             baseHex = selectedColorHex,
@@ -289,7 +275,6 @@ fun PaletteEditorScreen(
                                 selectedColorIndex = 0
                                 localError = null
                             },
-                            onColorsGenerated = { harmonyColors = it },
                         )
 
                         PaletaSectionTitle(
@@ -305,7 +290,7 @@ fun PaletteEditorScreen(
                             onColorChange = { updatedHex ->
                                 updateColorAt(safeSelectedColorIndex, updatedHex)
                             },
-                            harmonyColors = harmonyColors,
+                            harmonyColors = parsedColors,
                             selectedHarmonyIndex = safeSelectedColorIndex,
                             onHarmonyIndexSelected = { selectedColorIndex = it },
                         )
