@@ -58,7 +58,6 @@ import ru.diamko.paleta.ui.components.PaletaPrimaryButton
 import ru.diamko.paleta.ui.components.PaletaSectionTitle
 import ru.diamko.paleta.ui.components.PaletaTopBannerHost
 import ru.diamko.paleta.ui.components.paletaTextFieldColors
-import android.graphics.Color as AndroidColor
 import kotlin.math.max
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -126,6 +125,15 @@ fun PaletteEditorScreen(
     }
     val safeSelectedColorIndex = selectedColorIndex.coerceIn(0, max(0, parsedColors.lastIndex))
     val selectedColorHex = parsedColors.getOrNull(safeSelectedColorIndex)
+
+    var harmonyBaseHex by remember { mutableStateOf(selectedColorHex ?: "#000000") }
+    var harmonyColors by remember { mutableStateOf(emptyList<String>()) }
+
+    LaunchedEffect(selectedColorHex) {
+        if (selectedColorHex != null) {
+            harmonyBaseHex = selectedColorHex
+        }
+    }
 
     fun updateColorAt(index: Int, rawHex: String) {
         if (index !in parsedColors.indices) return
@@ -264,7 +272,7 @@ fun PaletteEditorScreen(
 
                     if (selectedColorHex != null) {
                         ColorHarmonySection(
-                            baseHex = selectedColorHex,
+                            baseHex = harmonyBaseHex,
                             colorCount = parsedColors.size.coerceAtLeast(3),
                             onApply = { harmony ->
                                 if (isCreateMode) {
@@ -276,6 +284,7 @@ fun PaletteEditorScreen(
                                 selectedColorIndex = 0
                                 localError = null
                             },
+                            onColorsGenerated = { harmonyColors = it },
                         )
 
                         PaletaSectionTitle(
@@ -287,32 +296,11 @@ fun PaletteEditorScreen(
                             ),
                         )
                         ColorWheelPicker(
-                            colorHex = selectedColorHex,
+                            colorHex = harmonyBaseHex,
                             onColorChange = { updatedHex ->
-                                val oldInt = ColorTools.hexToColorInt(selectedColorHex) ?: return@ColorWheelPicker
-                                val newInt = ColorTools.hexToColorInt(updatedHex) ?: return@ColorWheelPicker
-                                val oldHsv = FloatArray(3)
-                                val newHsv = FloatArray(3)
-                                AndroidColor.colorToHSV(oldInt, oldHsv)
-                                AndroidColor.colorToHSV(newInt, newHsv)
-                                val hueDelta = newHsv[0] - oldHsv[0]
-                                val shifted = parsedColors.mapIndexed { i, hex ->
-                                    if (i == safeSelectedColorIndex) updatedHex
-                                    else {
-                                        val c = ColorTools.hexToColorInt(hex) ?: return@mapIndexed hex
-                                        val h = FloatArray(3)
-                                        AndroidColor.colorToHSV(c, h)
-                                        h[0] = ((h[0] + hueDelta) % 360f + 360f) % 360f
-                                        ColorTools.colorIntToHex(AndroidColor.HSVToColor(h))
-                                    }
-                                }
-                                if (isCreateMode) createColors = shifted
-                                else colorsInput = shifted.joinToString(",")
-                                localError = null
+                                harmonyBaseHex = updatedHex
                             },
-                            harmonyColors = parsedColors,
-                            selectedHarmonyIndex = safeSelectedColorIndex,
-                            onHarmonyIndexSelected = { selectedColorIndex = it },
+                            harmonyColors = harmonyColors,
                         )
                     } else {
                         Text(

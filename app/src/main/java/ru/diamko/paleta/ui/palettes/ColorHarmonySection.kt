@@ -37,6 +37,7 @@ fun ColorHarmonySection(
     baseHex: String,
     colorCount: Int,
     onApply: (List<String>) -> Unit,
+    onColorsGenerated: (List<String>) -> Unit = {},
 ) {
     var selectedType by remember { mutableStateOf(ColorHarmonyType.ANALOGOUS) }
 
@@ -52,6 +53,10 @@ fun ColorHarmonySection(
             type = selectedType,
             count = colorCount,
         )
+    }
+
+    LaunchedEffect(generated) {
+        onColorsGenerated(generated)
     }
 
     PaletaSectionTitle(
