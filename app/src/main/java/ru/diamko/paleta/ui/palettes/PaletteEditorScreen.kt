@@ -58,6 +58,7 @@ import ru.diamko.paleta.ui.components.PaletaPrimaryButton
 import ru.diamko.paleta.ui.components.PaletaSectionTitle
 import ru.diamko.paleta.ui.components.PaletaTopBannerHost
 import ru.diamko.paleta.ui.components.paletaTextFieldColors
+import android.graphics.Color as AndroidColor
 import kotlin.math.max
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -288,7 +289,26 @@ fun PaletteEditorScreen(
                         ColorWheelPicker(
                             colorHex = selectedColorHex,
                             onColorChange = { updatedHex ->
-                                updateColorAt(safeSelectedColorIndex, updatedHex)
+                                val oldInt = ColorTools.hexToColorInt(selectedColorHex) ?: return@ColorWheelPicker
+                                val newInt = ColorTools.hexToColorInt(updatedHex) ?: return@ColorWheelPicker
+                                val oldHsv = FloatArray(3)
+                                val newHsv = FloatArray(3)
+                                AndroidColor.colorToHSV(oldInt, oldHsv)
+                                AndroidColor.colorToHSV(newInt, newHsv)
+                                val hueDelta = newHsv[0] - oldHsv[0]
+                                val shifted = parsedColors.mapIndexed { i, hex ->
+                                    if (i == safeSelectedColorIndex) updatedHex
+                                    else {
+                                        val c = ColorTools.hexToColorInt(hex) ?: return@mapIndexed hex
+                                        val h = FloatArray(3)
+                                        AndroidColor.colorToHSV(c, h)
+                                        h[0] = ((h[0] + hueDelta) % 360f + 360f) % 360f
+                                        ColorTools.colorIntToHex(AndroidColor.HSVToColor(h))
+                                    }
+                                }
+                                if (isCreateMode) createColors = shifted
+                                else colorsInput = shifted.joinToString(",")
+                                localError = null
                             },
                             harmonyColors = parsedColors,
                             selectedHarmonyIndex = safeSelectedColorIndex,

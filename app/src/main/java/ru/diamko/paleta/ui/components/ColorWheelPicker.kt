@@ -131,7 +131,7 @@ fun ColorWheelPicker(
                 .pointerInput(wheelSize) {
                     detectDragGestures(
                         onDragStart = { point ->
-                            updateFromPoint(point)
+                            handleTap(point)
                         },
                         onDrag = { change, _ ->
                             updateFromPoint(change.position)
