@@ -43,7 +43,6 @@ fun ColorWheelPicker(
     onColorChange: (String) -> Unit,
     modifier: Modifier = Modifier,
     harmonyColors: List<String> = emptyList(),
-    onHarmonyColorSelected: ((Int) -> Unit)? = null,
 ) {
     var wheelSize by remember { mutableStateOf(IntSize.Zero) }
 
@@ -89,33 +88,6 @@ fun ColorWheelPicker(
         emitColor()
     }
 
-    fun handleTap(point: Offset) {
-        if (onHarmonyColorSelected != null && harmonyColors.isNotEmpty()) {
-            val size = wheelSize
-            if (size.width > 0 && size.height > 0) {
-                val radius = min(size.width, size.height) / 2f
-                val center = Offset(size.width / 2f, size.height / 2f)
-                val hitRadius = 20f * (size.width / 360f) // scale-aware hit target
-                harmonyColors.forEachIndexed { index, hex ->
-                    val colorInt = ColorTools.hexToColorInt(hex) ?: return@forEachIndexed
-                    val hsv = FloatArray(3)
-                    AndroidColor.colorToHSV(colorInt, hsv)
-                    val angle = Math.toRadians(hsv[0].toDouble())
-                    val dist = hsv[1] * radius
-                    val cx = center.x + (dist * kotlin.math.cos(angle)).toFloat()
-                    val cy = center.y + (dist * kotlin.math.sin(angle)).toFloat()
-                    val dx = point.x - cx
-                    val dy = point.y - cy
-                    if (sqrt(dx * dx + dy * dy) <= hitRadius) {
-                        onHarmonyColorSelected(index)
-                        return
-                    }
-                }
-            }
-        }
-        updateFromPoint(point)
-    }
-
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -127,7 +99,7 @@ fun ColorWheelPicker(
                 .onSizeChanged { wheelSize = it }
                 .pointerInput(wheelSize) {
                     detectTapGestures(onTap = { point ->
-                        handleTap(point)
+                        updateFromPoint(point)
                     })
                 }
                 .pointerInput(wheelSize) {

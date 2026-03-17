@@ -302,11 +302,6 @@ fun PaletteEditorScreen(
                                 updateColorAt(safeSelectedColorIndex, updatedHex)
                             },
                             harmonyColors = harmonyColors,
-                            onHarmonyColorSelected = { index ->
-                                val hex = harmonyColors.getOrNull(index) ?: return@ColorWheelPicker
-                                harmonyBaseHex = hex
-                                updateColorAt(safeSelectedColorIndex, hex)
-                            },
                         )
                     } else {
                         Text(
