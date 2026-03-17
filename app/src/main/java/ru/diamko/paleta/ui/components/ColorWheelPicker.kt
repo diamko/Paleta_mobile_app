@@ -43,6 +43,8 @@ fun ColorWheelPicker(
     onColorChange: (String) -> Unit,
     modifier: Modifier = Modifier,
     harmonyColors: List<String> = emptyList(),
+    selectedHarmonyIndex: Int = 0,
+    onHarmonyIndexSelected: (Int) -> Unit = {},
 ) {
     var wheelSize by remember { mutableStateOf(IntSize.Zero) }
 
@@ -88,6 +90,30 @@ fun ColorWheelPicker(
         emitColor()
     }
 
+    fun handleTap(point: Offset) {
+        val size = wheelSize
+        if (size.width <= 0 || size.height <= 0) return
+        val radius = min(size.width, size.height) / 2f
+        val center = Offset(size.width / 2f, size.height / 2f)
+        val hitRadius = 48f
+        harmonyColors.forEachIndexed { index, hex ->
+            val colorInt = ColorTools.hexToColorInt(hex) ?: return@forEachIndexed
+            val hsv = FloatArray(3)
+            AndroidColor.colorToHSV(colorInt, hsv)
+            val angle = Math.toRadians(hsv[0].toDouble())
+            val dist = hsv[1] * radius
+            val cx = center.x + (dist * kotlin.math.cos(angle)).toFloat()
+            val cy = center.y + (dist * kotlin.math.sin(angle)).toFloat()
+            val dx = point.x - cx
+            val dy = point.y - cy
+            if (sqrt(dx * dx + dy * dy) <= hitRadius) {
+                onHarmonyIndexSelected(index)
+                return
+            }
+        }
+        updateFromPoint(point)
+    }
+
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -99,7 +125,7 @@ fun ColorWheelPicker(
                 .onSizeChanged { wheelSize = it }
                 .pointerInput(wheelSize) {
                     detectTapGestures(onTap = { point ->
-                        updateFromPoint(point)
+                        handleTap(point)
                     })
                 }
                 .pointerInput(wheelSize) {
@@ -124,37 +150,29 @@ fun ColorWheelPicker(
             val center = Offset(size.width / 2f, size.height / 2f)
 
             val dotRadius = 8.dp.toPx()
-            val dotStroke = 1.5.dp.toPx()
-            harmonyColors.forEach { hex ->
-                val colorInt = ColorTools.hexToColorInt(hex) ?: return@forEach
+            val selectedStroke = 2.dp.toPx()
+            val unselectedStroke = 1.dp.toPx()
+            harmonyColors.forEachIndexed { index, hex ->
+                val colorInt = ColorTools.hexToColorInt(hex) ?: return@forEachIndexed
                 val hsv = FloatArray(3)
                 AndroidColor.colorToHSV(colorInt, hsv)
                 val angle = Math.toRadians(hsv[0].toDouble())
                 val dist = hsv[1] * radius
                 val cx = center.x + (dist * kotlin.math.cos(angle)).toFloat()
                 val cy = center.y + (dist * kotlin.math.sin(angle)).toFloat()
+                val isSelected = index == selectedHarmonyIndex
                 drawCircle(
                     color = Color(colorInt),
                     radius = dotRadius,
                     center = Offset(cx, cy),
                 )
                 drawCircle(
-                    color = Color.White,
+                    color = if (isSelected) Color.White else Color.Gray,
                     radius = dotRadius,
                     center = Offset(cx, cy),
-                    style = Stroke(width = dotStroke),
+                    style = Stroke(width = if (isSelected) selectedStroke else unselectedStroke),
                 )
             }
-
-            val angleRad = Math.toRadians(hue.toDouble())
-            val markerX = center.x + (saturation * radius * kotlin.math.cos(angleRad).toFloat())
-            val markerY = center.y + (saturation * radius * kotlin.math.sin(angleRad).toFloat())
-            drawCircle(
-                color = Color.White,
-                radius = 10.dp.toPx(),
-                center = Offset(markerX, markerY),
-                style = Stroke(width = 2.dp.toPx()),
-            )
         }
 
         Text(

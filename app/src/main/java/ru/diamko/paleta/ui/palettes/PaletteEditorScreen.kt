@@ -208,16 +208,28 @@ fun PaletteEditorScreen(
 
                     if (parsedColors.isNotEmpty()) {
                         if (isCreateMode) {
-                            ColorCountDropdown(
-                                label = stringResource(id = R.string.color_count_hint),
-                                selectedCount = createColorCount,
-                                onSelected = { selected ->
-                                    if (selected != null) {
-                                        resizeCreateColors(selected)
-                                    }
-                                },
+                            Row(
                                 modifier = Modifier.fillMaxWidth(),
-                            )
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            ) {
+                                ColorCountDropdown(
+                                    label = stringResource(id = R.string.color_count_hint),
+                                    selectedCount = createColorCount,
+                                    onSelected = { selected ->
+                                        if (selected != null) {
+                                            resizeCreateColors(selected)
+                                        }
+                                    },
+                                    modifier = Modifier.weight(1f),
+                                )
+                                PaletaGhostButton(
+                                    text = stringResource(id = R.string.recalculate),
+                                    onClick = {
+                                        createColors = RandomPaletteGenerator.generate(createColorCount)
+                                        selectedColorIndex = 0
+                                    },
+                                )
+                            }
                         }
 
                         FlowRow(
@@ -294,6 +306,8 @@ fun PaletteEditorScreen(
                                 updateColorAt(safeSelectedColorIndex, updatedHex)
                             },
                             harmonyColors = harmonyColors,
+                            selectedHarmonyIndex = safeSelectedColorIndex,
+                            onHarmonyIndexSelected = { selectedColorIndex = it },
                         )
                     } else {
                         Text(

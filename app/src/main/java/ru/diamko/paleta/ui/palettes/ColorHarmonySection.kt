@@ -40,6 +40,13 @@ fun ColorHarmonySection(
     onColorsGenerated: (List<String>) -> Unit = {},
 ) {
     var selectedType by remember { mutableStateOf(ColorHarmonyType.ANALOGOUS) }
+
+    LaunchedEffect(colorCount) {
+        if (!selectedType.isCompatibleWith(colorCount)) {
+            selectedType = ColorHarmonyType.entries.first { it.isCompatibleWith(colorCount) }
+        }
+    }
+
     val generated = remember(baseHex, colorCount, selectedType) {
         ColorHarmony.generate(
             baseHex = baseHex,
@@ -63,9 +70,11 @@ fun ColorHarmonySection(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         ColorHarmonyType.entries.forEach { type ->
+            val compatible = type.isCompatibleWith(colorCount)
             FilterChip(
                 selected = selectedType == type,
                 onClick = { selectedType = type },
+                enabled = compatible,
                 label = { Text(text = stringResource(id = type.labelResId())) },
                 shape = RoundedCornerShape(50),
                 colors = FilterChipDefaults.filterChipColors(

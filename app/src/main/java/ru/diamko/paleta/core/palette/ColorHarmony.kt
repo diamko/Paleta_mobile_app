@@ -2,15 +2,21 @@ package ru.diamko.paleta.core.palette
 
 import android.graphics.Color
 
-enum class ColorHarmonyType {
-    SEQUENTIAL,
-    ANALOGOUS,
-    MONOCHROMATIC,
-    TRIADIC,
-    COMPLEMENTARY,
-    SQUARE,
-    SPLIT_COMPLEMENTARY,
-    TETRADIC,
+enum class ColorHarmonyType(val patternSize: Int?) {
+    SEQUENTIAL(null),
+    ANALOGOUS(null),
+    MONOCHROMATIC(null),
+    TRIADIC(3),
+    COMPLEMENTARY(4),
+    SQUARE(4),
+    SPLIT_COMPLEMENTARY(3),
+    TETRADIC(4),
+    ;
+
+    fun isCompatibleWith(colorCount: Int): Boolean {
+        val ps = patternSize ?: return true
+        return colorCount % ps == 0
+    }
 }
 
 object ColorHarmony {
