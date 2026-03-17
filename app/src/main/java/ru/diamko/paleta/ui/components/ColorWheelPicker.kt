@@ -42,6 +42,7 @@ fun ColorWheelPicker(
     colorHex: String,
     onColorChange: (String) -> Unit,
     modifier: Modifier = Modifier,
+    harmonyColors: List<String> = emptyList(),
 ) {
     var wheelSize by remember { mutableStateOf(IntSize.Zero) }
 
@@ -122,13 +123,29 @@ fun ColorWheelPicker(
             val radius = min(size.width, size.height) / 2f
             val center = Offset(size.width / 2f, size.height / 2f)
 
-            if (value < 1f) {
+            val dotRadius = 8.dp.toPx()
+            val dotStroke = 1.5.dp.toPx()
+            harmonyColors.forEach { hex ->
+                val colorInt = ColorTools.hexToColorInt(hex) ?: return@forEach
+                val hsv = FloatArray(3)
+                AndroidColor.colorToHSV(colorInt, hsv)
+                val angle = Math.toRadians(hsv[0].toDouble())
+                val dist = hsv[1] * radius
+                val cx = center.x + (dist * kotlin.math.cos(angle)).toFloat()
+                val cy = center.y + (dist * kotlin.math.sin(angle)).toFloat()
                 drawCircle(
-                    color = Color.Black.copy(alpha = 1f - value),
-                    radius = radius,
-                    center = center,
+                    color = Color(colorInt),
+                    radius = dotRadius,
+                    center = Offset(cx, cy),
+                )
+                drawCircle(
+                    color = Color.White,
+                    radius = dotRadius,
+                    center = Offset(cx, cy),
+                    style = Stroke(width = dotStroke),
                 )
             }
+
             val angleRad = Math.toRadians(hue.toDouble())
             val markerX = center.x + (saturation * radius * kotlin.math.cos(angleRad).toFloat())
             val markerY = center.y + (saturation * radius * kotlin.math.sin(angleRad).toFloat())

@@ -15,6 +15,7 @@ import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,6 +37,7 @@ fun ColorHarmonySection(
     baseHex: String,
     colorCount: Int,
     onApply: (List<String>) -> Unit,
+    onColorsGenerated: (List<String>) -> Unit = {},
 ) {
     var selectedType by remember { mutableStateOf(ColorHarmonyType.ANALOGOUS) }
     val generated = remember(baseHex, colorCount, selectedType) {
@@ -44,6 +46,10 @@ fun ColorHarmonySection(
             type = selectedType,
             count = colorCount,
         )
+    }
+
+    LaunchedEffect(generated) {
+        onColorsGenerated(generated)
     }
 
     PaletaSectionTitle(

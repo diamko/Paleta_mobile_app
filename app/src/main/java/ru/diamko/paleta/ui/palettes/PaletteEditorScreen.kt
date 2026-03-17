@@ -261,6 +261,8 @@ fun PaletteEditorScreen(
                         )
                     }
 
+                    var harmonyColors by remember { mutableStateOf(emptyList<String>()) }
+
                     if (selectedColorHex != null) {
                         ColorHarmonySection(
                             baseHex = selectedColorHex,
@@ -275,6 +277,7 @@ fun PaletteEditorScreen(
                                 selectedColorIndex = 0
                                 localError = null
                             },
+                            onColorsGenerated = { harmonyColors = it },
                         )
 
                         PaletaSectionTitle(
@@ -290,6 +293,7 @@ fun PaletteEditorScreen(
                             onColorChange = { updatedHex ->
                                 updateColorAt(safeSelectedColorIndex, updatedHex)
                             },
+                            harmonyColors = harmonyColors,
                         )
                     } else {
                         Text(
