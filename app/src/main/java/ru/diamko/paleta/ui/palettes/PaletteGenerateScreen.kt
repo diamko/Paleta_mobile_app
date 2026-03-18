@@ -943,6 +943,10 @@ fun PaletteGenerateScreen(
                         modifier = Modifier.fillMaxWidth(),
                         text = stringResource(id = R.string.save_palette),
                         onClick = {
+                            if (paletteColors.isEmpty()) {
+                                localError = context.getString(R.string.palette_not_generated)
+                                return@PaletaPrimaryButton
+                            }
                             if (!isAuthenticated) {
                                 localError = context.getString(R.string.login_to_save_palette)
                                 return@PaletaPrimaryButton
