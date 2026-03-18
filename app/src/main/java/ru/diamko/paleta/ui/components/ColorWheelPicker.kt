@@ -3,8 +3,9 @@ package ru.diamko.paleta.ui.components
 import android.graphics.Bitmap
 import android.graphics.Color as AndroidColor
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.drag
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -107,19 +108,22 @@ fun ColorWheelPicker(
                 .height(260.dp)
                 .onSizeChanged { wheelSize = it }
                 .pointerInput(wheelSize) {
-                    detectTapGestures(onTap = { point ->
-                        updateFromPoint(point)
-                    })
-                }
-                .pointerInput(wheelSize) {
-                    detectDragGestures(
-                        onDragStart = { point ->
-                            updateFromPoint(point)
-                        },
-                        onDrag = { change, _ ->
+                    awaitEachGesture {
+                        val down = awaitFirstDown(requireUnconsumed = false)
+                        val size = wheelSize
+                        if (size.width <= 0 || size.height <= 0) return@awaitEachGesture
+                        val radius = min(size.width, size.height) / 2f
+                        val center = Offset(size.width / 2f, size.height / 2f)
+                        val dx = down.position.x - center.x
+                        val dy = down.position.y - center.y
+                        if (sqrt(dx * dx + dy * dy) > radius) return@awaitEachGesture
+                        down.consume()
+                        updateFromPoint(down.position)
+                        drag(down.id) { change ->
+                            change.consume()
                             updateFromPoint(change.position)
-                        },
-                    )
+                        }
+                    }
                 },
         ) {
             val bitmap = wheelBitmap ?: return@Canvas
