@@ -9,6 +9,7 @@
     <string name="go_register">Нет аккаунта? Зарегистрироваться</string>
     <string name="forgot_password_link">Забыли пароль?</string>
     <string name="continue_as_guest">Продолжить как гость</string>
+    <string name="wifi_hint"></string>
 
     <string name="register_title">Регистрация</string>
     <string name="register_subtitle">Создайте аккаунт, чтобы хранить и экспортировать палитры</string>
