@@ -73,7 +73,6 @@ fun PaletteEditorScreen(
     paletteViewModel: PaletteViewModel,
     onBack: () -> Unit,
     isAuthenticated: Boolean,
-    onRequireLogin: () -> Unit,
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -86,6 +85,7 @@ fun PaletteEditorScreen(
         mutableStateOf(if (isCreateMode) RandomPaletteGenerator.generate(5) else emptyList())
     }
     var localError by remember { mutableStateOf<String?>(null) }
+    var localErrorKey by remember { mutableStateOf(0) }
     var statusMessage by remember { mutableStateOf<String?>(null) }
     var selectedColorIndex by remember(existing?.id) { mutableStateOf(0) }
     var selectedFormat by remember { mutableStateOf(PaletteExportFormat.JSON) }
@@ -111,6 +111,7 @@ fun PaletteEditorScreen(
                 }
                 .onFailure { error ->
                     localError = error.message ?: context.getString(R.string.export_error_generic)
+                    localErrorKey++
                     pendingExport = null
                 }
         }
@@ -367,6 +368,7 @@ fun PaletteEditorScreen(
                             val colors = HexColors.normalize(parsedColors)
                             if (colors == null) {
                                 localError = context.getString(R.string.palette_invalid_hex_count)
+                                localErrorKey++
                                 return@PaletaPrimaryButton
                             }
                             isBusy = true
@@ -382,6 +384,7 @@ fun PaletteEditorScreen(
                                 onError = { error ->
                                     isBusy = false
                                     localError = error
+                                    localErrorKey++
                                 },
                             )
                         },
@@ -394,11 +397,13 @@ fun PaletteEditorScreen(
                             onClick = {
                                 if (!isAuthenticated) {
                                     localError = context.getString(R.string.login_to_save_palette)
+                                    localErrorKey++
                                     return@PaletaPrimaryButton
                                 } else {
                                     val parsed = HexColors.normalize(parsedColors)
                                     if (parsed == null) {
                                         localError = context.getString(R.string.palette_invalid_hex_count)
+                                        localErrorKey++
                                         return@PaletaPrimaryButton
                                     }
                                     paletteViewModel.createPalette(name = name, colors = parsed) {
@@ -414,15 +419,18 @@ fun PaletteEditorScreen(
                             onClick = {
                                 if (!isAuthenticated) {
                                     localError = context.getString(R.string.login_to_save_palette)
+                                    localErrorKey++
                                     return@PaletaPrimaryButton
                                 }
                                 val parsed = HexColors.parse(colorsInput)
                                 if (name.isBlank()) {
                                     localError = context.getString(R.string.palette_name_required)
+                                    localErrorKey++
                                     return@PaletaPrimaryButton
                                 }
                                 if (parsed == null) {
                                     localError = context.getString(R.string.palette_invalid_hex_count)
+                                    localErrorKey++
                                     return@PaletaPrimaryButton
                                 }
                                 paletteViewModel.savePaletteChanges(
@@ -441,6 +449,7 @@ fun PaletteEditorScreen(
                             onClick = {
                                 if (!isAuthenticated) {
                                     localError = context.getString(R.string.login_to_save_palette)
+                                    localErrorKey++
                                     return@PaletaGhostButton
                                 }
                                 showDeleteConfirm = true
@@ -455,6 +464,7 @@ fun PaletteEditorScreen(
                 PaletaTopBannerHost(
                     error = localError,
                     info = statusMessage,
+                    errorKey = localErrorKey,
                 )
             }
         }

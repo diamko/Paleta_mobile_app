@@ -277,7 +277,6 @@ fun PaletaApp(
                 mode = PaletteGenerateScreenMode.RANDOM,
                 onBack = { navController.popBackStack() },
                 isAuthenticated = authState.user != null,
-                onRequireLogin = { requireLogin() },
             )
         }
 
@@ -287,7 +286,6 @@ fun PaletaApp(
                 mode = PaletteGenerateScreenMode.IMAGE,
                 onBack = { navController.popBackStack() },
                 isAuthenticated = authState.user != null,
-                onRequireLogin = { requireLogin() },
             )
         }
 
@@ -379,7 +377,6 @@ fun PaletaApp(
                     }
                 },
                 isAuthenticated = authState.user != null,
-                onRequireLogin = { requireLogin() },
             )
         }
     }

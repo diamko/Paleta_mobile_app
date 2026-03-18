@@ -128,7 +128,6 @@ fun PaletteGenerateScreen(
     mode: PaletteGenerateScreenMode,
     onBack: () -> Unit,
     isAuthenticated: Boolean,
-    onRequireLogin: () -> Unit,
 ) {
     val context = LocalContext.current
     val clipboard = LocalClipboardManager.current
@@ -149,6 +148,7 @@ fun PaletteGenerateScreen(
     var loupeSample by remember { mutableStateOf<SampledPoint?>(null) }
 
     var localError by remember { mutableStateOf<String?>(null) }
+    var localErrorKey by remember { mutableStateOf(0) }
     var statusMessage by remember { mutableStateOf<String?>(null) }
     var isBusy by remember { mutableStateOf(false) }
     var selectedFormat by remember { mutableStateOf(PaletteExportFormat.JSON) }
@@ -907,11 +907,13 @@ fun PaletteGenerateScreen(
                         onClick = {
                             if (paletteColors.isEmpty()) {
                                 localError = context.getString(R.string.palette_not_generated)
+                                localErrorKey++
                                 return@PaletaPrimaryButton
                             }
                             val colors = HexColors.normalize(paletteColors)
                             if (colors == null) {
                                 localError = context.getString(R.string.palette_invalid_hex_count)
+                                localErrorKey++
                                 return@PaletaPrimaryButton
                             }
                             isBusy = true
@@ -927,6 +929,7 @@ fun PaletteGenerateScreen(
                                 onError = { error ->
                                     isBusy = false
                                     localError = error
+                                    localErrorKey++
                                 },
                             )
                         },
@@ -945,15 +948,18 @@ fun PaletteGenerateScreen(
                         onClick = {
                             if (paletteColors.isEmpty()) {
                                 localError = context.getString(R.string.palette_not_generated)
+                                localErrorKey++
                                 return@PaletaPrimaryButton
                             }
                             if (!isAuthenticated) {
                                 localError = context.getString(R.string.login_to_save_palette)
+                                localErrorKey++
                                 return@PaletaPrimaryButton
                             } else {
                                 val colors = HexColors.normalize(paletteColors)
                                 if (colors == null) {
                                     localError = context.getString(R.string.palette_invalid_hex_count)
+                                    localErrorKey++
                                 } else {
                                     paletteViewModel.createPalette(
                                         name = paletteName,
@@ -981,6 +987,7 @@ fun PaletteGenerateScreen(
                 PaletaTopBannerHost(
                     error = localError,
                     info = statusMessage,
+                    errorKey = localErrorKey,
                 )
             }
         }

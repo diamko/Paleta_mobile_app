@@ -222,6 +222,8 @@ fun PaletaMessageBanner(
 fun BoxScope.PaletaTopBannerHost(
     error: String?,
     info: String?,
+    errorKey: Int = 0,
+    infoKey: Int = 0,
     modifier: Modifier = Modifier,
     topPadding: Dp = 0.dp,
     onErrorDismissed: (() -> Unit)? = null,
@@ -230,7 +232,7 @@ fun BoxScope.PaletaTopBannerHost(
     var visibleError by remember { mutableStateOf<String?>(null) }
     var visibleInfo by remember { mutableStateOf<String?>(null) }
 
-    LaunchedEffect(error) {
+    LaunchedEffect(error, errorKey) {
         visibleError = error
         if (!error.isNullOrBlank()) {
             delay(2500)
@@ -239,7 +241,7 @@ fun BoxScope.PaletaTopBannerHost(
         }
     }
 
-    LaunchedEffect(info) {
+    LaunchedEffect(info, infoKey) {
         visibleInfo = info
         if (!info.isNullOrBlank()) {
             delay(2500)
