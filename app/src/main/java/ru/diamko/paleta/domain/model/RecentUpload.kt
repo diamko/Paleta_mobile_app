@@ -1,3 +1,7 @@
+/**
+ * Модуль: RecentUpload.
+ * Назначение: Модель недавней загрузки изображения.
+ */
 package ru.diamko.paleta.domain.model
 
 data class RecentUpload(

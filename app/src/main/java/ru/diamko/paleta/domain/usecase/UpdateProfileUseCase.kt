@@ -1,3 +1,7 @@
+/**
+ * Модуль: UpdateProfileUseCase.
+ * Назначение: Use-case: обновление профиля пользователя.
+ */
 package ru.diamko.paleta.domain.usecase
 
 import ru.diamko.paleta.domain.model.User

@@ -1,3 +1,7 @@
+/**
+ * Модуль: UserStore.
+ * Назначение: Интерфейс хранилища данных пользователя.
+ */
 package ru.diamko.paleta.core.storage
 
 import ru.diamko.paleta.domain.model.User

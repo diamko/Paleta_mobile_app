@@ -1,3 +1,7 @@
+/**
+ * Модуль: DataStoreThemeStore.
+ * Назначение: Хранилище темы оформления через DataStore.
+ */
 package ru.diamko.paleta.core.storage
 
 import android.content.Context

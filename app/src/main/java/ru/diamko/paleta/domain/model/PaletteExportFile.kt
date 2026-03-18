@@ -1,3 +1,7 @@
+/**
+ * Модуль: PaletteExportFile.
+ * Назначение: Модель файла экспорта палитры: имя и содержимое.
+ */
 package ru.diamko.paleta.domain.model
 
 data class PaletteExportFile(

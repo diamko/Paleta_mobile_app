@@ -1,3 +1,7 @@
+/**
+ * Модуль: ForgotPasswordScreen.
+ * Назначение: Экран запроса кода восстановления пароля.
+ */
 package ru.diamko.paleta.ui.auth
 
 import androidx.compose.foundation.layout.Arrangement

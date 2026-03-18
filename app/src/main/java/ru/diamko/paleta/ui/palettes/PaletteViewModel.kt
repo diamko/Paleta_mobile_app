@@ -1,3 +1,7 @@
+/**
+ * Модуль: PaletteViewModel.
+ * Назначение: ViewModel палитр: CRUD, генерация, экспорт, синхронизация.
+ */
 package ru.diamko.paleta.ui.palettes
 
 import androidx.lifecycle.ViewModel

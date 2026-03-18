@@ -1,3 +1,7 @@
+/**
+ * Модуль: AppContainer.
+ * Назначение: DI-контейнер: фабрики репозиториев, хранилищ и сетевых модулей.
+ */
 package ru.diamko.paleta.core.di
 
 import android.content.Context

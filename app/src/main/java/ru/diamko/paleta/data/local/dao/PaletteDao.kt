@@ -1,3 +1,7 @@
+/**
+ * Модуль: PaletteDao.
+ * Назначение: DAO для работы с палитрами в локальной базе данных.
+ */
 package ru.diamko.paleta.data.local.dao
 
 import androidx.room.Dao

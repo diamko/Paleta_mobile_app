@@ -1,3 +1,7 @@
+/**
+ * Модуль: PaletteRepository.
+ * Назначение: Интерфейс репозитория палитр.
+ */
 package ru.diamko.paleta.domain.repository
 
 import ru.diamko.paleta.domain.model.Palette

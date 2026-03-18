@@ -1,3 +1,7 @@
+/**
+ * Модуль: DataStoreLocaleStore.
+ * Назначение: Хранилище языковых настроек через DataStore.
+ */
 package ru.diamko.paleta.core.storage
 
 import android.content.Context

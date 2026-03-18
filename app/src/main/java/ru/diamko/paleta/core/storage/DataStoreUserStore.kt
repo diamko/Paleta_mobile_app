@@ -1,3 +1,7 @@
+/**
+ * Модуль: DataStoreUserStore.
+ * Назначение: Хранилище данных текущего пользователя через DataStore.
+ */
 package ru.diamko.paleta.core.storage
 
 import android.content.Context

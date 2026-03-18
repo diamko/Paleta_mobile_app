@@ -1,3 +1,7 @@
+/**
+ * Модуль: AuthDtos.
+ * Назначение: DTO авторизации: запросы и ответы для login, register, reset.
+ */
 package ru.diamko.paleta.data.remote.dto
 
 import kotlinx.serialization.Serializable

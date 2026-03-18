@@ -1,3 +1,7 @@
+/**
+ * Модуль: BitmapPaletteExtractor.
+ * Назначение: Извлечение доминантных цветов из Bitmap через k-means кластеризацию.
+ */
 package ru.diamko.paleta.core.palette
 
 import android.graphics.Bitmap

@@ -1,3 +1,7 @@
+/**
+ * Модуль: MainActivity.
+ * Назначение: Главная Activity приложения; точка входа и инициализация навигации.
+ */
 package ru.diamko.paleta
 
 import android.os.Bundle

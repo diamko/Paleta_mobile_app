@@ -1,3 +1,7 @@
+/**
+ * Модуль: RequestPasswordResetCodeUseCase.
+ * Назначение: Use-case: запрос кода восстановления пароля на email.
+ */
 package ru.diamko.paleta.domain.usecase
 
 import ru.diamko.paleta.domain.repository.AuthRepository

@@ -1,3 +1,7 @@
+/**
+ * Модуль: FaqScreen.
+ * Назначение: Экран FAQ: часто задаваемые вопросы и ответы.
+ */
 package ru.diamko.paleta.ui.settings
 
 import androidx.compose.foundation.layout.Arrangement

@@ -1,3 +1,7 @@
+/**
+ * Модуль: LoginScreen.
+ * Назначение: Экран входа в учётную запись.
+ */
 package ru.diamko.paleta.ui.auth
 
 import androidx.compose.foundation.Image
@@ -146,12 +150,6 @@ fun LoginScreen(
                         enabled = !state.isLoading,
                     )
                 }
-
-                Text(
-                    text = stringResource(id = R.string.wifi_hint),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
             }
 
             PaletaTopBannerHost(

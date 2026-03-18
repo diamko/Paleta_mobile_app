@@ -1,3 +1,7 @@
+/**
+ * Модуль: PaletteListScreen.
+ * Назначение: Экран списка палитр: поиск, сортировка, экспорт, удаление.
+ */
 package ru.diamko.paleta.ui.palettes
 
 import androidx.activity.compose.rememberLauncherForActivityResult

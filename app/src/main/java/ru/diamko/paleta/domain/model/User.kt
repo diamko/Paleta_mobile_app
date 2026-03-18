@@ -1,3 +1,7 @@
+/**
+ * Модуль: User.
+ * Назначение: Доменная модель пользователя: id, имя, email.
+ */
 package ru.diamko.paleta.domain.model
 
 import androidx.compose.runtime.Immutable

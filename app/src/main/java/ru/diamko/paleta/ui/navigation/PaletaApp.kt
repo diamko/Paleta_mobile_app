@@ -1,3 +1,7 @@
+/**
+ * Модуль: PaletaApp.
+ * Назначение: Корневой Composable: NavHost и граф навигации приложения.
+ */
 package ru.diamko.paleta.ui.navigation
 
 import android.app.Activity

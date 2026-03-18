@@ -1,3 +1,7 @@
+/**
+ * Модуль: Modifiers.
+ * Назначение: Общие Compose-модификаторы: FadingEdge, скролл-индикаторы.
+ */
 package ru.diamko.paleta.ui.components
 
 import androidx.compose.ui.Modifier

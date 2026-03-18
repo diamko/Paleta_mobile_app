@@ -1,3 +1,7 @@
+/**
+ * Модуль: RandomPaletteGenerator.
+ * Назначение: Генератор случайных цветовых палитр с учётом гармонии.
+ */
 package ru.diamko.paleta.core.palette
 
 import android.graphics.Color

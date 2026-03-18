@@ -1,3 +1,7 @@
+/**
+ * Модуль: ColorHarmony.
+ * Назначение: Генерация гармоничных цветов: аналоговые, триадные, комплементарные и др.
+ */
 package ru.diamko.paleta.core.palette
 
 import android.graphics.Color

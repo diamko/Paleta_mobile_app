@@ -1,3 +1,7 @@
+/**
+ * Модуль: LastImageStorage.
+ * Назначение: Сохранение и восстановление последнего загруженного изображения.
+ */
 package ru.diamko.paleta.core.storage
 
 import android.content.Context

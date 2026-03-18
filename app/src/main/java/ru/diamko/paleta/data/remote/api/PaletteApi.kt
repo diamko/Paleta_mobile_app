@@ -1,3 +1,7 @@
+/**
+ * Модуль: PaletteApi.
+ * Назначение: Retrofit-интерфейс палитр: CRUD, генерация, экспорт.
+ */
 package ru.diamko.paleta.data.remote.api
 
 import okhttp3.MultipartBody

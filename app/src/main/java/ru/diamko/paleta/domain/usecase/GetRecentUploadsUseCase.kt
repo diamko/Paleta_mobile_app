@@ -1,3 +1,7 @@
+/**
+ * Модуль: GetRecentUploadsUseCase.
+ * Назначение: Use-case: получение списка недавних загрузок изображений.
+ */
 package ru.diamko.paleta.domain.usecase
 
 import ru.diamko.paleta.domain.model.RecentUpload

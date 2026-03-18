@@ -1,3 +1,7 @@
+/**
+ * Модуль: PaletteDtos.
+ * Назначение: DTO палитр: запросы и ответы для CRUD и генерации.
+ */
 package ru.diamko.paleta.data.remote.dto
 
 import kotlinx.serialization.Serializable

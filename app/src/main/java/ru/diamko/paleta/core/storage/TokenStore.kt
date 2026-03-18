@@ -1,3 +1,7 @@
+/**
+ * Модуль: TokenStore.
+ * Назначение: Интерфейс хранилища токенов авторизации.
+ */
 package ru.diamko.paleta.core.storage
 
 interface TokenStore {

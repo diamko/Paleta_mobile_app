@@ -1,3 +1,7 @@
+/**
+ * Модуль: PaletaDatabase.
+ * Назначение: Room-база данных: определение таблиц и миграций.
+ */
 package ru.diamko.paleta.data.local
 
 import androidx.room.Database

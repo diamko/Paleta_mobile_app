@@ -1,3 +1,7 @@
+/**
+ * Модуль: ResetPasswordScreen.
+ * Назначение: Экран ввода кода и нового пароля для сброса.
+ */
 package ru.diamko.paleta.ui.auth
 
 import androidx.compose.foundation.layout.Arrangement

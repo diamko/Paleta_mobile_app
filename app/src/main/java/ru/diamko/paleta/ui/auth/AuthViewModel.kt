@@ -1,3 +1,7 @@
+/**
+ * Модуль: AuthViewModel.
+ * Назначение: ViewModel авторизации: login, register, forgot/reset password, profile.
+ */
 package ru.diamko.paleta.ui.auth
 
 import androidx.lifecycle.ViewModel

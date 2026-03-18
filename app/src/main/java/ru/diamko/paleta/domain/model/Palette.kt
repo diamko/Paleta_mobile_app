@@ -1,3 +1,7 @@
+/**
+ * Модуль: Palette.
+ * Назначение: Доменная модель палитры: id, название, список цветов, дата.
+ */
 package ru.diamko.paleta.domain.model
 
 import androidx.compose.runtime.Immutable

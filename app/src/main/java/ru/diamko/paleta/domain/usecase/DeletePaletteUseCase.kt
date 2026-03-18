@@ -1,3 +1,7 @@
+/**
+ * Модуль: DeletePaletteUseCase.
+ * Назначение: Use-case: удаление палитры.
+ */
 package ru.diamko.paleta.domain.usecase
 
 import ru.diamko.paleta.domain.repository.PaletteRepository

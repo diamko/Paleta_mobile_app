@@ -1,3 +1,7 @@
+/**
+ * Модуль: PaletteSyncWorker.
+ * Назначение: WorkManager-задача для фоновой синхронизации палитр.
+ */
 package ru.diamko.paleta.data.sync
 
 import android.content.Context

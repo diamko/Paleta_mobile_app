@@ -1,3 +1,7 @@
+/**
+ * Модуль: AuthInterceptor.
+ * Назначение: OkHttp-интерцептор: добавление access-токена к запросам и автообновление через refresh.
+ */
 package ru.diamko.paleta.core.network
 
 import kotlinx.coroutines.runBlocking

@@ -1,3 +1,7 @@
+/**
+ * Модуль: RemotePaletteRepository.
+ * Назначение: Реализация репозитория палитр через REST API.
+ */
 package ru.diamko.paleta.data.repository
 
 import kotlinx.coroutines.Dispatchers

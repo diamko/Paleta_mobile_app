@@ -1,3 +1,7 @@
+/**
+ * Модуль: GetPalettesUseCase.
+ * Назначение: Use-case: получение списка палитр пользователя.
+ */
 package ru.diamko.paleta.domain.usecase
 
 import ru.diamko.paleta.domain.model.Palette

@@ -1,3 +1,7 @@
+/**
+ * Модуль: RenamePaletteUseCase.
+ * Назначение: Use-case: переименование палитры.
+ */
 package ru.diamko.paleta.domain.usecase
 
 import ru.diamko.paleta.domain.model.Palette

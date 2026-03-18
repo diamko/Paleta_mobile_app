@@ -1,3 +1,7 @@
+/**
+ * Модуль: GetCurrentUserUseCase.
+ * Назначение: Use-case: получение текущего авторизованного пользователя.
+ */
 package ru.diamko.paleta.domain.usecase
 
 import ru.diamko.paleta.domain.model.User

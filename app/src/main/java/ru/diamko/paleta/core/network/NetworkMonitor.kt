@@ -1,3 +1,7 @@
+/**
+ * Модуль: NetworkMonitor.
+ * Назначение: Мониторинг состояния сети через ConnectivityManager.
+ */
 package ru.diamko.paleta.core.network
 
 import android.content.Context

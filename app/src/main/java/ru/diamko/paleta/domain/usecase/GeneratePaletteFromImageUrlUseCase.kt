@@ -1,3 +1,7 @@
+/**
+ * Модуль: GeneratePaletteFromImageUrlUseCase.
+ * Назначение: Use-case: генерация палитры из URL изображения (недавние загрузки).
+ */
 package ru.diamko.paleta.domain.usecase
 
 import ru.diamko.paleta.domain.repository.PaletteRepository

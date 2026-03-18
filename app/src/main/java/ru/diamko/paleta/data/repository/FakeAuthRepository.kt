@@ -1,3 +1,7 @@
+/**
+ * Модуль: FakeAuthRepository.
+ * Назначение: Фейковый репозиторий авторизации для разработки и тестирования.
+ */
 package ru.diamko.paleta.data.repository
 
 import kotlinx.coroutines.Dispatchers

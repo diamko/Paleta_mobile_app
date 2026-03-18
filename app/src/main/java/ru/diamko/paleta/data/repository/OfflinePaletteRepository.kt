@@ -1,3 +1,7 @@
+/**
+ * Модуль: OfflinePaletteRepository.
+ * Назначение: Репозиторий палитр с оффлайн-поддержкой: кэш + синхронизация.
+ */
 package ru.diamko.paleta.data.repository
 
 import android.graphics.BitmapFactory

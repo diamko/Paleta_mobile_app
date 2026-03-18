@@ -1,3 +1,7 @@
+/**
+ * Модуль: RemoteAuthRepository.
+ * Назначение: Реализация репозитория авторизации через REST API.
+ */
 package ru.diamko.paleta.data.repository
 
 import kotlinx.coroutines.Dispatchers

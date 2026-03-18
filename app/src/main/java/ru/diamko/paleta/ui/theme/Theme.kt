@@ -1,3 +1,7 @@
+/**
+ * Модуль: Theme.
+ * Назначение: Конфигурация Material3 темы: светлая, тёмная, динамические цвета.
+ */
 package ru.diamko.paleta.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme

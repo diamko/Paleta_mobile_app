@@ -1,3 +1,7 @@
+/**
+ * Модуль: Routes.
+ * Назначение: Перечисление маршрутов навигации.
+ */
 package ru.diamko.paleta.ui.navigation
 
 object Routes {

@@ -1,3 +1,7 @@
+/**
+ * Модуль: FakeBackend.
+ * Назначение: Имитация серверного API для локального тестирования.
+ */
 package ru.diamko.paleta.data.repository
 
 import java.time.Instant

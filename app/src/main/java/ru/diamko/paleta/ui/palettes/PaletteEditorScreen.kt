@@ -1,3 +1,7 @@
+/**
+ * Модуль: PaletteEditorScreen.
+ * Назначение: Экран редактора палитры: цветовое колесо, гармония, HEX-ввод.
+ */
 package ru.diamko.paleta.ui.palettes
 
 import androidx.activity.compose.rememberLauncherForActivityResult

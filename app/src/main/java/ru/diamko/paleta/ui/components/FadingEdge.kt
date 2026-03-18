@@ -1,3 +1,7 @@
+/**
+ * Модуль: FadingEdge.
+ * Назначение: Эффект затухания краёв для прокручиваемых списков.
+ */
 package ru.diamko.paleta.ui.components
 
 import androidx.compose.foundation.ScrollState

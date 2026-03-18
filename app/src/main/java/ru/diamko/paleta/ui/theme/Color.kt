@@ -1,3 +1,7 @@
+/**
+ * Модуль: Color.
+ * Назначение: Определение цветовых токенов для Material3 темы.
+ */
 package ru.diamko.paleta.ui.theme
 
 import androidx.compose.ui.graphics.Color

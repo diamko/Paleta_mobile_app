@@ -1,3 +1,7 @@
+/**
+ * Модуль: ColorHarmonySection.
+ * Назначение: Секция выбора цветовой гармонии: типы и применение.
+ */
 package ru.diamko.paleta.ui.palettes
 
 import androidx.compose.foundation.ScrollState

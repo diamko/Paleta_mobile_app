@@ -1,3 +1,7 @@
+/**
+ * Модуль: PaletaApplication.
+ * Назначение: Application-класс: создание DI-контейнера и глобальная инициализация.
+ */
 package ru.diamko.paleta
 
 import android.app.Application

@@ -1,3 +1,7 @@
+/**
+ * Модуль: PaletteExportFormatter.
+ * Назначение: Форматирование палитры для экспорта в CSS, JSON, SVG и др.
+ */
 package ru.diamko.paleta.core.palette
 
 import android.graphics.Bitmap

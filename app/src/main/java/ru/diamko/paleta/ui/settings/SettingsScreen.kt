@@ -1,3 +1,7 @@
+/**
+ * Модуль: SettingsScreen.
+ * Назначение: Экран настроек: язык, тема, профиль, FAQ, выход.
+ */
 package ru.diamko.paleta.ui.settings
 
 import androidx.compose.foundation.layout.Arrangement

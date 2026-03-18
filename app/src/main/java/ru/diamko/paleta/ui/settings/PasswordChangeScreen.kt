@@ -1,3 +1,7 @@
+/**
+ * Модуль: PasswordChangeScreen.
+ * Назначение: Экран смены пароля из профиля по коду подтверждения.
+ */
 package ru.diamko.paleta.ui.settings
 
 import androidx.compose.foundation.layout.Arrangement

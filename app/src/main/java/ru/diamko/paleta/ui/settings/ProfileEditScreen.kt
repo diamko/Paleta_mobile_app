@@ -1,3 +1,7 @@
+/**
+ * Модуль: ProfileEditScreen.
+ * Назначение: Экран редактирования профиля: имя пользователя и email.
+ */
 package ru.diamko.paleta.ui.settings
 
 import androidx.compose.foundation.layout.Arrangement

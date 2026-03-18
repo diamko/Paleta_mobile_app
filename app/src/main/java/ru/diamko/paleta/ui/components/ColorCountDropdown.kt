@@ -1,3 +1,7 @@
+/**
+ * Модуль: ColorCountDropdown.
+ * Назначение: Выпадающий список выбора количества цветов в палитре.
+ */
 package ru.diamko.paleta.ui.components
 
 import androidx.compose.foundation.layout.PaddingValues

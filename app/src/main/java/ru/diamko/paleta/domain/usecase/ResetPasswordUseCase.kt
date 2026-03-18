@@ -1,3 +1,7 @@
+/**
+ * Модуль: ResetPasswordUseCase.
+ * Назначение: Use-case: сброс пароля по коду подтверждения.
+ */
 package ru.diamko.paleta.domain.usecase
 
 import ru.diamko.paleta.domain.repository.AuthRepository

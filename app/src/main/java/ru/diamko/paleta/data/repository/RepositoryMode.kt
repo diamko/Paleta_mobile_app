@@ -1,3 +1,7 @@
+/**
+ * Модуль: RepositoryMode.
+ * Назначение: Перечисление режимов репозитория: FAKE / REMOTE.
+ */
 package ru.diamko.paleta.data.repository
 
 enum class RepositoryMode {

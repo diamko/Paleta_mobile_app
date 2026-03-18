@@ -1,3 +1,7 @@
+/**
+ * Модуль: ExportPaletteUseCase.
+ * Назначение: Use-case: экспорт палитры в выбранный формат.
+ */
 package ru.diamko.paleta.domain.usecase
 
 import ru.diamko.paleta.domain.model.PaletteExportFile

@@ -1,3 +1,7 @@
+/**
+ * Модуль: HexColors.
+ * Назначение: Набор предустановленных HEX-цветов для палитр по умолчанию.
+ */
 package ru.diamko.paleta.core.palette
 
 object HexColors {

@@ -1,3 +1,7 @@
+/**
+ * Модуль: AuthRepository.
+ * Назначение: Интерфейс репозитория авторизации.
+ */
 package ru.diamko.paleta.domain.repository
 
 import ru.diamko.paleta.domain.model.User

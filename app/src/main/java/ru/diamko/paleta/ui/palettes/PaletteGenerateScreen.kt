@@ -1,3 +1,7 @@
+/**
+ * Модуль: PaletteGenerateScreen.
+ * Назначение: Экран генерации палитры: случайная, из изображения, пипетка.
+ */
 package ru.diamko.paleta.ui.palettes
 
 import android.content.Context

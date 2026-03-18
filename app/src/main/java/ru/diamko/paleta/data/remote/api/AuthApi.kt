@@ -1,3 +1,7 @@
+/**
+ * Модуль: AuthApi.
+ * Назначение: Retrofit-интерфейс авторизации: login, register, forgot/reset password, profile.
+ */
 package ru.diamko.paleta.data.remote.api
 
 import retrofit2.http.Body

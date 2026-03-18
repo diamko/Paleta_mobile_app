@@ -1,3 +1,7 @@
+/**
+ * Модуль: RegisterScreen.
+ * Назначение: Экран регистрации нового пользователя.
+ */
 package ru.diamko.paleta.ui.auth
 
 import androidx.compose.foundation.layout.Arrangement

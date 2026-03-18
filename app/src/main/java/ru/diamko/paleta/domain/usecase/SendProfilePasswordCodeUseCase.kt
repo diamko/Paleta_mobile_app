@@ -1,3 +1,7 @@
+/**
+ * Модуль: SendProfilePasswordCodeUseCase.
+ * Назначение: Use-case: отправка кода подтверждения для смены пароля.
+ */
 package ru.diamko.paleta.domain.usecase
 
 import ru.diamko.paleta.domain.repository.AuthRepository

@@ -1,3 +1,7 @@
+/**
+ * Модуль: ColorTools.
+ * Назначение: Утилиты для работы с цветами: конвертация HEX ↔ Int, валидация.
+ */
 package ru.diamko.paleta.core.palette
 
 import android.graphics.Color

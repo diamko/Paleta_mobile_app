@@ -1,3 +1,7 @@
+/**
+ * Модуль: NetworkModule.
+ * Назначение: Конфигурация Retrofit и OkHttp; создание API-интерфейсов.
+ */
 package ru.diamko.paleta.core.network
 
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory

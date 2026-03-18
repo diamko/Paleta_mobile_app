@@ -1,3 +1,7 @@
+/**
+ * Модуль: PaletaUi.
+ * Назначение: Переиспользуемые UI-компоненты: кнопки, карточки, фон, баннеры.
+ */
 package ru.diamko.paleta.ui.components
 
 import androidx.compose.foundation.background

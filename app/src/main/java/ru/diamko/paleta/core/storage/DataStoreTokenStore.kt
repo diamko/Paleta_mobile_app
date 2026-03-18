@@ -1,3 +1,7 @@
+/**
+ * Модуль: DataStoreTokenStore.
+ * Назначение: Хранилище access/refresh токенов через DataStore.
+ */
 package ru.diamko.paleta.core.storage
 
 import android.content.Context

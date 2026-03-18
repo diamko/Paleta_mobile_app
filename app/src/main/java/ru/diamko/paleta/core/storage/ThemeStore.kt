@@ -1,3 +1,7 @@
+/**
+ * Модуль: ThemeStore.
+ * Назначение: Интерфейс хранилища темы оформления.
+ */
 package ru.diamko.paleta.core.storage
 
 import kotlinx.coroutines.flow.Flow

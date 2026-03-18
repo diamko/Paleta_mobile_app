@@ -1,3 +1,7 @@
+/**
+ * Модуль: PaletteEntity.
+ * Назначение: Room-сущность палитры для локального хранения.
+ */
 package ru.diamko.paleta.data.local.entity
 
 import androidx.room.Entity

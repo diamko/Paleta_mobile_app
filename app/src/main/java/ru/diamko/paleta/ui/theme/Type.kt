@@ -1,3 +1,7 @@
+/**
+ * Модуль: Type.
+ * Назначение: Определение типографики для Material3 темы.
+ */
 package ru.diamko.paleta.ui.theme
 
 import androidx.compose.material3.Typography

@@ -1,3 +1,7 @@
+/**
+ * Модуль: ExportFileSaver.
+ * Назначение: Сохранение экспортированного файла палитры через SAF.
+ */
 package ru.diamko.paleta.ui.palettes
 
 import android.content.Context

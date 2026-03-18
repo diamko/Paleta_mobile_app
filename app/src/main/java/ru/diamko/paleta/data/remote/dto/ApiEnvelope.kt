@@ -1,3 +1,7 @@
+/**
+ * Модуль: ApiEnvelope.
+ * Назначение: Обёртка ответа API: success, data, error.
+ */
 package ru.diamko.paleta.data.remote.dto
 
 import kotlinx.serialization.Serializable

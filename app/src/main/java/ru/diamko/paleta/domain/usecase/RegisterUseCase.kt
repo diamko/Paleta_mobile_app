@@ -1,3 +1,7 @@
+/**
+ * Модуль: RegisterUseCase.
+ * Назначение: Use-case: регистрация нового пользователя.
+ */
 package ru.diamko.paleta.domain.usecase
 
 import ru.diamko.paleta.domain.model.User

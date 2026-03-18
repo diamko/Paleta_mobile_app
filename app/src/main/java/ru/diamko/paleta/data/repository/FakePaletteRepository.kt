@@ -1,3 +1,7 @@
+/**
+ * Модуль: FakePaletteRepository.
+ * Назначение: Фейковый репозиторий палитр для разработки и тестирования.
+ */
 package ru.diamko.paleta.data.repository
 
 import android.graphics.BitmapFactory

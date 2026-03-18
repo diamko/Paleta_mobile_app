@@ -1,3 +1,7 @@
+/**
+ * Модуль: AuthValidation.
+ * Назначение: Валидация полей авторизации: email, имя пользователя, пароль.
+ */
 package ru.diamko.paleta.core.validation
 
 object AuthValidation {
