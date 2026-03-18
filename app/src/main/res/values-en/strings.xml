@@ -211,4 +211,18 @@
     <string name="faq_q3_body">On the login screen tap Forgot password, receive the code by email, then set a new password.</string>
     <string name="faq_q4_title">4. How to edit profile?</string>
     <string name="faq_q4_body">Open Settings -> Profile, make changes, and confirm with current password.</string>
+    <string name="faq_q5_title">5. Can I use the app without registration?</string>
+    <string name="faq_q5_body">Yes. Tap "Continue as guest" on the login screen. Guest mode allows generation, editing, harmonies, and export. Saving palettes to the library requires an account.</string>
+    <string name="faq_q6_title">6. How to extract colors from an image?</string>
+    <string name="faq_q6_body">Open Generator -> Image tab, tap "From image" and pick a photo. Set the number of colors and tap "Recalculate" to re-extract.</string>
+    <string name="faq_q7_title">7. How does the color wheel work?</string>
+    <string name="faq_q7_body">Select a color from the palette, then drag the dot on the wheel to change hue and saturation. The slider below adjusts brightness. You can also type a HEX code manually.</string>
+    <string name="faq_q8_title">8. What are color harmonies?</string>
+    <string name="faq_q8_body">Harmonies automatically generate matching colors based on your selected color: analogous, complementary, triadic, and more. Pick a type and tap "Apply harmony".</string>
+    <string name="faq_q9_title">9. What export formats are supported?</string>
+    <string name="faq_q9_body">JSON, GPL (GIMP), ASE (Adobe), CSV, PNG, and ACO (Adobe). Choose a format in the Export section and tap "Export".</string>
+    <string name="faq_q10_title">10. How to find a palette in the library?</string>
+    <string name="faq_q10_body">In My Palettes, use the search bar by name, filter by number of colors, and sort by date or name.</string>
+    <string name="faq_q11_title">11. How to change theme or language?</string>
+    <string name="faq_q11_body">Open Settings. Theme (dark, light, system) and language (RU / EN) can be changed in their respective sections.</string>
 </resources>

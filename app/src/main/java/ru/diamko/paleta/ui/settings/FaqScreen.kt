@@ -55,6 +55,27 @@ fun FaqScreen(
                     Text(stringResource(id = R.string.faq_q4_title), fontWeight = FontWeight.SemiBold)
                     Text(stringResource(id = R.string.faq_q4_body))
 
+                    Text(stringResource(id = R.string.faq_q5_title), fontWeight = FontWeight.SemiBold)
+                    Text(stringResource(id = R.string.faq_q5_body))
+
+                    Text(stringResource(id = R.string.faq_q6_title), fontWeight = FontWeight.SemiBold)
+                    Text(stringResource(id = R.string.faq_q6_body))
+
+                    Text(stringResource(id = R.string.faq_q7_title), fontWeight = FontWeight.SemiBold)
+                    Text(stringResource(id = R.string.faq_q7_body))
+
+                    Text(stringResource(id = R.string.faq_q8_title), fontWeight = FontWeight.SemiBold)
+                    Text(stringResource(id = R.string.faq_q8_body))
+
+                    Text(stringResource(id = R.string.faq_q9_title), fontWeight = FontWeight.SemiBold)
+                    Text(stringResource(id = R.string.faq_q9_body))
+
+                    Text(stringResource(id = R.string.faq_q10_title), fontWeight = FontWeight.SemiBold)
+                    Text(stringResource(id = R.string.faq_q10_body))
+
+                    Text(stringResource(id = R.string.faq_q11_title), fontWeight = FontWeight.SemiBold)
+                    Text(stringResource(id = R.string.faq_q11_body))
+
                     PaletaGhostButton(
                         modifier = Modifier.fillMaxWidth(),
                         text = stringResource(id = R.string.back),
