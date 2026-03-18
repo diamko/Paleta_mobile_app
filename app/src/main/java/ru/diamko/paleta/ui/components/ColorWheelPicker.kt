@@ -142,6 +142,13 @@ fun ColorWheelPicker(
                     radius = dotRadius,
                     center = Offset(cx, cy),
                 )
+                val dotStroke = 1.dp.toPx()
+                drawCircle(
+                    color = Color.White.copy(alpha = 0.45f),
+                    radius = dotRadius - dotStroke / 2f,
+                    center = Offset(cx, cy),
+                    style = Stroke(width = dotStroke),
+                )
             }
 
             // Draw base color marker (selected handle)
@@ -150,9 +157,9 @@ fun ColorWheelPicker(
             val markerY = center.y + (saturation * radius * kotlin.math.sin(angleRad).toFloat())
             drawCircle(
                 color = Color.White,
-                radius = 10.dp.toPx(),
+                radius = 7.dp.toPx(),
                 center = Offset(markerX, markerY),
-                style = Stroke(width = 2.5.dp.toPx()),
+                style = Stroke(width = 2.dp.toPx()),
             )
         }
 
