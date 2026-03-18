@@ -308,7 +308,6 @@ fun PaletteEditorScreen(
                                 harmonyBaseHex = updatedHex
                                 updateColorAt(currentIndex, updatedHex)
                             },
-                            harmonyColors = harmonyColors,
                         )
                     } else {
                         Text(

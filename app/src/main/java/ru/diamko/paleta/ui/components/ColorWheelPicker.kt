@@ -43,7 +43,6 @@ fun ColorWheelPicker(
     colorHex: String,
     onColorChange: (String) -> Unit,
     modifier: Modifier = Modifier,
-    harmonyColors: List<String> = emptyList(),
 ) {
     var wheelSize by remember { mutableStateOf(IntSize.Zero) }
 
@@ -126,38 +125,13 @@ fun ColorWheelPicker(
             val radius = min(size.width, size.height) / 2f
             val center = Offset(size.width / 2f, size.height / 2f)
 
-            // Draw harmony dots (full brightness, no stroke)
-            val dotRadius = 7.dp.toPx()
-            harmonyColors.forEach { hex ->
-                val colorInt = ColorTools.hexToColorInt(hex) ?: return@forEach
-                val hsv = FloatArray(3)
-                AndroidColor.colorToHSV(colorInt, hsv)
-                val angle = Math.toRadians(hsv[0].toDouble())
-                val dist = hsv[1] * radius
-                val cx = center.x + (dist * kotlin.math.cos(angle)).toFloat()
-                val cy = center.y + (dist * kotlin.math.sin(angle)).toFloat()
-                val dotColor = AndroidColor.HSVToColor(floatArrayOf(hsv[0], hsv[1], 1f))
-                drawCircle(
-                    color = Color(dotColor),
-                    radius = dotRadius,
-                    center = Offset(cx, cy),
-                )
-                val dotStroke = 1.dp.toPx()
-                drawCircle(
-                    color = Color.White.copy(alpha = 0.45f),
-                    radius = dotRadius - dotStroke / 2f,
-                    center = Offset(cx, cy),
-                    style = Stroke(width = dotStroke),
-                )
-            }
-
             // Draw base color marker (selected handle)
             val angleRad = Math.toRadians(hue.toDouble())
             val markerX = center.x + (saturation * radius * kotlin.math.cos(angleRad).toFloat())
             val markerY = center.y + (saturation * radius * kotlin.math.sin(angleRad).toFloat())
             drawCircle(
                 color = Color.White,
-                radius = 7.dp.toPx(),
+                radius = 6.dp.toPx(),
                 center = Offset(markerX, markerY),
                 style = Stroke(width = 2.dp.toPx()),
             )
