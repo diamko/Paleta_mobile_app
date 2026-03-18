@@ -25,6 +25,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.foundation.Canvas
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
@@ -90,6 +91,7 @@ fun PaletteEditorScreen(
     var selectedFormat by remember { mutableStateOf(PaletteExportFormat.JSON) }
     var pendingExport by remember { mutableStateOf<PaletteExportFile?>(null) }
     var isBusy by remember { mutableStateOf(false) }
+    var showDeleteConfirm by remember { mutableStateOf(false) }
 
     val createDocumentLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("*/*"),
@@ -440,11 +442,8 @@ fun PaletteEditorScreen(
                                 if (!isAuthenticated) {
                                     localError = context.getString(R.string.login_to_save_palette)
                                     return@PaletaGhostButton
-                                } else {
-                                    paletteViewModel.deletePalette(existing!!.id) {
-                                        onBack()
-                                    }
                                 }
+                                showDeleteConfirm = true
                             },
                             isDanger = true,
                         )
@@ -459,5 +458,31 @@ fun PaletteEditorScreen(
                 )
             }
         }
+    }
+
+    if (showDeleteConfirm && existing != null) {
+        AlertDialog(
+            onDismissRequest = { showDeleteConfirm = false },
+            title = { Text(stringResource(id = R.string.delete_palette_confirm_title)) },
+            text = { Text(stringResource(id = R.string.delete_palette_confirm_message, existing.name)) },
+            confirmButton = {
+                PaletaPrimaryButton(
+                    text = stringResource(id = R.string.delete),
+                    onClick = {
+                        showDeleteConfirm = false
+                        paletteViewModel.deletePalette(existing.id) {
+                            statusMessage = context.getString(R.string.palette_deleted)
+                            onBack()
+                        }
+                    },
+                )
+            },
+            dismissButton = {
+                PaletaGhostButton(
+                    text = stringResource(id = R.string.cancel),
+                    onClick = { showDeleteConfirm = false },
+                )
+            },
+        )
     }
 }

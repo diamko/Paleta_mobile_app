@@ -85,6 +85,7 @@
     <string name="save_changes">Save changes</string>
     <string name="delete_palette">Delete palette</string>
     <string name="palette_invalid_hex_count">Enter from 3 to 15 valid HEX colors</string>
+    <string name="palette_deleted">Palette deleted</string>
     <string name="palette_name_required">Palette name cannot be empty</string>
     <string name="save">Save</string>
     <string name="cancel">Cancel</string>

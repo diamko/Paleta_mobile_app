@@ -85,6 +85,7 @@
     <string name="save_changes">Сохранить изменения</string>
     <string name="delete_palette">Удалить палитру</string>
     <string name="palette_invalid_hex_count">Введите от 3 до 15 корректных HEX-цветов</string>
+    <string name="palette_deleted">Палитра удалена</string>
     <string name="palette_name_required">Название палитры не может быть пустым</string>
     <string name="save">Сохранить</string>
     <string name="cancel">Отмена</string>
