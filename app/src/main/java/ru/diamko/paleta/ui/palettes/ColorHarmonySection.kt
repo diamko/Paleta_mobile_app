@@ -31,7 +31,6 @@ import ru.diamko.paleta.core.palette.ColorTools
 import ru.diamko.paleta.ui.components.HorizontalScrollIndicator
 import ru.diamko.paleta.ui.components.PaletaGhostButton
 import ru.diamko.paleta.ui.components.PaletaSectionTitle
-import ru.diamko.paleta.ui.components.innerBorder
 
 @Composable
 fun ColorHarmonySection(
@@ -42,16 +41,22 @@ fun ColorHarmonySection(
 ) {
     var selectedType by remember { mutableStateOf(ColorHarmonyType.ANALOGOUS) }
 
+    val effectiveType = if (selectedType.isCompatibleWith(colorCount)) {
+        selectedType
+    } else {
+        ColorHarmonyType.entries.first { it.isCompatibleWith(colorCount) }
+    }
+
     LaunchedEffect(colorCount) {
         if (!selectedType.isCompatibleWith(colorCount)) {
-            selectedType = ColorHarmonyType.entries.first { it.isCompatibleWith(colorCount) }
+            selectedType = effectiveType
         }
     }
 
-    val generated = remember(baseHex, colorCount, selectedType) {
+    val generated = remember(baseHex, colorCount, effectiveType) {
         ColorHarmony.generate(
             baseHex = baseHex,
-            type = selectedType,
+            type = effectiveType,
             count = colorCount,
         )
     }
@@ -89,7 +94,6 @@ fun ColorHarmonySection(
 
     if (generated.isNotEmpty()) {
         val colorsScrollState = rememberScrollState()
-        val swatchShape = RoundedCornerShape(8.dp)
         Row(
             modifier = Modifier.horizontalScroll(colorsScrollState),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -100,12 +104,12 @@ fun ColorHarmonySection(
                         .size(30.dp)
                         .background(
                             color = ColorTools.hexToColorInt(hex)?.let(::Color) ?: Color.Gray,
-                            shape = swatchShape,
+                            shape = RoundedCornerShape(8.dp),
                         )
-                        .innerBorder(
+                        .border(
                             width = 1.dp,
                             color = Color.White.copy(alpha = 0.75f),
-                            shape = swatchShape,
+                            shape = RoundedCornerShape(8.dp),
                         ),
                 )
             }

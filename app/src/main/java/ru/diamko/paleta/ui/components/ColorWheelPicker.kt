@@ -17,6 +17,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -55,10 +56,12 @@ fun ColorWheelPicker(
     var saturation by remember(colorHex) { mutableStateOf(initialHsv[1]) }
     var value by remember(colorHex) { mutableStateOf(initialHsv[2]) }
 
+    val currentOnColorChange by rememberUpdatedState(onColorChange)
+
     fun emitColor() {
         val nextHex = ColorTools.colorIntToHex(AndroidColor.HSVToColor(floatArrayOf(hue, saturation, value)))
         if (!nextHex.equals(colorHex, ignoreCase = true)) {
-            onColorChange(nextHex)
+            currentOnColorChange(nextHex)
         }
     }
 

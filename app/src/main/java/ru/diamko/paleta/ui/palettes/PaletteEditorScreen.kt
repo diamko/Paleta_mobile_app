@@ -19,6 +19,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
@@ -34,7 +36,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -57,7 +58,6 @@ import ru.diamko.paleta.ui.components.PaletaGradientBackground
 import ru.diamko.paleta.ui.components.PaletaPrimaryButton
 import ru.diamko.paleta.ui.components.PaletaSectionTitle
 import ru.diamko.paleta.ui.components.PaletaTopBannerHost
-import ru.diamko.paleta.ui.components.innerBorder
 import ru.diamko.paleta.ui.components.paletaTextFieldColors
 import kotlin.math.max
 
@@ -121,21 +121,16 @@ fun PaletteEditorScreen(
             HexColors.parse(colorsInput) ?: emptyList()
         }
     }
-    val createColorCount = createColors.size.coerceIn(3, 15)
     val safeSelectedColorIndex = selectedColorIndex.coerceIn(0, max(0, parsedColors.lastIndex))
     val selectedColorHex = parsedColors.getOrNull(safeSelectedColorIndex)
 
     var harmonyBaseHex by remember { mutableStateOf(selectedColorHex ?: "#000000") }
     var harmonyColors by remember { mutableStateOf(emptyList<String>()) }
-    val selectedIndexState = rememberUpdatedState(safeSelectedColorIndex)
 
     LaunchedEffect(selectedColorHex) {
         if (selectedColorHex != null) {
             harmonyBaseHex = selectedColorHex
         }
-    }
-    LaunchedEffect(parsedColors.size) {
-        selectedColorIndex = selectedColorIndex.coerceIn(0, max(0, parsedColors.lastIndex))
     }
 
     fun updateColorAt(index: Int, rawHex: String) {
@@ -221,7 +216,7 @@ fun PaletteEditorScreen(
                         if (isCreateMode) {
                             ColorCountDropdown(
                                 label = stringResource(id = R.string.color_count_hint),
-                                selectedCount = createColorCount,
+                                selectedCount = createColors.size.coerceIn(3, 15),
                                 onSelected = { selected ->
                                     if (selected != null) {
                                         resizeCreateColors(selected)
@@ -238,30 +233,35 @@ fun PaletteEditorScreen(
                         ) {
                             parsedColors.forEachIndexed { index, hex ->
                                 val color = ColorTools.hexToColorInt(hex)?.let(::Color) ?: Color.Gray
-                                    val isSelected = index == safeSelectedColorIndex
-                                    val borderWidth = if (isSelected) 2.dp else 1.dp
-                                    val borderColor = if (isSelected) {
-                                        Color.White
-                                    } else {
-                                        Color.White.copy(alpha = 0.8f)
-                                    }
-                                    Box(
-                                        modifier = Modifier
-                                            .size(if (isSelected) 40.dp else 34.dp)
-                                            .background(color, CircleShape)
-                                            .innerBorder(
-                                                width = borderWidth,
-                                                color = borderColor,
-                                                shape = CircleShape,
-                                            )
-                                            .clickable {
-                                                selectedColorIndex = index
-                                                harmonyBaseHex = hex
-                                            },
+                                val isSelected = index == safeSelectedColorIndex
+                                val size = if (isSelected) 40.dp else 34.dp
+                                val borderWidth = if (isSelected) 2.dp else 1.dp
+                                Canvas(
+                                    modifier = Modifier
+                                        .size(size)
+                                        .clickable { selectedColorIndex = index },
+                                ) {
+                                    val radius = this.size.minDimension / 2f
+                                    val borderWidthPx = borderWidth.toPx()
+                                    // Draw background circle
+                                    drawCircle(
+                                        color = color,
+                                        radius = radius,
+                                    )
+                                    // Draw inner border
+                                    drawCircle(
+                                        color = if (isSelected) {
+                                            Color.White
+                                        } else {
+                                            Color.White.copy(alpha = 0.8f)
+                                        },
+                                        radius = radius - borderWidthPx,
+                                        style = Stroke(width = borderWidthPx),
                                     )
                                 }
                             }
                         }
+                    }
 
                     if (!isCreateMode) {
                         OutlinedTextField(
@@ -304,8 +304,9 @@ fun PaletteEditorScreen(
                         ColorWheelPicker(
                             colorHex = harmonyBaseHex,
                             onColorChange = { updatedHex ->
+                                val currentIndex = selectedColorIndex.coerceIn(0, max(0, parsedColors.lastIndex))
                                 harmonyBaseHex = updatedHex
-                                updateColorAt(selectedIndexState.value, updatedHex)
+                                updateColorAt(currentIndex, updatedHex)
                             },
                             harmonyColors = harmonyColors,
                         )
