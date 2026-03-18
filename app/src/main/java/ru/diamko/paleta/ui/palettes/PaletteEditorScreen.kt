@@ -85,6 +85,7 @@ fun PaletteEditorScreen(
         mutableStateOf(if (isCreateMode) RandomPaletteGenerator.generate(5) else emptyList())
     }
     var localError by remember { mutableStateOf<String?>(null) }
+    var statusMessage by remember { mutableStateOf<String?>(null) }
     var selectedColorIndex by remember(existing?.id) { mutableStateOf(0) }
     var selectedFormat by remember { mutableStateOf(PaletteExportFormat.JSON) }
     var pendingExport by remember { mutableStateOf<PaletteExportFile?>(null) }
@@ -95,13 +96,14 @@ fun PaletteEditorScreen(
     ) { outputUri ->
         val payload = pendingExport ?: return@rememberLauncherForActivityResult
         if (outputUri == null) {
-            localError = context.getString(R.string.export_canceled)
+            statusMessage = context.getString(R.string.export_canceled)
             pendingExport = null
             return@rememberLauncherForActivityResult
         }
         scope.launch {
             writeExportFile(context, outputUri, payload)
                 .onSuccess {
+                    statusMessage = context.getString(R.string.file_saved, payload.fileName)
                     localError = null
                     pendingExport = null
                 }
@@ -447,7 +449,7 @@ fun PaletteEditorScreen(
 
                 PaletaTopBannerHost(
                     error = localError,
-                    info = null,
+                    info = statusMessage,
                 )
             }
         }
