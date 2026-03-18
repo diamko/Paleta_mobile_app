@@ -126,9 +126,8 @@ fun ColorWheelPicker(
             val radius = min(size.width, size.height) / 2f
             val center = Offset(size.width / 2f, size.height / 2f)
 
-            // Draw harmony dots
+            // Draw harmony dots (full brightness, no stroke)
             val dotRadius = 7.dp.toPx()
-            val dotStroke = 1.5.dp.toPx()
             harmonyColors.forEach { hex ->
                 val colorInt = ColorTools.hexToColorInt(hex) ?: return@forEach
                 val hsv = FloatArray(3)
@@ -137,16 +136,11 @@ fun ColorWheelPicker(
                 val dist = hsv[1] * radius
                 val cx = center.x + (dist * kotlin.math.cos(angle)).toFloat()
                 val cy = center.y + (dist * kotlin.math.sin(angle)).toFloat()
+                val dotColor = AndroidColor.HSVToColor(floatArrayOf(hsv[0], hsv[1], 1f))
                 drawCircle(
-                    color = Color(colorInt),
+                    color = Color(dotColor),
                     radius = dotRadius,
                     center = Offset(cx, cy),
-                )
-                drawCircle(
-                    color = Color.White.copy(alpha = 0.7f),
-                    radius = dotRadius - dotStroke / 2f,
-                    center = Offset(cx, cy),
-                    style = Stroke(width = dotStroke),
                 )
             }
 
