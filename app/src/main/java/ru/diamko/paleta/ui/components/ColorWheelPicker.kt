@@ -46,14 +46,21 @@ fun ColorWheelPicker(
 ) {
     var wheelSize by remember { mutableStateOf(IntSize.Zero) }
 
-    val initialColor = ColorTools.hexToColorInt(colorHex) ?: AndroidColor.BLACK
-    val initialHsv = remember(initialColor) {
-        FloatArray(3).also { AndroidColor.colorToHSV(initialColor, it) }
-    }
+    var hue by remember { mutableStateOf(0f) }
+    var saturation by remember { mutableStateOf(0f) }
+    var value by remember { mutableStateOf(1f) }
 
-    var hue by remember(colorHex) { mutableStateOf(initialHsv[0]) }
-    var saturation by remember(colorHex) { mutableStateOf(initialHsv[1]) }
-    var value by remember(colorHex) { mutableStateOf(initialHsv[2]) }
+    // Sync HSV from external colorHex changes without recreating MutableState
+    // (recreating states breaks pointerInput which holds refs to old objects)
+    var prevColorHex by remember { mutableStateOf("") }
+    if (prevColorHex != colorHex) {
+        prevColorHex = colorHex
+        val color = ColorTools.hexToColorInt(colorHex) ?: AndroidColor.BLACK
+        val hsv = FloatArray(3).also { AndroidColor.colorToHSV(color, it) }
+        hue = hsv[0]
+        saturation = hsv[1]
+        value = hsv[2]
+    }
 
     val currentOnColorChange by rememberUpdatedState(onColorChange)
 
