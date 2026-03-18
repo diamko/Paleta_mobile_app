@@ -7,8 +7,8 @@ package ru.diamko.paleta.core.validation
 object AuthValidation {
     const val USERNAME_MIN = 3
     const val USERNAME_MAX = 20
-    const val PASSWORD_MIN = 8
-    const val PASSWORD_MAX = 64
+    const val PASSWORD_MIN = 10
+    const val PASSWORD_MAX = 16
     const val EMAIL_MAX = 254
 
     private val usernameRegex = Regex("^[A-Za-z0-9_.]{${USERNAME_MIN},${USERNAME_MAX}}$")
@@ -42,9 +42,12 @@ object AuthValidation {
 
     fun isValidPassword(input: String): Boolean {
         if (input.length !in PASSWORD_MIN..PASSWORD_MAX) return false
-        val hasLetter = input.any { it.isLetter() }
+        if (input.any { it.isWhitespace() }) return false
+        val hasUpper = input.any { it.isUpperCase() }
+        val hasLower = input.any { it.isLowerCase() }
         val hasDigit = input.any { it.isDigit() }
-        return hasLetter && hasDigit
+        val hasSpecial = input.any { !it.isLetterOrDigit() }
+        return hasUpper && hasLower && hasDigit && hasSpecial
     }
 
     private fun isAsciiLetterOrDigit(ch: Char): Boolean {

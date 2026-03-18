@@ -45,7 +45,7 @@
     <string name="auth_error_change_password">Не удалось изменить пароль</string>
     <string name="auth_invalid_username">Имя пользователя должно быть 3–20 символов (буквы, цифры, _ или .)</string>
     <string name="auth_invalid_email">Введите корректный email</string>
-    <string name="auth_invalid_password">Пароль должен быть 8–64 символов и содержать буквы и цифры</string>
+    <string name="auth_invalid_password">Пароль должен быть 10–16 символов и содержать заглавную, строчную букву, цифру и спецсимвол</string>
     <string name="auth_passwords_not_match">Пароли не совпадают</string>
 
     <string name="palettes_title">Мои палитры</string>

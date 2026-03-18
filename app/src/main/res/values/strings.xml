@@ -45,7 +45,7 @@
     <string name="auth_error_change_password">Failed to change password</string>
     <string name="auth_invalid_username">Username must be 3-20 characters (letters, numbers, _ or .)</string>
     <string name="auth_invalid_email">Enter a valid email address</string>
-    <string name="auth_invalid_password">Password must be 8-64 characters and include letters and numbers</string>
+    <string name="auth_invalid_password">Password must be 10–16 characters and include uppercase, lowercase, digit, and special character</string>
     <string name="auth_passwords_not_match">Passwords do not match</string>
 
     <string name="palettes_title">My palettes</string>
