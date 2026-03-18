@@ -1,13 +1,14 @@
 # Paleta Mobile
 
 <p align="right">
-  <strong>Language:</strong>
-  English |
-  <a href="README.ru.md">Русский</a>
+  🌍 <strong>Language:</strong>
+  🇬🇧 English |
+  🇷🇺 <a href="README.ru.md">Русский</a>
 </p>
 
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.0-purple.svg)](https://kotlinlang.org/)
 [![Jetpack Compose](https://img.shields.io/badge/Jetpack_Compose-Material_3-4285F4.svg)](https://developer.android.com/jetpack/compose)
+[![Android](https://img.shields.io/badge/Android-API_26+-34A853.svg)](https://developer.android.com/)
 [![Status](https://img.shields.io/badge/status-active-success.svg)](#)
 
 <p align="center">
@@ -16,96 +17,106 @@
   </a>
 </p>
 
-<p align="center">
-  <strong>Visit my website:</strong> <a href="https://diamko.ru">diamko.ru</a>
-</p>
+Paleta Mobile is an Android companion app for [Paleta](https://github.com/diamko/Paleta_web_app) — a tool for generating, editing, saving, and exporting color palettes.
 
-Paleta Mobile is an Android companion app for [Paleta](https://github.com/diamko/Paleta) — a tool for generating, editing, saving, and exporting color palettes.
-Upload an image to extract dominant colors, generate random palettes, fine-tune them with a built-in color wheel and pipette, and export to design-ready formats.
-
-The app is aimed at designers, mobile developers, and anyone who works with colors and needs a fast, on-the-go workflow from image to HEX codes.
+Upload an image to extract dominant colors, generate random palettes, fine-tune them with a built-in color wheel and pipette, and export to design-ready formats — all from your phone.
 
 ## Table of Contents
 
 1. [Why Paleta Mobile](#why-paleta-mobile)
 2. [Key Features](#key-features)
 3. [Tech Stack](#tech-stack)
-4. [How It Works](#how-it-works)
-5. [Installation and Setup](#installation-and-setup)
-6. [Run the Project](#run-the-project)
-7. [Configuration](#configuration)
-8. [Usage Guide](#usage-guide)
-9. [Project Structure](#project-structure)
-10. [Related Projects](#related-projects)
-11. [Contributing](#contributing)
-12. [Authors](#authors)
-13. [License](#license)
+4. [Architecture](#architecture)
+5. [How It Works](#how-it-works)
+6. [Installation and Setup](#installation-and-setup)
+7. [Run the Project](#run-the-project)
+8. [Configuration](#configuration)
+9. [Usage Guide](#usage-guide)
+10. [Project Structure](#project-structure)
+11. [Related Projects](#related-projects)
+12. [Contributing](#contributing)
+13. [Authors](#authors)
+14. [License](#license)
 
 ## Why Paleta Mobile
 
 ### Goal
 
-To bring the full Paleta palette workflow to Android — generate, edit, save, and export color palettes from your phone.
+Bring the full Paleta palette workflow to Android — generate, edit, save, and export color palettes directly from your phone.
 
 ### Problem It Solves
 
 - Desktop-only palette tools are inconvenient when you need to capture colors from a photo on the spot.
-- Transferring palettes between devices often requires extra steps.
+- Transferring palettes between devices requires extra steps.
 - Most mobile color tools lack export to professional formats (GPL, ASE, ACO).
 
 ### What Makes It Different
 
-- Two generation modes: from image (with on-image pipette) and random.
-- Built-in color wheel, RGB sliders, and color harmonies.
-- Export to 6 formats: JSON, GPL, ASE, CSV, PNG, ACO.
-- Guest mode — works without registration for quick tasks.
-- Syncs with the Paleta backend for palette storage and recent uploads.
+- **Two generation modes**: from image (with on-image pipette) and random.
+- **Built-in color wheel** with brightness slider and 8 color harmony modes.
+- **Export to 6 formats**: JSON, GPL, ASE, CSV, PNG, ACO.
+- **Guest mode** — full generation, editing, and export without registration.
+- **Offline support** — saved palettes are cached locally and synced when connection is restored.
 
 ## Key Features
 
-- Generate palette from image with dominant color extraction (server-side KMeans).
-- Random palette generation with harmony modes (complementary, triadic, analogous, split-complementary).
-- On-image pipette: drag markers on the uploaded image to pick exact pixel colors.
-- Color wheel picker with brightness slider for precise color adjustments.
-- RGB channel sliders for fine control.
-- Export palettes: `JSON`, `GPL`, `ASE`, `CSV`, `PNG`, `ACO`.
-- User authentication (register, login, password reset via email).
-- Personal palette library with search, filters, and sorting.
-- Recent image uploads (last 7 days) for quick reuse.
-- Guest mode — full generation, editing, and export without login.
-- Dark/light/system theme support.
-- Bilingual interface: Russian and English.
+| Category | Features |
+|---|---|
+| **Generation** | Palette from image (KMeans on server), random palette with harmony modes |
+| **Editing** | HSV color wheel with brightness slider, on-image pipette with magnifier, HEX input |
+| **Harmonies** | Analogous, complementary, triadic, square, split-complementary, monochromatic, sequential, tetradic |
+| **Export** | JSON, GPL, ASE, CSV, PNG, ACO |
+| **Library** | Personal palette library with search, filtering by color count, and sorting (name, date, color count) |
+| **Auth** | Register, login, password reset via email, profile editing, password change |
+| **Offline** | Room database cache with WorkManager background sync |
+| **UI** | Dark / light / system theme, Russian and English interface |
 
 ## Tech Stack
 
-- `Kotlin 2.0+`
-- `Jetpack Compose` (Material 3)
-- `Single-module MVVM` architecture
-- `Retrofit 2` + `OkHttp` for networking
-- `Kotlin Serialization` for JSON
-- `DataStore Preferences` for local settings
-- `Kotlin Coroutines` for async operations
-- `Navigation Compose` for screen routing
-- `Android SDK 35` (minSdk 26)
+| Layer | Technology |
+|---|---|
+| Language | Kotlin 2.0+ |
+| UI | Jetpack Compose (Material 3) |
+| Architecture | Single-module MVVM + Clean Architecture layers |
+| Networking | Retrofit 2 + OkHttp + Kotlin Serialization |
+| Local storage | Room (SQLite) + DataStore Preferences |
+| Background sync | WorkManager |
+| Async | Kotlin Coroutines + Flow |
+| Navigation | Navigation Compose |
+| Target | Android SDK 35 (minSdk 26, Android 8.0+) |
+
+## Architecture
+
+The project follows a single-module **Clean Architecture** layout with three layers:
+
+```
+core/       → DI container, networking, palette algorithms, local storage interfaces
+data/       → Retrofit API clients, DTOs, Room database, repository implementations, sync worker
+domain/     → Domain models, repository interfaces, use cases
+ui/         → Compose screens, ViewModels, theme, navigation
+```
+
+Data flow: **UI → ViewModel → UseCase → Repository → API / Room**
 
 ## How It Works
 
 1. User uploads an image or generates a random palette.
 2. For images: the backend runs KMeans clustering and returns dominant colors.
-3. User edits colors via the color wheel, RGB sliders, or on-image pipette.
-4. The palette can be exported to a file or saved to the user's account.
-5. Saved palettes are available in "My Palettes" with search, filters, and sorting.
+3. User edits colors via the color wheel, HEX input, or on-image pipette.
+4. Colors can be harmonized using 8 harmony modes (analogous, triadic, etc.).
+5. The palette can be exported to a file or saved to the user's account.
+6. Saved palettes are cached locally (Room) and synced with the server in the background.
 
 ## Installation and Setup
 
 ### Prerequisites
 
 - `git`
-- `JDK 17` (required by AGP)
+- `JDK 17` (required by Android Gradle Plugin)
 - `Android SDK` (API level 35)
 - Android Studio (recommended) or Gradle CLI
 
-### 1) Clone repository
+### 1) Clone the repository
 
 ```bash
 git clone https://github.com/diamko/Paleta_mobile_app.git
@@ -114,7 +125,7 @@ cd Paleta_mobile_app
 
 ### 2) Install JDK 17 (if not installed)
 
-Ubuntu/Debian:
+Ubuntu / Debian:
 
 ```bash
 sudo apt install openjdk-17-jdk
@@ -152,70 +163,95 @@ $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
 
 ```bash
 chmod +x gradlew
-./gradlew assembleDebug
+JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64 ./gradlew assembleDebug
 ```
 
 The debug APK will be at `app/build/outputs/apk/debug/app-debug.apk`.
 
 ## Configuration
 
-### Repository mode
+### Backend connection
 
-By default, the app uses `FakeRepository` (offline, no backend required).
-
-To connect to a real Paleta backend, edit `app/build.gradle.kts`:
+By default, the app connects to the remote Paleta backend. The base URL and repository mode are configured in `app/build.gradle.kts`:
 
 ```kotlin
 buildConfigField("String", "REPOSITORY_MODE", "\"remote\"")
-buildConfigField("String", "API_BASE_URL", "\"http://your-server:5000/\"")
+buildConfigField("String", "API_BASE_URL", "\"https://your-server.com/\"")
+```
+
+To develop offline without a backend, switch to the built-in fake repository:
+
+```kotlin
+buildConfigField("String", "REPOSITORY_MODE", "\"fake\"")
 ```
 
 ### Theme
 
-The app supports light, dark, and system themes. Change it in Settings.
+The app supports light, dark, and system themes. Change it in **Settings**.
 
 ### Language
 
-Russian and English are supported. Change it in Settings — the app will restart to apply the new locale.
+Russian and English are supported. Change it in **Settings** — the app will restart to apply the new locale.
 
 ## Usage Guide
 
 ### Guest mode (without account)
 
-You can:
+Available:
 
-- generate palettes from images and random,
-- edit colors with the color wheel, sliders, and pipette,
-- export palettes to all supported formats.
+- generate palettes from images and random
+- edit colors with the color wheel, HEX input, and pipette
+- apply color harmonies
+- export palettes to all supported formats
 
 ### Authenticated mode
 
-You also get:
+Additionally available:
 
-- saving palettes to your personal library,
-- rename and delete palettes,
-- search, filter, and sort in "My Palettes",
-- recent image uploads for quick reuse.
+- save palettes to your personal library
+- rename and delete palettes
+- search, filter, and sort in "My Palettes"
+- reuse recent image uploads (last 7 days)
+- change password and edit profile
 
 ## Project Structure
 
-```text
+```
 Paleta_mobile_app/
 ├── app/
-│   └── src/main/java/ru/diamko/paleta/
-│       ├── core/           # DI, networking, palette logic, storage
-│       ├── data/           # API clients, DTOs, repository implementations
-│       ├── domain/         # Models, repository interfaces, use cases
-│       ├── ui/
-│       │   ├── auth/       # Login, register, password screens
-│       │   ├── components/ # Reusable UI components
-│       │   ├── navigation/ # NavHost, routes
-│       │   ├── palettes/   # Palette list, editor, generator screens
-│       │   ├── settings/   # Settings, FAQ, profile screens
-│       │   └── theme/      # Colors, typography, theme
-│       └── MainActivity.kt
+│   ├── build.gradle.kts              # App-level build config
+│   └── src/main/
+│       ├── java/ru/diamko/paleta/
+│       │   ├── MainActivity.kt       # Entry point
+│       │   ├── PaletaApplication.kt  # App init, DI container
+│       │   ├── core/
+│       │   │   ├── di/               # AppContainer (dependency injection)
+│       │   │   ├── network/          # Retrofit, OkHttp, auth interceptor
+│       │   │   ├── palette/          # Color tools, harmonies, export, extraction
+│       │   │   ├── storage/          # DataStore interfaces and implementations
+│       │   │   └── validation/       # Auth field validation
+│       │   ├── data/
+│       │   │   ├── local/            # Room database, DAO, entities
+│       │   │   ├── remote/           # Retrofit API interfaces, DTOs
+│       │   │   ├── repository/       # Repository implementations (Remote, Offline, Fake)
+│       │   │   └── sync/             # WorkManager palette sync
+│       │   ├── domain/
+│       │   │   ├── model/            # Domain models (Palette, User, etc.)
+│       │   │   ├── repository/       # Repository interfaces
+│       │   │   └── usecase/          # Business logic use cases
+│       │   └── ui/
+│       │       ├── auth/             # Login, register, forgot/reset password
+│       │       ├── components/       # Reusable UI: color wheel, buttons, cards
+│       │       ├── navigation/       # NavHost, route definitions
+│       │       ├── palettes/         # Palette list, editor, generator
+│       │       ├── settings/         # Settings, FAQ, profile, password change
+│       │       └── theme/            # Material 3 colors, typography, theme
+│       └── res/
+│           ├── values/               # Default strings (English)
+│           ├── values-ru/            # Russian strings
+│           └── values-en/            # English strings (explicit)
 ├── gradle/
-├── build.gradle.kts
+├── build.gradle.kts                  # Root build config
 ├── LICENCE
 ├── README.md
 └── README.ru.md
@@ -223,7 +259,7 @@ Paleta_mobile_app/
 
 ## Related Projects
 
-- [Paleta](https://github.com/diamko/Paleta) — the web application and backend that powers this mobile app.
+- [Paleta](https://github.com/diamko/Paleta_web_app) — the web application and Flask backend that powers this mobile app.
 
 ## Contributing
 
@@ -242,6 +278,4 @@ Contributions are welcome.
 
 ## License
 
-This project is licensed under the MIT License.
-
-See: [`LICENCE`](LICENCE)
+This project is licensed under the MIT License — see [`LICENCE`](LICENCE).
