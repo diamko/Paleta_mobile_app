@@ -176,6 +176,13 @@ fun PaletteEditorScreen(
                 TopAppBar(
                     colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
                     title = { Text(text = stringResource(id = R.string.palette_editor_title)) },
+                    actions = {
+                        PaletaGhostButton(
+                            modifier = Modifier.padding(end = 12.dp),
+                            text = stringResource(id = R.string.back),
+                            onClick = onBack,
+                        )
+                    },
                 )
             },
         ) { paddingValues ->
@@ -231,6 +238,11 @@ fun PaletteEditorScreen(
                                 modifier = Modifier.fillMaxWidth(),
                             )
                         }
+
+                        PaletaSectionTitle(
+                            title = stringResource(id = R.string.palette_label),
+                            subtitle = stringResource(id = R.string.palette_your_palette),
+                        )
 
                         FlowRow(
                             modifier = Modifier.fillMaxWidth(),
@@ -376,11 +388,11 @@ fun PaletteEditorScreen(
                     if (isCreateMode) {
                         PaletaPrimaryButton(
                             modifier = Modifier.fillMaxWidth(),
-                            text = stringResource(id = R.string.create_palette),
+                            text = stringResource(id = R.string.save_palette),
                             onClick = {
                                 if (!isAuthenticated) {
                                     localError = context.getString(R.string.login_to_save_palette)
-                                    onRequireLogin()
+                                    return@PaletaPrimaryButton
                                 } else {
                                     val parsed = HexColors.normalize(parsedColors)
                                     if (parsed == null) {
@@ -400,7 +412,6 @@ fun PaletteEditorScreen(
                             onClick = {
                                 if (!isAuthenticated) {
                                     localError = context.getString(R.string.login_to_save_palette)
-                                    onRequireLogin()
                                     return@PaletaPrimaryButton
                                 }
                                 val parsed = HexColors.parse(colorsInput)
@@ -428,7 +439,7 @@ fun PaletteEditorScreen(
                             onClick = {
                                 if (!isAuthenticated) {
                                     localError = context.getString(R.string.login_to_save_palette)
-                                    onRequireLogin()
+                                    return@PaletaGhostButton
                                 } else {
                                     paletteViewModel.deletePalette(existing!!.id) {
                                         onBack()
@@ -439,11 +450,6 @@ fun PaletteEditorScreen(
                         )
                     }
 
-                    PaletaGhostButton(
-                        modifier = Modifier.fillMaxWidth(),
-                        text = stringResource(id = R.string.cancel),
-                        onClick = onBack,
-                    )
                     }
                 }
 

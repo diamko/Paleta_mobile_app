@@ -905,6 +905,10 @@ fun PaletteGenerateScreen(
                         modifier = Modifier.fillMaxWidth(),
                         text = stringResource(id = R.string.export_file),
                         onClick = {
+                            if (paletteColors.isEmpty()) {
+                                localError = context.getString(R.string.palette_not_generated)
+                                return@PaletaPrimaryButton
+                            }
                             val colors = HexColors.normalize(paletteColors)
                             if (colors == null) {
                                 localError = context.getString(R.string.palette_invalid_hex_count)
@@ -941,7 +945,7 @@ fun PaletteGenerateScreen(
                         onClick = {
                             if (!isAuthenticated) {
                                 localError = context.getString(R.string.login_to_save_palette)
-                                onRequireLogin()
+                                return@PaletaPrimaryButton
                             } else {
                                 val colors = HexColors.normalize(paletteColors)
                                 if (colors == null) {

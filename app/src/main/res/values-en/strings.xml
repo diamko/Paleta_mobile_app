@@ -43,7 +43,7 @@
     <string name="auth_profile_password_code_sent">Verification code sent</string>
     <string name="auth_password_changed">Password changed successfully</string>
     <string name="auth_error_change_password">Failed to change password</string>
-    <string name="auth_invalid_username">Username must be 3-20 characters (letters, numbers, _ or .)</string>
+    <string name="auth_invalid_username">Username must be 3–80 characters without spaces</string>
     <string name="auth_invalid_email">Enter a valid email address</string>
     <string name="auth_invalid_password">Password must be 10–16 characters and include uppercase, lowercase, digit, and special character</string>
     <string name="auth_passwords_not_match">Passwords do not match</string>
@@ -123,8 +123,10 @@
     <string name="selected_image_desc">Selected image</string>
     <string name="pipette_help">Pipettes appear after extraction. The loupe appears only while moving an active pipette.</string>
 
+    <string name="palette_label">Palette:</string>
+    <string name="palette_your_palette">This is your palette</string>
     <string name="palette_colors_title">Palette colors</string>
-    <string name="palette_colors_subtitle">Up to 3 cards per row, each color can be edited separately</string>
+    <string name="palette_colors_subtitle">Each color can be edited separately</string>
     <string name="generate_first_hint">Generate a palette first or extract colors from an image</string>
     <string name="color_label">Color %1$d</string>
     <string name="color_editor_title">Selected color editor</string>
@@ -133,7 +135,7 @@
     <string name="hex_copied">HEX copied: %1$s</string>
     <string name="random_color">Random color</string>
     <string name="harmony_title">Color harmony</string>
-    <string name="harmony_subtitle">Generate related colors like Adobe Color</string>
+    <string name="harmony_subtitle">Generate related colors</string>
     <string name="harmony_apply">Apply harmony</string>
     <string name="harmony_applied">Harmony applied</string>
     <string name="harmony_sequential">Sequential</string>
@@ -167,6 +169,7 @@
     <string name="error_generating">Failed to generate palette</string>
     <string name="error_generating_from_recent">Failed to generate from recent image</string>
     <string name="error_palette_colors_required">Palette colors are required</string>
+    <string name="palette_not_generated">Palette not generated</string>
     <string name="default_palette_name">My palette</string>
     <string name="offline_banner">Offline mode — changes will sync when connected</string>
 

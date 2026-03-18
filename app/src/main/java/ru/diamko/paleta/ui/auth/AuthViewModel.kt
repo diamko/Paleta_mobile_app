@@ -56,10 +56,9 @@ class AuthViewModel(
     }
 
     private fun resolveErrorMessage(error: Throwable, fallbackResId: Int): String {
-        return when (error) {
-            is IllegalArgumentException, is IllegalStateException -> error.message ?: getString(fallbackResId)
-            else -> getString(fallbackResId)
-        }
+        val message = error.message
+        if (!message.isNullOrBlank()) return message
+        return getString(fallbackResId)
     }
 
     fun login(login: String, password: String) {

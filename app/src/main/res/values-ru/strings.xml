@@ -43,7 +43,7 @@
     <string name="auth_profile_password_code_sent">Код подтверждения отправлен</string>
     <string name="auth_password_changed">Пароль успешно изменён</string>
     <string name="auth_error_change_password">Не удалось изменить пароль</string>
-    <string name="auth_invalid_username">Имя пользователя должно быть 3–20 символов (буквы, цифры, _ или .)</string>
+    <string name="auth_invalid_username">Имя пользователя должно быть 3–80 символов без пробелов</string>
     <string name="auth_invalid_email">Введите корректный email</string>
     <string name="auth_invalid_password">Пароль должен быть 10–16 символов и содержать заглавную, строчную букву, цифру и спецсимвол</string>
     <string name="auth_passwords_not_match">Пароли не совпадают</string>
@@ -122,8 +122,10 @@
     <string name="selected_image_desc">Выбранное изображение</string>
     <string name="pipette_help">Пипетки появляются после извлечения. Лупа показывается только при движении активной пипетки.</string>
 
+    <string name="palette_label">Палитра:</string>
+    <string name="palette_your_palette">Это ваша палитра</string>
     <string name="palette_colors_title">Цвета палитры</string>
-    <string name="palette_colors_subtitle">Максимум 3 карточки в ряд, каждый цвет редактируется отдельно</string>
+    <string name="palette_colors_subtitle">Каждый цвет редактируется отдельно</string>
     <string name="generate_first_hint">Сначала сгенерируйте палитру или извлеките цвета из изображения</string>
     <string name="color_label">Цвет %1$d</string>
     <string name="color_editor_title">Редактор выбранного цвета</string>
@@ -132,7 +134,7 @@
     <string name="hex_copied">HEX скопирован: %1$s</string>
     <string name="random_color">Случайный цвет</string>
     <string name="harmony_title">Гармонии цвета</string>
-    <string name="harmony_subtitle">Генерируйте связанные цвета как в Adobe Color</string>
+    <string name="harmony_subtitle">Генерируйте связанные цвета</string>
     <string name="harmony_apply">Применить гармонию</string>
     <string name="harmony_applied">Гармония применена</string>
     <string name="harmony_sequential">Последовательная</string>
@@ -166,6 +168,7 @@
     <string name="error_generating">Ошибка генерации палитры</string>
     <string name="error_generating_from_recent">Ошибка генерации из недавнего изображения</string>
     <string name="error_palette_colors_required">Необходимо указать цвета палитры</string>
+    <string name="palette_not_generated">Палитра не сгенерирована</string>
     <string name="default_palette_name">Моя палитра</string>
     <string name="offline_banner">Офлайн-режим — изменения сохранятся при подключении</string>
 
