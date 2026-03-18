@@ -9,7 +9,6 @@
     <string name="go_register">No account? Sign up</string>
     <string name="forgot_password_link">Forgot password?</string>
     <string name="continue_as_guest">Continue as guest</string>
-    <string name="wifi_hint"></string>
 
     <string name="register_title">Sign up</string>
     <string name="register_subtitle">Create an account to save and export palettes</string>
