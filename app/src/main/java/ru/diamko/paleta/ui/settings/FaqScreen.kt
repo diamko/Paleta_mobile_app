@@ -30,7 +30,7 @@ fun FaqScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
+                .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 32.dp),
             contentAlignment = Alignment.Center,
         ) {
             Column(

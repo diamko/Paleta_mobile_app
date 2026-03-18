@@ -335,8 +335,9 @@ fun PaletteListScreen(
                         }
 
                         item {
+                            val sortScrollState = rememberScrollState()
                             Row(
-                                modifier = Modifier.horizontalScroll(rememberScrollState()),
+                                modifier = Modifier.horizontalScroll(sortScrollState),
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                             ) {
                                 SortChip(stringResource(id = R.string.sort_newest), sortMode == PaletteSortMode.NEWEST.name) { sortMode = PaletteSortMode.NEWEST.name }
@@ -346,6 +347,7 @@ fun PaletteListScreen(
                                 SortChip(stringResource(id = R.string.sort_colors_asc), sortMode == PaletteSortMode.COLORS_ASC.name) { sortMode = PaletteSortMode.COLORS_ASC.name }
                                 SortChip(stringResource(id = R.string.sort_colors_desc), sortMode == PaletteSortMode.COLORS_DESC.name) { sortMode = PaletteSortMode.COLORS_DESC.name }
                             }
+                            HorizontalScrollIndicator(scrollState = sortScrollState)
                         }
 
                         item {
