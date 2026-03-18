@@ -3,13 +3,16 @@ package ru.diamko.paleta.ui.components
 import android.graphics.Bitmap
 import android.graphics.Color as AndroidColor
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.gestures.awaitEachGesture
-import androidx.compose.foundation.gestures.awaitFirstDown
-import androidx.compose.foundation.gestures.drag
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.shape.GenericShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
@@ -24,6 +27,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -102,49 +107,58 @@ fun ColorWheelPicker(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Canvas(
+        val wheelCircleShape = remember {
+            GenericShape { size, _ ->
+                val r = min(size.width, size.height) / 2f
+                val cx = size.width / 2f
+                val cy = size.height / 2f
+                addOval(Rect(cx - r, cy - r, cx + r, cy + r))
+            }
+        }
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(260.dp)
-                .onSizeChanged { wheelSize = it }
-                .pointerInput(wheelSize) {
-                    awaitEachGesture {
-                        val down = awaitFirstDown(requireUnconsumed = false)
-                        val size = wheelSize
-                        if (size.width <= 0 || size.height <= 0) return@awaitEachGesture
-                        val radius = min(size.width, size.height) / 2f
-                        val center = Offset(size.width / 2f, size.height / 2f)
-                        val dx = down.position.x - center.x
-                        val dy = down.position.y - center.y
-                        if (sqrt(dx * dx + dy * dy) > radius) return@awaitEachGesture
-                        down.consume()
-                        updateFromPoint(down.position)
-                        drag(down.id) { change ->
-                            change.consume()
-                            updateFromPoint(change.position)
-                        }
-                    }
-                },
+                .height(260.dp),
         ) {
-            val bitmap = wheelBitmap ?: return@Canvas
-            drawImage(
-                image = bitmap.asImageBitmap(),
-                dstOffset = IntOffset.Zero,
-                dstSize = IntSize(size.width.toInt(), size.height.toInt()),
-            )
+            Canvas(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .onSizeChanged { wheelSize = it },
+            ) {
+                val bitmap = wheelBitmap ?: return@Canvas
+                drawImage(
+                    image = bitmap.asImageBitmap(),
+                    dstOffset = IntOffset.Zero,
+                    dstSize = IntSize(size.width.toInt(), size.height.toInt()),
+                )
 
-            val radius = min(size.width, size.height) / 2f
-            val center = Offset(size.width / 2f, size.height / 2f)
+                val radius = min(size.width, size.height) / 2f
+                val center = Offset(size.width / 2f, size.height / 2f)
 
-            // Draw base color marker (selected handle)
-            val angleRad = Math.toRadians(hue.toDouble())
-            val markerX = center.x + (saturation * radius * kotlin.math.cos(angleRad).toFloat())
-            val markerY = center.y + (saturation * radius * kotlin.math.sin(angleRad).toFloat())
-            drawCircle(
-                color = Color.White,
-                radius = 8.dp.toPx(),
-                center = Offset(markerX, markerY),
-                style = Stroke(width = 2.dp.toPx()),
+                val angleRad = Math.toRadians(hue.toDouble())
+                val markerX = center.x + (saturation * radius * kotlin.math.cos(angleRad).toFloat())
+                val markerY = center.y + (saturation * radius * kotlin.math.sin(angleRad).toFloat())
+                drawCircle(
+                    color = Color.White,
+                    radius = 8.dp.toPx(),
+                    center = Offset(markerX, markerY),
+                    style = Stroke(width = 2.dp.toPx()),
+                )
+            }
+
+            Spacer(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(wheelCircleShape)
+                    .pointerInput(wheelSize) {
+                        detectTapGestures(onTap = { updateFromPoint(it) })
+                    }
+                    .pointerInput(wheelSize) {
+                        detectDragGestures(
+                            onDragStart = { updateFromPoint(it) },
+                            onDrag = { change, _ -> updateFromPoint(change.position) },
+                        )
+                    },
             )
         }
 
