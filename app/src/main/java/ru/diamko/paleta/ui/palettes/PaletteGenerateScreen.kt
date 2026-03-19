@@ -160,12 +160,14 @@ fun PaletteGenerateScreen(
         val normalized = HexColors.normalize(colors)
         if (normalized == null) {
             localError = context.getString(R.string.palette_invalid_hex_count)
+            localErrorKey++
             return
         }
         paletteColors = normalized
         selectedColorIndex = selectedColorIndex.coerceIn(0, normalized.lastIndex)
         markerPositions = List(normalized.size) { idx -> markerPositions.getOrNull(idx) }
         statusMessage = message
+        statusMessageKey++
         localError = null
     }
 
