@@ -155,6 +155,7 @@
     <string name="generate_gradient">Gradient</string>
     <string name="gradient_need_two_colors">Need at least 2 colors to create a gradient</string>
     <string name="gradient_applied">Gradient applied</string>
+    <string name="gradient_description">Creates a smooth HSV color transition from the first to the last color</string>
 
     <string name="export_title">Export</string>
     <string name="export_subtitle">Choose format and export file</string>

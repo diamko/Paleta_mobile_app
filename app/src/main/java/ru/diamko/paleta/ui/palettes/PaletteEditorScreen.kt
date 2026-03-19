@@ -351,6 +351,11 @@ fun PaletteEditorScreen(
                                 statusMessageKey++
                             },
                         )
+                        Text(
+                            text = stringResource(id = R.string.gradient_description),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
 
                         ColorHarmonySection(
                             baseHex = harmonyBaseHex,
