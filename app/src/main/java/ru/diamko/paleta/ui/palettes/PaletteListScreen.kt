@@ -43,6 +43,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -60,6 +61,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import ru.diamko.paleta.R
@@ -276,6 +278,8 @@ fun PaletteListScreen(
                                 title = stringResource(id = R.string.home_title),
                                 subtitle = stringResource(id = R.string.home_subtitle),
                             )
+                            val labelFontSize = MaterialTheme.typography.labelLarge.fontSize
+                            val sharedGeneratorFontSize = remember(labelFontSize) { mutableStateOf(labelFontSize) }
                             Row(
                                 modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -291,6 +295,7 @@ fun PaletteListScreen(
                                         ),
                                     ),
                                     onClick = onOpenRandomGenerator,
+                                    sharedFontSize = sharedGeneratorFontSize,
                                 )
                                 PaletaHomeActionButton(
                                     modifier = Modifier.weight(1f).fillMaxHeight(),
@@ -303,6 +308,7 @@ fun PaletteListScreen(
                                         ),
                                     ),
                                     onClick = onOpenImageGenerator,
+                                    sharedFontSize = sharedGeneratorFontSize,
                                 )
                             }
                             Row(
@@ -517,6 +523,7 @@ private fun PaletaHomeActionButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    sharedFontSize: MutableState<TextUnit>? = null,
 ) {
     OutlinedButton(
         modifier = modifier,
@@ -537,6 +544,7 @@ private fun PaletaHomeActionButton(
             style = MaterialTheme.typography.labelLarge,
             textAlign = TextAlign.Center,
             maxLines = 2,
+            sharedFontSize = sharedFontSize,
         )
     }
 }

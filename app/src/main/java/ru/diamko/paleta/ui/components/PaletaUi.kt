@@ -32,6 +32,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.key
@@ -68,13 +69,22 @@ fun AutoResizeText(
     color: Color = Color.Unspecified,
     textAlign: TextAlign = TextAlign.Center,
     maxLines: Int = Int.MAX_VALUE,
+    sharedFontSize: MutableState<TextUnit>? = null,
 ) {
     val effectiveColor = if (color != Color.Unspecified) color else style.color
     val maxFontSize = if (style.fontSize.isSp) style.fontSize else 14.sp
     val minFontSize = 9.sp
 
-    var fontSize by remember(text, maxFontSize) { mutableStateOf(maxFontSize) }
+    var localFontSize by remember(text, maxFontSize) { mutableStateOf(maxFontSize) }
     var readyToDraw by remember(text, maxFontSize) { mutableStateOf(false) }
+
+    // Use the smaller of our local size and the shared minimum
+    val renderFontSize = if (sharedFontSize != null && sharedFontSize.value.isSp &&
+        sharedFontSize.value.value < localFontSize.value) {
+        sharedFontSize.value
+    } else {
+        localFontSize
+    }
 
     Text(
         text = text,
@@ -84,14 +94,19 @@ fun AutoResizeText(
         style = style.copy(
             color = effectiveColor,
             textAlign = textAlign,
-            fontSize = fontSize,
+            fontSize = renderFontSize,
         ),
         maxLines = maxLines,
-        overflow = TextOverflow.Visible,
+        overflow = TextOverflow.Clip,
         onTextLayout = { result ->
-            if (result.hasVisualOverflow && fontSize > minFontSize) {
-                val reduced = fontSize.value * 0.9f
-                fontSize = TextUnit(maxOf(minFontSize.value, reduced), TextUnitType.Sp)
+            if (result.hasVisualOverflow && localFontSize > minFontSize) {
+                val reduced = localFontSize.value * 0.9f
+                val newSize = TextUnit(maxOf(minFontSize.value, reduced), TextUnitType.Sp)
+                localFontSize = newSize
+                // Propagate smaller size to shared state
+                if (sharedFontSize != null && newSize.value < (sharedFontSize.value.takeIf { it.isSp }?.value ?: Float.MAX_VALUE)) {
+                    sharedFontSize.value = newSize
+                }
                 readyToDraw = false
             } else {
                 readyToDraw = true
@@ -238,12 +253,11 @@ fun PaletaGhostButton(
             .padding(horizontal = 16.dp, vertical = 12.dp),
         horizontalArrangement = Arrangement.Center,
     ) {
-        Text(
+        AutoResizeText(
             text = text,
             style = MaterialTheme.typography.labelLarge,
             color = if (enabled) strokeColor else MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
+            maxLines = 1,
             textAlign = TextAlign.Center,
         )
     }
