@@ -54,8 +54,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
@@ -184,6 +188,13 @@ fun PaletteListScreen(
     val listError = state.error ?: localError
     val exportFormat = remember(selectedFormat) { PaletteExportFormat.valueOf(selectedFormat) }
 
+    val density = LocalDensity.current
+    val screenWidthDp = LocalConfiguration.current.screenWidthDp.toFloat()
+    // Scale all sp values proportionally: narrower screen or larger fontScale → smaller text.
+    // Cap at 1.2x so large-font users keep a reasonable size on standard-width screens.
+    val scaledFontScale = minOf(density.fontScale * (screenWidthDp / 360f), 1.2f)
+
+    CompositionLocalProvider(LocalDensity provides Density(density = density.density, fontScale = scaledFontScale)) {
     PaletaGradientBackground(modifier = Modifier.fillMaxSize()) {
         Scaffold(
             containerColor = Color.Transparent,
@@ -465,6 +476,7 @@ fun PaletteListScreen(
             }
         }
     }
+    } // CompositionLocalProvider
 
     if (pendingDelete != null) {
         val deleting = pendingDelete!!
