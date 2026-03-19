@@ -147,6 +147,12 @@
     <string name="harmony_square">Квадратная</string>
     <string name="harmony_split_complementary">Раздельно-комплементарная</string>
     <string name="harmony_tetradic">Тетрада</string>
+    <string name="harmony_random">Произвольный</string>
+
+    <string name="palette_editor_save_subtitle">Сохраните изменения или создайте новую палитру</string>
+    <string name="generate_gradient">Градиент</string>
+    <string name="gradient_need_two_colors">Нужно минимум 2 цвета для создания градиента</string>
+    <string name="gradient_applied">Градиент применён</string>
 
     <string name="export_title">Экспорт</string>
     <string name="export_subtitle">Выберите формат и экспортируйте файл</string>

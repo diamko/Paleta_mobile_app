@@ -46,7 +46,6 @@ import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -93,6 +92,7 @@ import ru.diamko.paleta.ui.components.PaletaGhostButton
 import ru.diamko.paleta.ui.components.PaletaGradientBackground
 import ru.diamko.paleta.ui.components.PaletaPrimaryButton
 import ru.diamko.paleta.ui.components.PaletaSectionTitle
+import ru.diamko.paleta.ui.components.ColorWheelPicker
 import ru.diamko.paleta.ui.components.PaletaTopBannerHost
 import ru.diamko.paleta.ui.components.ColorCountDropdown
 import ru.diamko.paleta.ui.components.paletaTextFieldColors
@@ -404,7 +404,6 @@ fun PaletteGenerateScreen(
     val hasPalette = paletteColors.isNotEmpty()
     val safeSelectedIndex = selectedColorIndex.coerceIn(0, max(0, paletteColors.lastIndex))
     val selectedHex = paletteColors.getOrNull(safeSelectedIndex) ?: "#000000"
-    val selectedColorInt = ColorTools.hexToColorInt(selectedHex) ?: AndroidColor.BLACK
 
     val fitMetrics = remember(bitmap, imageBoxSize) {
         bitmap?.let {
@@ -820,40 +819,10 @@ fun PaletteGenerateScreen(
                             subtitle = stringResource(id = R.string.selected_color_subtitle, safeSelectedIndex + 1, selectedHex),
                         )
 
-                        ColorChannelSlider(
-                            title = "R",
-                            value = AndroidColor.red(selectedColorInt),
-                            onValueChange = { red ->
-                                val colorInt = AndroidColor.rgb(
-                                    red,
-                                    AndroidColor.green(selectedColorInt),
-                                    AndroidColor.blue(selectedColorInt),
-                                )
-                                updateColorAt(safeSelectedIndex, ColorTools.colorIntToHex(colorInt))
-                            },
-                        )
-                        ColorChannelSlider(
-                            title = "G",
-                            value = AndroidColor.green(selectedColorInt),
-                            onValueChange = { green ->
-                                val colorInt = AndroidColor.rgb(
-                                    AndroidColor.red(selectedColorInt),
-                                    green,
-                                    AndroidColor.blue(selectedColorInt),
-                                )
-                                updateColorAt(safeSelectedIndex, ColorTools.colorIntToHex(colorInt))
-                            },
-                        )
-                        ColorChannelSlider(
-                            title = "B",
-                            value = AndroidColor.blue(selectedColorInt),
-                            onValueChange = { blue ->
-                                val colorInt = AndroidColor.rgb(
-                                    AndroidColor.red(selectedColorInt),
-                                    AndroidColor.green(selectedColorInt),
-                                    blue,
-                                )
-                                updateColorAt(safeSelectedIndex, ColorTools.colorIntToHex(colorInt))
+                        ColorWheelPicker(
+                            colorHex = selectedHex,
+                            onColorChange = { updatedHex ->
+                                updateColorAt(safeSelectedIndex, updatedHex)
                             },
                         )
 
@@ -1006,26 +975,6 @@ fun PaletteGenerateScreen(
                 )
             }
         }
-    }
-}
-
-@Composable
-private fun ColorChannelSlider(
-    title: String,
-    value: Int,
-    onValueChange: (Int) -> Unit,
-) {
-    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text(
-            text = "$title: $value",
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Slider(
-            value = value.toFloat(),
-            onValueChange = { onValueChange(it.roundToInt().coerceIn(0, 255)) },
-            valueRange = 0f..255f,
-        )
     }
 }
 

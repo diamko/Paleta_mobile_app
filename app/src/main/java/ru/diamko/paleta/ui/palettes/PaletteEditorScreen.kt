@@ -44,9 +44,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
+import android.graphics.Color as AndroidColor
 import kotlinx.coroutines.launch
 import ru.diamko.paleta.R
 import ru.diamko.paleta.core.palette.ColorTools
@@ -75,6 +78,7 @@ fun PaletteEditorScreen(
     isAuthenticated: Boolean,
 ) {
     val context = LocalContext.current
+    val clipboard = LocalClipboardManager.current
     val scope = rememberCoroutineScope()
     val existing = paletteId?.let { paletteViewModel.paletteById(it) }
     val isCreateMode = existing == null
@@ -333,6 +337,50 @@ fun PaletteEditorScreen(
                                 updateColorAt(currentIndex, updatedHex)
                             },
                         )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            PaletaGhostButton(
+                                modifier = Modifier.weight(1f),
+                                text = stringResource(id = R.string.copy_hex),
+                                onClick = {
+                                    clipboard.setText(AnnotatedString(selectedColorHex))
+                                    statusMessage = context.getString(R.string.hex_copied, selectedColorHex)
+                                    statusMessageKey++
+                                },
+                            )
+                            PaletaGhostButton(
+                                modifier = Modifier.weight(1f),
+                                text = stringResource(id = R.string.generate_gradient),
+                                onClick = {
+                                    val colors = parsedColors
+                                    if (colors.size < 2) {
+                                        localError = context.getString(R.string.gradient_need_two_colors)
+                                        localErrorKey++
+                                        return@PaletaGhostButton
+                                    }
+                                    val firstInt = ColorTools.hexToColorInt(colors.first()) ?: return@PaletaGhostButton
+                                    val lastInt = ColorTools.hexToColorInt(colors.last()) ?: return@PaletaGhostButton
+                                    val firstHsv = FloatArray(3)
+                                    AndroidColor.RGBToHSV(AndroidColor.red(firstInt), AndroidColor.green(firstInt), AndroidColor.blue(firstInt), firstHsv)
+                                    val lastHsv = FloatArray(3)
+                                    AndroidColor.RGBToHSV(AndroidColor.red(lastInt), AndroidColor.green(lastInt), AndroidColor.blue(lastInt), lastHsv)
+                                    val gradient = List(colors.size) { i ->
+                                        val t = if (colors.size > 1) i.toFloat() / (colors.size - 1) else 0f
+                                        ColorTools.colorIntToHex(AndroidColor.HSVToColor(floatArrayOf(
+                                            firstHsv[0] + (lastHsv[0] - firstHsv[0]) * t,
+                                            firstHsv[1] + (lastHsv[1] - firstHsv[1]) * t,
+                                            firstHsv[2] + (lastHsv[2] - firstHsv[2]) * t,
+                                        )))
+                                    }
+                                    if (isCreateMode) createColors = gradient else colorsInput = gradient.joinToString(",")
+                                    selectedColorIndex = 0
+                                    statusMessage = context.getString(R.string.gradient_applied)
+                                    statusMessageKey++
+                                },
+                            )
+                        }
                     } else {
                         Text(
                             text = stringResource(id = R.string.color_wheel_empty_hint),
@@ -340,6 +388,9 @@ fun PaletteEditorScreen(
                         )
                     }
 
+                    }
+
+                PaletaCard(modifier = Modifier.fillMaxWidth()) {
                     PaletaSectionTitle(
                         title = stringResource(id = R.string.export_title),
                         subtitle = stringResource(id = R.string.export_subtitle),
@@ -392,7 +443,13 @@ fun PaletteEditorScreen(
                             )
                         },
                     )
+                }
 
+                PaletaCard(modifier = Modifier.fillMaxWidth()) {
+                    PaletaSectionTitle(
+                        title = stringResource(id = R.string.save_title),
+                        subtitle = stringResource(id = R.string.palette_editor_save_subtitle),
+                    )
                     if (isCreateMode) {
                         PaletaPrimaryButton(
                             modifier = Modifier.fillMaxWidth(),
@@ -460,8 +517,7 @@ fun PaletteEditorScreen(
                             isDanger = true,
                         )
                     }
-
-                    }
+                }
                 }
 
                 PaletaTopBannerHost(

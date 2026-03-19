@@ -32,6 +32,7 @@ import ru.diamko.paleta.R
 import ru.diamko.paleta.core.palette.ColorHarmony
 import ru.diamko.paleta.core.palette.ColorHarmonyType
 import ru.diamko.paleta.core.palette.ColorTools
+import ru.diamko.paleta.core.palette.RandomPaletteGenerator
 import ru.diamko.paleta.ui.components.HorizontalScrollIndicator
 import ru.diamko.paleta.ui.components.PaletaGhostButton
 import ru.diamko.paleta.ui.components.PaletaSectionTitle
@@ -44,6 +45,8 @@ fun ColorHarmonySection(
     onColorsGenerated: (List<String>) -> Unit = {},
 ) {
     var selectedType by remember { mutableStateOf(ColorHarmonyType.ANALOGOUS) }
+    var useRandom by remember { mutableStateOf(false) }
+    var randomSeed by remember { mutableStateOf(0) }
 
     val effectiveType = if (selectedType.isCompatibleWith(colorCount)) {
         selectedType
@@ -57,12 +60,9 @@ fun ColorHarmonySection(
         }
     }
 
-    val generated = remember(baseHex, colorCount, effectiveType) {
-        ColorHarmony.generate(
-            baseHex = baseHex,
-            type = effectiveType,
-            count = colorCount,
-        )
+    val generated = remember(baseHex, colorCount, effectiveType, useRandom, randomSeed) {
+        if (useRandom) RandomPaletteGenerator.generate(colorCount)
+        else ColorHarmony.generate(baseHex = baseHex, type = effectiveType, count = colorCount)
     }
 
     LaunchedEffect(generated) {
@@ -82,8 +82,8 @@ fun ColorHarmonySection(
         ColorHarmonyType.entries.forEach { type ->
             val compatible = type.isCompatibleWith(colorCount)
             FilterChip(
-                selected = selectedType == type,
-                onClick = { selectedType = type },
+                selected = !useRandom && selectedType == type,
+                onClick = { selectedType = type; useRandom = false },
                 enabled = compatible,
                 label = { Text(text = stringResource(id = type.labelResId())) },
                 shape = RoundedCornerShape(50),
@@ -93,6 +93,16 @@ fun ColorHarmonySection(
                 ),
             )
         }
+        FilterChip(
+            selected = useRandom,
+            onClick = { useRandom = true; randomSeed++ },
+            label = { Text(text = stringResource(id = R.string.harmony_random)) },
+            shape = RoundedCornerShape(50),
+            colors = FilterChipDefaults.filterChipColors(
+                selectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+                selectedLabelColor = MaterialTheme.colorScheme.primary,
+            ),
+        )
     }
     HorizontalScrollIndicator(scrollState = harmonyScrollState)
 
