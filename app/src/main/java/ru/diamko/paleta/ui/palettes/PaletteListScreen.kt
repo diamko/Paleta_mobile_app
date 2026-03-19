@@ -59,6 +59,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import ru.diamko.paleta.R
@@ -68,6 +69,7 @@ import ru.diamko.paleta.domain.model.PaletteExportFile
 import ru.diamko.paleta.ui.components.HorizontalScrollIndicator
 import ru.diamko.paleta.ui.components.ColorCountDropdown
 import ru.diamko.paleta.ui.components.PaletaCard
+import ru.diamko.paleta.ui.components.AutoResizeText
 import ru.diamko.paleta.ui.components.PaletaGhostButton
 import ru.diamko.paleta.ui.components.PaletaGradientBackground
 import ru.diamko.paleta.ui.components.PaletaPrimaryButton
@@ -199,10 +201,11 @@ fun PaletteListScreen(
                                 contentDescription = null,
                                 modifier = Modifier.size(28.dp),
                             )
-                            Text(
+                            AutoResizeText(
                                 text = stringResource(id = R.string.palettes_title),
-                                style = MaterialTheme.typography.titleLarge,
-                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                                textAlign = TextAlign.Start,
+                                maxLines = 1,
                             )
                         }
                     },
@@ -529,9 +532,10 @@ private fun PaletaHomeActionButton(
         ),
         contentPadding = PaddingValues(horizontal = 18.dp, vertical = 14.dp),
     ) {
-        Text(
+        AutoResizeText(
             text = text,
             style = MaterialTheme.typography.labelLarge,
+            textAlign = TextAlign.Center,
         )
     }
 }

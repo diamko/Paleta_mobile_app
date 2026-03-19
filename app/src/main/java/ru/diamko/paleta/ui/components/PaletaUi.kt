@@ -47,13 +47,58 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import ru.diamko.paleta.ui.theme.BrandBlue
 import ru.diamko.paleta.ui.theme.BrandSuccess
 import ru.diamko.paleta.ui.theme.BrandViolet
+
+@Composable
+fun AutoResizeText(
+    text: String,
+    modifier: Modifier = Modifier,
+    style: TextStyle = TextStyle.Default,
+    color: Color = Color.Unspecified,
+    textAlign: TextAlign = TextAlign.Center,
+    maxLines: Int = Int.MAX_VALUE,
+) {
+    val effectiveColor = if (color != Color.Unspecified) color else style.color
+    val maxFontSize = if (style.fontSize.isSp) style.fontSize else 14.sp
+    val minFontSize = 9.sp
+
+    var fontSize by remember(text, maxFontSize) { mutableStateOf(maxFontSize) }
+    var readyToDraw by remember(text, maxFontSize) { mutableStateOf(false) }
+
+    Text(
+        text = text,
+        modifier = modifier.drawWithContent {
+            if (readyToDraw) drawContent()
+        },
+        style = style.copy(
+            color = effectiveColor,
+            textAlign = textAlign,
+            fontSize = fontSize,
+        ),
+        maxLines = maxLines,
+        overflow = TextOverflow.Visible,
+        onTextLayout = { result ->
+            if (result.hasVisualOverflow && fontSize > minFontSize) {
+                val reduced = fontSize.value * 0.9f
+                fontSize = TextUnit(maxOf(minFontSize.value, reduced), TextUnitType.Sp)
+                readyToDraw = false
+            } else {
+                readyToDraw = true
+            }
+        },
+    )
+}
 
 @Composable
 fun PaletaGradientBackground(
@@ -197,7 +242,7 @@ fun PaletaGhostButton(
             text = text,
             style = MaterialTheme.typography.labelLarge,
             color = if (enabled) strokeColor else MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = 1,
+            maxLines = 2,
             overflow = TextOverflow.Ellipsis,
             textAlign = TextAlign.Center,
         )
