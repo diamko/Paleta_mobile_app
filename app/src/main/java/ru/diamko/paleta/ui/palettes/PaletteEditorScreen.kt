@@ -19,12 +19,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.foundation.Canvas
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -66,6 +66,7 @@ import ru.diamko.paleta.ui.components.PaletaGradientBackground
 import ru.diamko.paleta.ui.components.PaletaPrimaryButton
 import ru.diamko.paleta.ui.components.PaletaSectionTitle
 import ru.diamko.paleta.ui.components.PaletaTopBannerHost
+import ru.diamko.paleta.ui.components.innerBorder
 import ru.diamko.paleta.ui.components.paletaTextFieldColors
 import kotlin.math.max
 
@@ -250,42 +251,56 @@ fun PaletteEditorScreen(
                         }
 
                         PaletaSectionTitle(
-                            title = stringResource(id = R.string.palette_label),
-                            subtitle = stringResource(id = R.string.palette_your_palette),
+                            title = stringResource(id = R.string.palette_colors_title),
+                            subtitle = stringResource(id = R.string.palette_colors_subtitle),
                         )
 
                         FlowRow(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            maxItemsInEachRow = 3,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
                             verticalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
                             parsedColors.forEachIndexed { index, hex ->
                                 val color = ColorTools.hexToColorInt(hex)?.let(::Color) ?: Color.Gray
-                                val isSelected = index == safeSelectedColorIndex
-                                val size = if (isSelected) 40.dp else 34.dp
-                                val borderWidth = if (isSelected) 2.dp else 1.dp
-                                Canvas(
+                                val selected = index == safeSelectedColorIndex
+                                val swatchShape = RoundedCornerShape(12.dp)
+                                Column(
                                     modifier = Modifier
-                                        .size(size)
-                                        .clickable { selectedColorIndex = index },
+                                        .width(92.dp)
+                                        .clip(RoundedCornerShape(14.dp))
+                                        .background(
+                                            if (selected) {
+                                                MaterialTheme.colorScheme.primary.copy(alpha = 0.13f)
+                                            } else {
+                                                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
+                                            },
+                                        )
+                                        .clickable { selectedColorIndex = index }
+                                        .padding(8.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.spacedBy(6.dp),
                                 ) {
-                                    val radius = this.size.minDimension / 2f
-                                    val borderWidthPx = borderWidth.toPx()
-                                    // Draw background circle
-                                    drawCircle(
-                                        color = color,
-                                        radius = radius,
+                                    Box(
+                                        modifier = Modifier
+                                            .size(50.dp)
+                                            .background(color, swatchShape)
+                                            .innerBorder(
+                                                width = 1.dp,
+                                                color = Color.White.copy(alpha = 0.8f),
+                                                shape = swatchShape,
+                                            ),
                                     )
-                                    // Draw inner border
-                                    drawCircle(
-                                        color = if (isSelected) {
-                                            Color.White
+                                    Text(
+                                        text = stringResource(id = R.string.color_label, index + 1),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = if (selected) {
+                                            MaterialTheme.colorScheme.primary
                                         } else {
-                                            Color.White.copy(alpha = 0.8f)
+                                            MaterialTheme.colorScheme.onSurfaceVariant
                                         },
-                                        radius = radius - borderWidthPx,
-                                        style = Stroke(width = borderWidthPx),
                                     )
+                                    Text(text = hex, style = MaterialTheme.typography.labelSmall)
                                 }
                             }
                         }
@@ -306,6 +321,37 @@ fun PaletteEditorScreen(
                     }
 
                     if (selectedColorHex != null) {
+                        PaletaGhostButton(
+                            modifier = Modifier.fillMaxWidth(),
+                            text = stringResource(id = R.string.generate_gradient),
+                            onClick = {
+                                val colors = parsedColors
+                                if (colors.size < 2) {
+                                    localError = context.getString(R.string.gradient_need_two_colors)
+                                    localErrorKey++
+                                    return@PaletaGhostButton
+                                }
+                                val firstInt = ColorTools.hexToColorInt(colors.first()) ?: return@PaletaGhostButton
+                                val lastInt = ColorTools.hexToColorInt(colors.last()) ?: return@PaletaGhostButton
+                                val firstHsv = FloatArray(3)
+                                AndroidColor.RGBToHSV(AndroidColor.red(firstInt), AndroidColor.green(firstInt), AndroidColor.blue(firstInt), firstHsv)
+                                val lastHsv = FloatArray(3)
+                                AndroidColor.RGBToHSV(AndroidColor.red(lastInt), AndroidColor.green(lastInt), AndroidColor.blue(lastInt), lastHsv)
+                                val gradient = List(colors.size) { i ->
+                                    val t = if (colors.size > 1) i.toFloat() / (colors.size - 1) else 0f
+                                    ColorTools.colorIntToHex(AndroidColor.HSVToColor(floatArrayOf(
+                                        firstHsv[0] + (lastHsv[0] - firstHsv[0]) * t,
+                                        firstHsv[1] + (lastHsv[1] - firstHsv[1]) * t,
+                                        firstHsv[2] + (lastHsv[2] - firstHsv[2]) * t,
+                                    )))
+                                }
+                                if (isCreateMode) createColors = gradient else colorsInput = gradient.joinToString(",")
+                                selectedColorIndex = 0
+                                statusMessage = context.getString(R.string.gradient_applied)
+                                statusMessageKey++
+                            },
+                        )
+
                         ColorHarmonySection(
                             baseHex = harmonyBaseHex,
                             colorCount = parsedColors.size.coerceAtLeast(3),
@@ -337,50 +383,15 @@ fun PaletteEditorScreen(
                                 updateColorAt(currentIndex, updatedHex)
                             },
                         )
-                        Row(
+                        PaletaGhostButton(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        ) {
-                            PaletaGhostButton(
-                                modifier = Modifier.weight(1f),
-                                text = stringResource(id = R.string.copy_hex),
-                                onClick = {
-                                    clipboard.setText(AnnotatedString(selectedColorHex))
-                                    statusMessage = context.getString(R.string.hex_copied, selectedColorHex)
-                                    statusMessageKey++
-                                },
-                            )
-                            PaletaGhostButton(
-                                modifier = Modifier.weight(1f),
-                                text = stringResource(id = R.string.generate_gradient),
-                                onClick = {
-                                    val colors = parsedColors
-                                    if (colors.size < 2) {
-                                        localError = context.getString(R.string.gradient_need_two_colors)
-                                        localErrorKey++
-                                        return@PaletaGhostButton
-                                    }
-                                    val firstInt = ColorTools.hexToColorInt(colors.first()) ?: return@PaletaGhostButton
-                                    val lastInt = ColorTools.hexToColorInt(colors.last()) ?: return@PaletaGhostButton
-                                    val firstHsv = FloatArray(3)
-                                    AndroidColor.RGBToHSV(AndroidColor.red(firstInt), AndroidColor.green(firstInt), AndroidColor.blue(firstInt), firstHsv)
-                                    val lastHsv = FloatArray(3)
-                                    AndroidColor.RGBToHSV(AndroidColor.red(lastInt), AndroidColor.green(lastInt), AndroidColor.blue(lastInt), lastHsv)
-                                    val gradient = List(colors.size) { i ->
-                                        val t = if (colors.size > 1) i.toFloat() / (colors.size - 1) else 0f
-                                        ColorTools.colorIntToHex(AndroidColor.HSVToColor(floatArrayOf(
-                                            firstHsv[0] + (lastHsv[0] - firstHsv[0]) * t,
-                                            firstHsv[1] + (lastHsv[1] - firstHsv[1]) * t,
-                                            firstHsv[2] + (lastHsv[2] - firstHsv[2]) * t,
-                                        )))
-                                    }
-                                    if (isCreateMode) createColors = gradient else colorsInput = gradient.joinToString(",")
-                                    selectedColorIndex = 0
-                                    statusMessage = context.getString(R.string.gradient_applied)
-                                    statusMessageKey++
-                                },
-                            )
-                        }
+                            text = stringResource(id = R.string.copy_hex),
+                            onClick = {
+                                clipboard.setText(AnnotatedString(selectedColorHex))
+                                statusMessage = context.getString(R.string.hex_copied, selectedColorHex)
+                                statusMessageKey++
+                            },
+                        )
                     } else {
                         Text(
                             text = stringResource(id = R.string.color_wheel_empty_hint),
