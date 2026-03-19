@@ -23,10 +23,10 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -287,8 +287,8 @@ fun BoxScope.PaletaTopBannerHost(
             key(banner.id) {
                 AnimatedVisibility(
                     visible = banner.id !in removingIds,
-                    enter = slideInVertically(tween(250)) { -it } + fadeIn(tween(250)),
-                    exit = slideOutVertically(tween(250)) { -it } + fadeOut(tween(250)),
+                    enter = expandVertically(tween(250), expandFrom = Alignment.Top) + fadeIn(tween(250)),
+                    exit = shrinkVertically(tween(250), shrinkTowards = Alignment.Bottom) + fadeOut(tween(250)),
                 ) {
                     PaletaMessageBanner(message = banner.message, isError = banner.isError)
                 }
