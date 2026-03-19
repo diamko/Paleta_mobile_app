@@ -58,23 +58,19 @@ fun ColorWheelPicker(
     // Sync HSV from external colorHex changes without recreating MutableState
     // (recreating states breaks pointerInput which holds refs to old objects)
     var prevColorHex by remember { mutableStateOf("") }
-    var lastEmittedHex by remember { mutableStateOf("") }
-    if (prevColorHex != colorHex && !colorHex.equals(lastEmittedHex, ignoreCase = true)) {
+    if (prevColorHex != colorHex) {
         prevColorHex = colorHex
         val color = ColorTools.hexToColorInt(colorHex) ?: AndroidColor.BLACK
         val hsv = FloatArray(3).also { AndroidColor.colorToHSV(color, it) }
         hue = hsv[0]
         saturation = hsv[1]
         value = hsv[2]
-    } else {
-        prevColorHex = colorHex
     }
 
     val currentOnColorChange by rememberUpdatedState(onColorChange)
 
     fun emitColor() {
         val nextHex = ColorTools.colorIntToHex(AndroidColor.HSVToColor(floatArrayOf(hue, saturation, value)))
-        lastEmittedHex = nextHex
         if (!nextHex.equals(colorHex, ignoreCase = true)) {
             currentOnColorChange(nextHex)
         }
