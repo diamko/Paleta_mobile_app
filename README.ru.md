@@ -61,7 +61,7 @@ Paleta Mobile — Android-приложение для [Paleta](https://github.co
 ## Ключевые функции
 
 | Категория | Возможности |
-|---|---|
+| --- | --- |
 | **Генерация** | Палитра из изображения (KMeans на сервере), случайная палитра с режимами гармоний |
 | **Редактирование** | HSV цветовое колесо с регулятором яркости, пипетка на изображении с лупой, ввод HEX, Copy HEX, HSV-градиент между первым и последним цветом |
 | **Гармонии** | Аналоговая, комплементарная, триадная, квадратная, расщепленно-комплементарная, монохроматическая, последовательная, тетрадная, произвольная |
@@ -74,7 +74,7 @@ Paleta Mobile — Android-приложение для [Paleta](https://github.co
 ## Технологии
 
 | Слой | Технология |
-|---|---|
+| --- | --- |
 | Язык | Kotlin 2.0+ |
 | UI | Jetpack Compose (Material 3) |
 | Архитектура | Single-module MVVM + слои Clean Architecture |
@@ -89,7 +89,7 @@ Paleta Mobile — Android-приложение для [Paleta](https://github.co
 
 Проект следует **Clean Architecture** в рамках одного модуля с тремя слоями:
 
-```
+```text
 core/       → DI-контейнер, сетевой слой, алгоритмы палитр, интерфейсы хранилищ
 data/       → Retrofit API, DTO, Room БД, реализации репозиториев, воркер синхронизации
 domain/     → Доменные модели, интерфейсы репозиториев, use-кейсы
@@ -176,7 +176,7 @@ Debug APK будет в `app/build/outputs/apk/debug/app-debug.apk`.
 
 ```kotlin
 buildConfigField("String", "REPOSITORY_MODE", "\"remote\"")
-buildConfigField("String", "API_BASE_URL", "\"https://your-server.com/\"")
+buildConfigField("String", "API_BASE_URL", "\"https://diamko.ru/\"")
 ```
 
 Для разработки без бэкенда переключитесь на встроенный фейковый репозиторий:
@@ -216,7 +216,7 @@ buildConfigField("String", "REPOSITORY_MODE", "\"fake\"")
 
 ## Структура проекта
 
-```
+```text
 Paleta_mobile_app/
 ├── app/
 │   ├── build.gradle.kts              # Конфигурация сборки
@@ -254,7 +254,9 @@ Paleta_mobile_app/
 ├── build.gradle.kts                  # Корневая конфигурация сборки
 ├── LICENCE
 ├── README.md
-└── README.ru.md
+├── README.ru.md
+├── CONTRIBUTING.md
+└── CONTRIBUTING.ru.md
 ```
 
 ## Связанные проекты
@@ -263,7 +265,12 @@ Paleta_mobile_app/
 
 ## Как внести вклад
 
-Контрибьюции приветствуются.
+Контрибьюции приветствуются. Подробные правила:
+
+- [`CONTRIBUTING.md`](CONTRIBUTING.md) (English)
+- [`CONTRIBUTING.ru.md`](CONTRIBUTING.ru.md) (Русский)
+
+Быстрый старт:
 
 1. Сделайте fork репозитория.
 2. Создайте ветку: `git checkout -b feature/your-feature-name`.

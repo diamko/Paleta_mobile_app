@@ -176,7 +176,7 @@ By default, the app connects to the remote Paleta backend. The base URL and repo
 
 ```kotlin
 buildConfigField("String", "REPOSITORY_MODE", "\"remote\"")
-buildConfigField("String", "API_BASE_URL", "\"https://your-server.com/\"")
+buildConfigField("String", "API_BASE_URL", "\"https://diamko.ru/\"")
 ```
 
 To develop offline without a backend, switch to the built-in fake repository:
@@ -254,7 +254,9 @@ Paleta_mobile_app/
 ├── build.gradle.kts                  # Root build config
 ├── LICENCE
 ├── README.md
-└── README.ru.md
+├── README.ru.md
+├── CONTRIBUTING.md
+└── CONTRIBUTING.ru.md
 ```
 
 ## Related Projects
@@ -263,7 +265,12 @@ Paleta_mobile_app/
 
 ## Contributing
 
-Contributions are welcome.
+Contributions are welcome. Please read the full guidelines:
+
+- [`CONTRIBUTING.md`](CONTRIBUTING.md) (English)
+- [`CONTRIBUTING.ru.md`](CONTRIBUTING.ru.md) (Russian)
+
+Quick start:
 
 1. Fork the repo.
 2. Create a branch: `git checkout -b feature/your-feature-name`.
