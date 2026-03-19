@@ -84,6 +84,8 @@ Bring the full Paleta palette workflow to Android — generate, edit, save, and 
 | Async | Kotlin Coroutines + Flow |
 | Navigation | Navigation Compose |
 | Target | Android SDK 35 (minSdk 26, Android 8.0+) |
+| Recommended screen | 360dp width or wider (standard smartphone) |
+| Narrow screen support | from ~280dp — all fonts scale proportionally |
 
 ## Architecture
 

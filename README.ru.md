@@ -84,6 +84,8 @@ Paleta Mobile — Android-приложение для [Paleta](https://github.co
 | Асинхронность | Kotlin Coroutines + Flow |
 | Навигация | Navigation Compose |
 | Целевая платформа | Android SDK 35 (minSdk 26, Android 8.0+) |
+| Рекомендуемый экран | ширина 360dp и выше (стандартный смартфон) |
+| Поддержка узких экранов | от ~280dp — все шрифты масштабируются пропорционально |
 
 ## Архитектура
 
