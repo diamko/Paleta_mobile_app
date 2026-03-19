@@ -150,6 +150,7 @@ fun PaletteGenerateScreen(
     var localError by remember { mutableStateOf<String?>(null) }
     var localErrorKey by remember { mutableStateOf(0) }
     var statusMessage by remember { mutableStateOf<String?>(null) }
+    var statusMessageKey by remember { mutableStateOf(0) }
     var isBusy by remember { mutableStateOf(false) }
     var selectedFormat by remember { mutableStateOf(PaletteExportFormat.JSON) }
     var pendingExport by remember { mutableStateOf<PaletteExportFile?>(null) }
@@ -195,6 +196,7 @@ fun PaletteGenerateScreen(
         isBusy = true
         localError = null
         statusMessage = context.getString(R.string.last_image_restored)
+        statusMessageKey++
         paletteColors = emptyList()
         markerPositions = emptyList()
         selectedColorIndex = 0
@@ -238,6 +240,7 @@ fun PaletteGenerateScreen(
             isBusy = true
             localError = null
             statusMessage = context.getString(R.string.extracting_colors)
+            statusMessageKey++
             paletteColors = emptyList()
             markerPositions = emptyList()
             selectedColorIndex = 0
@@ -295,6 +298,7 @@ fun PaletteGenerateScreen(
             isBusy = true
             localError = null
             statusMessage = context.getString(R.string.extracting_colors)
+            statusMessageKey++
             paletteColors = emptyList()
             markerPositions = emptyList()
             selectedColorIndex = 0
@@ -329,6 +333,7 @@ fun PaletteGenerateScreen(
             isBusy = true
             localError = null
             statusMessage = context.getString(R.string.extracting_colors)
+            statusMessageKey++
             paletteColors = emptyList()
             markerPositions = emptyList()
             selectedColorIndex = 0
@@ -366,6 +371,7 @@ fun PaletteGenerateScreen(
         val payload = pendingExport ?: return@rememberLauncherForActivityResult
         if (outputUri == null) {
             statusMessage = context.getString(R.string.export_canceled)
+            statusMessageKey++
             pendingExport = null
             return@rememberLauncherForActivityResult
         }
@@ -374,6 +380,7 @@ fun PaletteGenerateScreen(
             writeExportFile(context, outputUri, payload)
                 .onSuccess {
                     statusMessage = context.getString(R.string.file_saved, payload.fileName)
+                    statusMessageKey++
                     localError = null
                     pendingExport = null
                 }
@@ -619,6 +626,7 @@ fun PaletteGenerateScreen(
                                         if (draggingIndex != currentSelectedIndex) {
                                             selectedColorIndex = draggingIndex
                                             statusMessage = context.getString(R.string.pipette_selected, draggingIndex + 1)
+                                            statusMessageKey++
                                             localError = null
                                         }
                                         val markerNorm = markerPositions.getOrNull(draggingIndex)
@@ -656,6 +664,7 @@ fun PaletteGenerateScreen(
 
                                         isDraggingPipette = false
                                         statusMessage = context.getString(R.string.color_updated_from_image, safeSelectedIndex + 1)
+                                        statusMessageKey++
                                         loupeTouchPosition = null
                                         loupeSample = null
                                     }
@@ -691,6 +700,7 @@ fun PaletteGenerateScreen(
                                             .clickable(enabled = false) {
                                                 selectedColorIndex = index
                                                 statusMessage = context.getString(R.string.pipette_selected, index + 1)
+                                                statusMessageKey++
                                                 localError = null
                                             },
                                     ) {
@@ -855,6 +865,7 @@ fun PaletteGenerateScreen(
                                 onClick = {
                                     clipboard.setText(AnnotatedString(selectedHex))
                                     statusMessage = context.getString(R.string.hex_copied, selectedHex)
+                                    statusMessageKey++
                                 },
                             )
                             PaletaGhostButton(
@@ -966,6 +977,7 @@ fun PaletteGenerateScreen(
                                         colors = colors,
                                     )
                                     statusMessage = context.getString(R.string.palette_saved)
+                                    statusMessageKey++
                                     localError = null
                                 }
                             }
@@ -988,6 +1000,7 @@ fun PaletteGenerateScreen(
                     error = localError,
                     info = statusMessage,
                     errorKey = localErrorKey,
+                    infoKey = statusMessageKey,
                 )
             }
         }

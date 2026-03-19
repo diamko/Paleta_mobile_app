@@ -21,11 +21,21 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.key
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,6 +50,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import ru.diamko.paleta.ui.theme.BrandBlue
 import ru.diamko.paleta.ui.theme.BrandSuccess
 import ru.diamko.paleta.ui.theme.BrandViolet
@@ -218,6 +229,8 @@ fun PaletaMessageBanner(
     }
 }
 
+private data class BannerItem(val id: Int, val message: String, val isError: Boolean)
+
 @Composable
 fun BoxScope.PaletaTopBannerHost(
     error: String?,
@@ -226,31 +239,42 @@ fun BoxScope.PaletaTopBannerHost(
     infoKey: Int = 0,
     modifier: Modifier = Modifier,
     topPadding: Dp = 0.dp,
-    onErrorDismissed: (() -> Unit)? = null,
-    onInfoDismissed: (() -> Unit)? = null,
 ) {
-    var visibleError by remember { mutableStateOf<String?>(null) }
-    var visibleInfo by remember { mutableStateOf<String?>(null) }
+    val banners = remember { mutableStateListOf<BannerItem>() }
+    var removingIds by remember { mutableStateOf(emptySet<Int>()) }
+    var idCounter by remember { mutableIntStateOf(0) }
+    val scope = rememberCoroutineScope()
+
+    fun removeBanner(id: Int) {
+        if (id in removingIds) return
+        removingIds = removingIds + id
+        scope.launch {
+            delay(250)
+            banners.removeAll { it.id == id }
+            removingIds = removingIds - id
+        }
+    }
+
+    fun addBanner(message: String, isError: Boolean) {
+        if (banners.size >= 2) banners.lastOrNull()?.let { removeBanner(it.id) }
+        val id = idCounter++
+        banners.add(0, BannerItem(id, message, isError))
+        scope.launch {
+            delay(2500)
+            removeBanner(id)
+        }
+    }
 
     LaunchedEffect(error, errorKey) {
-        visibleError = error
-        if (!error.isNullOrBlank()) {
-            delay(2500)
-            visibleError = null
-            onErrorDismissed?.invoke()
-        }
+        if (!error.isNullOrBlank()) addBanner(error, true)
     }
 
     LaunchedEffect(info, infoKey) {
-        visibleInfo = info
-        if (!info.isNullOrBlank()) {
-            delay(2500)
-            visibleInfo = null
-            onInfoDismissed?.invoke()
-        }
+        if (!info.isNullOrBlank()) addBanner(info, false)
     }
 
-    if (visibleError.isNullOrBlank() && visibleInfo.isNullOrBlank()) return
+    if (banners.isEmpty()) return
+
     Column(
         modifier = modifier
             .align(Alignment.TopCenter)
@@ -259,11 +283,16 @@ fun BoxScope.PaletaTopBannerHost(
             .padding(top = topPadding + 8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        if (!visibleError.isNullOrBlank()) {
-            PaletaMessageBanner(message = visibleError!!, isError = true)
-        }
-        if (!visibleInfo.isNullOrBlank()) {
-            PaletaMessageBanner(message = visibleInfo!!, isError = false)
+        banners.forEach { banner ->
+            key(banner.id) {
+                AnimatedVisibility(
+                    visible = banner.id !in removingIds,
+                    enter = slideInVertically(tween(250)) { -it } + fadeIn(tween(250)),
+                    exit = slideOutVertically(tween(250)) { -it } + fadeOut(tween(250)),
+                ) {
+                    PaletaMessageBanner(message = banner.message, isError = banner.isError)
+                }
+            }
         }
     }
 }

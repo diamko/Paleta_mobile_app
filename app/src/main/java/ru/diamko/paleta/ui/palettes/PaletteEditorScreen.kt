@@ -87,6 +87,7 @@ fun PaletteEditorScreen(
     var localError by remember { mutableStateOf<String?>(null) }
     var localErrorKey by remember { mutableStateOf(0) }
     var statusMessage by remember { mutableStateOf<String?>(null) }
+    var statusMessageKey by remember { mutableStateOf(0) }
     var selectedColorIndex by remember(existing?.id) { mutableStateOf(0) }
     var selectedFormat by remember { mutableStateOf(PaletteExportFormat.JSON) }
     var pendingExport by remember { mutableStateOf<PaletteExportFile?>(null) }
@@ -99,6 +100,7 @@ fun PaletteEditorScreen(
         val payload = pendingExport ?: return@rememberLauncherForActivityResult
         if (outputUri == null) {
             statusMessage = context.getString(R.string.export_canceled)
+            statusMessageKey++
             pendingExport = null
             return@rememberLauncherForActivityResult
         }
@@ -106,6 +108,7 @@ fun PaletteEditorScreen(
             writeExportFile(context, outputUri, payload)
                 .onSuccess {
                     statusMessage = context.getString(R.string.file_saved, payload.fileName)
+                    statusMessageKey++
                     localError = null
                     pendingExport = null
                 }
@@ -465,6 +468,7 @@ fun PaletteEditorScreen(
                     error = localError,
                     info = statusMessage,
                     errorKey = localErrorKey,
+                    infoKey = statusMessageKey,
                 )
             }
         }

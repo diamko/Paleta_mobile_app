@@ -110,7 +110,9 @@ fun PaletteListScreen(
     var colorCountFilter by rememberSaveable { mutableStateOf<Int?>(null) }
     var selectedFormat by rememberSaveable { mutableStateOf(PaletteExportFormat.JSON.name) }
     var localError by rememberSaveable { mutableStateOf<String?>(null) }
+    var localErrorKey by rememberSaveable { mutableStateOf(0) }
     var statusMessage by rememberSaveable { mutableStateOf<String?>(null) }
+    var statusMessageKey by rememberSaveable { mutableStateOf(0) }
     var pendingDelete by remember { mutableStateOf<Palette?>(null) }
     var pendingExport by remember { mutableStateOf<PaletteExportFile?>(null) }
 
@@ -128,6 +130,7 @@ fun PaletteListScreen(
         val payload = pendingExport ?: return@rememberLauncherForActivityResult
         if (outputUri == null) {
             statusMessage = context.getString(R.string.export_canceled)
+            statusMessageKey++
             pendingExport = null
             return@rememberLauncherForActivityResult
         }
@@ -136,11 +139,13 @@ fun PaletteListScreen(
             writeExportFile(context, outputUri, payload)
                 .onSuccess {
                     statusMessage = context.getString(R.string.file_saved, payload.fileName)
+                    statusMessageKey++
                     localError = null
                     pendingExport = null
                 }
                 .onFailure { error ->
                     localError = error.message ?: context.getString(R.string.export_error_generic)
+                    localErrorKey++
                     pendingExport = null
                 }
         }
@@ -414,6 +419,7 @@ fun PaletteListScreen(
                                     onCopyClick = {
                                         clipboard.setText(AnnotatedString(palette.colors.joinToString("\n")))
                                         statusMessage = context.getString(R.string.copy_palette_success)
+                                        statusMessageKey++
                                         localError = null
                                     },
                                     onExportClick = {
@@ -442,6 +448,8 @@ fun PaletteListScreen(
                 PaletaTopBannerHost(
                     error = listError,
                     info = statusMessage,
+                    errorKey = localErrorKey,
+                    infoKey = statusMessageKey,
                 )
             }
         }
