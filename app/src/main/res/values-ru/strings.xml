@@ -34,6 +34,7 @@
     <string name="auth_enter_email">Введите email</string>
     <string name="auth_error_login">Ошибка входа</string>
     <string name="auth_error_register">Ошибка регистрации</string>
+    <string name="auth_error_no_internet">Нет подключения к интернету. Проверьте соединение и попробуйте снова.</string>
     <string name="auth_reset_code_sent_if_exists">Если email найден, код отправлен</string>
     <string name="auth_error_send_code">Не удалось отправить код</string>
     <string name="auth_password_updated_login_again">Пароль обновлён. Войдите с новым паролем</string>

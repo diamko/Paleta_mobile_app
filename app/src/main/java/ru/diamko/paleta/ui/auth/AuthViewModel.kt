@@ -14,7 +14,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import ru.diamko.paleta.R
 import ru.diamko.paleta.core.di.AppContainer
+import ru.diamko.paleta.core.network.NetworkError
 import ru.diamko.paleta.core.validation.AuthValidation
+import java.io.IOException
 import ru.diamko.paleta.domain.model.User
 import ru.diamko.paleta.domain.usecase.ChangeProfilePasswordUseCase
 import ru.diamko.paleta.domain.usecase.GetCurrentUserUseCase
@@ -56,9 +58,11 @@ class AuthViewModel(
     }
 
     private fun resolveErrorMessage(error: Throwable, fallbackResId: Int): String {
-        val message = error.message
-        if (!message.isNullOrBlank()) return message
-        return getString(fallbackResId)
+        return when (error) {
+            is NetworkError -> error.message ?: getString(fallbackResId)
+            is IOException -> getString(R.string.auth_error_no_internet)
+            else -> getString(fallbackResId)
+        }
     }
 
     fun login(login: String, password: String) {
