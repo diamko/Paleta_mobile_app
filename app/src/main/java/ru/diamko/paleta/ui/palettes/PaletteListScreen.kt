@@ -536,6 +536,7 @@ private fun PaletaHomeActionButton(
             text = text,
             style = MaterialTheme.typography.labelLarge,
             textAlign = TextAlign.Center,
+            maxLines = 2,
         )
     }
 }
