@@ -17,6 +17,8 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -272,11 +274,11 @@ fun PaletteListScreen(
                                 subtitle = stringResource(id = R.string.home_subtitle),
                             )
                             Row(
-                                modifier = Modifier.fillMaxWidth(),
+                                modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                             ) {
                                 PaletaHomeActionButton(
-                                    modifier = Modifier.weight(1f),
+                                    modifier = Modifier.weight(1f).fillMaxHeight(),
                                     text = stringResource(id = R.string.generator_random_page),
                                     containerColor = BrandViolet.copy(alpha = 0.10f),
                                     borderBrush = Brush.horizontalGradient(
@@ -288,7 +290,7 @@ fun PaletteListScreen(
                                     onClick = onOpenRandomGenerator,
                                 )
                                 PaletaHomeActionButton(
-                                    modifier = Modifier.weight(1f),
+                                    modifier = Modifier.weight(1f).fillMaxHeight(),
                                     text = stringResource(id = R.string.generator_image_page),
                                     containerColor = BrandBlue.copy(alpha = 0.10f),
                                     borderBrush = Brush.horizontalGradient(
