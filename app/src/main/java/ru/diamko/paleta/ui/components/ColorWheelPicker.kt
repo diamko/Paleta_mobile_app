@@ -140,6 +140,13 @@ fun ColorWheelPicker(
             val radius = min(size.width, size.height) / 2f
             val center = Offset(size.width / 2f, size.height / 2f)
 
+            drawCircle(
+                color = Color.White.copy(alpha = 0.25f),
+                radius = radius + 1.dp.toPx(),
+                center = center,
+                style = Stroke(width = 1.dp.toPx()),
+            )
+
             val angleRad = Math.toRadians(hue.toDouble())
             val markerX = center.x + (saturation * radius * kotlin.math.cos(angleRad).toFloat())
             val markerY = center.y + (saturation * radius * kotlin.math.sin(angleRad).toFloat())
