@@ -53,7 +53,7 @@ Bring the full Paleta palette workflow to Android — generate, edit, save, and 
 ### What Makes It Different
 
 - **Two generation modes**: from image (with on-image pipette) and random.
-- **Built-in color wheel** with brightness slider and 8 color harmony modes.
+- **Built-in color wheel** with brightness slider, HEX input, Copy HEX, and 9 color harmony modes.
 - **Export to 6 formats**: JSON, GPL, ASE, CSV, PNG, ACO.
 - **Guest mode** — full generation, editing, and export without registration.
 - **Offline support** — saved palettes are cached locally and synced when connection is restored.
@@ -63,8 +63,8 @@ Bring the full Paleta palette workflow to Android — generate, edit, save, and 
 | Category | Features |
 |---|---|
 | **Generation** | Palette from image (KMeans on server), random palette with harmony modes |
-| **Editing** | HSV color wheel with brightness slider, on-image pipette with magnifier, HEX input |
-| **Harmonies** | Analogous, complementary, triadic, square, split-complementary, monochromatic, sequential, tetradic |
+| **Editing** | HSV color wheel with brightness slider, on-image pipette with magnifier, HEX input, Copy HEX, HSV gradient between first and last color |
+| **Harmonies** | Analogous, complementary, triadic, square, split-complementary, monochromatic, sequential, tetradic, random |
 | **Export** | JSON, GPL, ASE, CSV, PNG, ACO |
 | **Library** | Personal palette library with search, filtering by color count, and sorting (name, date, color count) |
 | **Auth** | Register, login, password reset via email, profile editing, password change |
@@ -103,7 +103,7 @@ Data flow: **UI → ViewModel → UseCase → Repository → API / Room**
 1. User uploads an image or generates a random palette.
 2. For images: the backend runs KMeans clustering and returns dominant colors.
 3. User edits colors via the color wheel, HEX input, or on-image pipette.
-4. Colors can be harmonized using 8 harmony modes (analogous, triadic, etc.).
+4. Colors can be harmonized using 9 harmony modes (analogous, triadic, random, etc.) or blended into an HSV gradient.
 5. The palette can be exported to a file or saved to the user's account.
 6. Saved palettes are cached locally (Room) and synced with the server in the background.
 
