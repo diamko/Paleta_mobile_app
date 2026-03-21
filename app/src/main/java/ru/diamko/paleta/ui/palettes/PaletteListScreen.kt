@@ -22,7 +22,9 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -55,11 +57,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
@@ -73,6 +77,7 @@ import ru.diamko.paleta.core.palette.PaletteExportFormat
 import ru.diamko.paleta.domain.model.Palette
 import ru.diamko.paleta.domain.model.PaletteExportFile
 import ru.diamko.paleta.ui.components.HorizontalScrollIndicator
+import ru.diamko.paleta.ui.utils.LocalWindowWidthSizeClass
 import ru.diamko.paleta.ui.components.ColorCountDropdown
 import ru.diamko.paleta.ui.components.PaletaCard
 import ru.diamko.paleta.ui.components.AutoResizeText
@@ -194,6 +199,19 @@ fun PaletteListScreen(
     // Cap at 1.2x so large-font users keep a reasonable size on standard-width screens.
     val scaledFontScale = minOf(density.fontScale * (screenWidthDp / 360f), 1.2f)
 
+    val widthSizeClass = LocalWindowWidthSizeClass.current
+    val isExpanded = widthSizeClass == WindowWidthSizeClass.Expanded
+    val isMediumOrExpanded = widthSizeClass != WindowWidthSizeClass.Compact
+    val contentMaxWidth = when (widthSizeClass) {
+        WindowWidthSizeClass.Expanded -> 860.dp
+        WindowWidthSizeClass.Medium -> 620.dp
+        else -> Dp.Unspecified
+    }
+
+    val paletteChunks = remember(visiblePalettes, isExpanded) {
+        if (isExpanded) visiblePalettes.chunked(2) else visiblePalettes.map { listOf(it) }
+    }
+
     CompositionLocalProvider(LocalDensity provides Density(density = density.density, fontScale = scaledFontScale)) {
     PaletaGradientBackground(modifier = Modifier.fillMaxSize()) {
         Scaffold(
@@ -256,9 +274,12 @@ fun PaletteListScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues),
+                contentAlignment = Alignment.TopCenter,
             ) {
                 LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .then(if (isMediumOrExpanded) Modifier.widthIn(max = contentMaxWidth) else Modifier.fillMaxWidth()),
                     contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
@@ -433,31 +454,39 @@ fun PaletteListScreen(
                                 }
                             }
                         } else {
-                            items(visiblePalettes, key = { it.id }) { palette ->
-                                PaletteCard(
-                                    palette = palette,
-                                    onEditClick = onEditClick,
-                                    onDeleteClick = { pendingDelete = palette },
-                                    onCopyClick = {
-                                        clipboard.setText(AnnotatedString(palette.colors.joinToString("\n")))
-                                        statusMessage = context.getString(R.string.copy_palette_success)
-                                        statusMessageKey++
-                                        localError = null
-                                    },
-                                    onExportClick = {
-                                        onExportPalette(
-                                            palette,
-                                            exportFormat.ext,
-                                            { payload ->
-                                                pendingExport = payload
-                                                createDocumentLauncher.launch(payload.fileName)
+                            items(paletteChunks, key = { it.first().id }) { chunk ->
+                                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                                    chunk.forEach { palette ->
+                                        PaletteCard(
+                                            modifier = Modifier.weight(1f),
+                                            palette = palette,
+                                            onEditClick = onEditClick,
+                                            onDeleteClick = { pendingDelete = palette },
+                                            onCopyClick = {
+                                                clipboard.setText(AnnotatedString(palette.colors.joinToString("\n")))
+                                                statusMessage = context.getString(R.string.copy_palette_success)
+                                                statusMessageKey++
+                                                localError = null
                                             },
-                                            { error ->
-                                                localError = error
+                                            onExportClick = {
+                                                onExportPalette(
+                                                    palette,
+                                                    exportFormat.ext,
+                                                    { payload ->
+                                                        pendingExport = payload
+                                                        createDocumentLauncher.launch(payload.fileName)
+                                                    },
+                                                    { error ->
+                                                        localError = error
+                                                    },
+                                                )
                                             },
                                         )
-                                    },
-                                )
+                                    }
+                                    if (chunk.size == 1 && isExpanded) {
+                                        Spacer(modifier = Modifier.weight(1f))
+                                    }
+                                }
                             }
                         }
                     }
@@ -568,9 +597,10 @@ private fun PaletteCard(
     onDeleteClick: (Long) -> Unit,
     onCopyClick: () -> Unit,
     onExportClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     PaletaCard(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
     ) {
         Text(
             text = palette.name,

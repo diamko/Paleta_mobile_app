@@ -10,6 +10,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
+import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
@@ -17,8 +20,10 @@ import androidx.compose.ui.Modifier
 import kotlinx.coroutines.launch
 import ru.diamko.paleta.ui.navigation.PaletaApp
 import ru.diamko.paleta.ui.theme.PaletaTheme
+import ru.diamko.paleta.ui.utils.LocalWindowWidthSizeClass
 
 class MainActivity : AppCompatActivity() {
+    @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -28,16 +33,19 @@ class MainActivity : AppCompatActivity() {
             val scope = rememberCoroutineScope()
             val isDarkTheme by container.themeStore.isDarkThemeFlow.collectAsState(initial = null)
             val useDark = isDarkTheme ?: isSystemInDarkTheme()
+            val windowSizeClass = calculateWindowSizeClass(this)
 
-            PaletaTheme(darkTheme = useDark) {
-                Surface(modifier = Modifier.fillMaxSize()) {
-                    PaletaApp(
-                        container = container,
-                        currentTheme = isDarkTheme,
-                        onChangeTheme = { newTheme ->
-                            scope.launch { container.themeStore.saveIsDarkTheme(newTheme) }
-                        },
-                    )
+            CompositionLocalProvider(LocalWindowWidthSizeClass provides windowSizeClass.widthSizeClass) {
+                PaletaTheme(darkTheme = useDark) {
+                    Surface(modifier = Modifier.fillMaxSize()) {
+                        PaletaApp(
+                            container = container,
+                            currentTheme = isDarkTheme,
+                            onChangeTheme = { newTheme ->
+                                scope.launch { container.themeStore.saveIsDarkTheme(newTheme) }
+                            },
+                        )
+                    }
                 }
             }
         }
