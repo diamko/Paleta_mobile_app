@@ -239,59 +239,77 @@ fun PaletteGenerateScreen(
 
     fun extractFromImage(uri: Uri) {
         scope.launch {
-            isBusy = true
-            localError = null
-            statusMessage = context.getString(R.string.extracting_colors)
-            statusMessageKey++
-            paletteColors = emptyList()
-            markerPositions = emptyList()
-            selectedColorIndex = 0
-            loupeTouchPosition = null
-            loupeSample = null
+            try {
+                isBusy = true
+                localError = null
+                statusMessage = context.getString(R.string.extracting_colors)
+                statusMessageKey++
+                paletteColors = emptyList()
+                markerPositions = emptyList()
+                selectedColorIndex = 0
+                loupeTouchPosition = null
+                loupeSample = null
 
-            val bytes = withContext(Dispatchers.IO) {
-                context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
-            }
-            if (bytes == null || bytes.isEmpty()) {
-                isBusy = false
-                localError = context.getString(R.string.read_image_failed)
-                return@launch
-            }
-            val bitmap = withContext(Dispatchers.Default) {
-                BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-            }
-            if (bitmap == null) {
-                isBusy = false
-                localError = context.getString(R.string.read_image_failed)
-                return@launch
-            }
-            lastImageStorage.save(bytes)
-
-            imageBitmap = bitmap
-            val fileName = resolveFileName(context, uri)
-            paletteViewModel.generateFromImage(
-                fileName = fileName,
-                imageBytes = bytes,
-                colorCount = paletteSize(),
-                onDone = { colors ->
+                val bytes = withContext(Dispatchers.IO) {
+                    context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
+                }
+                if (bytes == null || bytes.isEmpty()) {
                     isBusy = false
-                    if (colors.isEmpty()) {
-                        localError = context.getString(R.string.extract_colors_failed)
-                        return@generateFromImage
+                    localError = context.getString(R.string.read_image_failed)
+                    return@launch
+                }
+                val bitmap = withContext(Dispatchers.Default) {
+                    val boundsOptions = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+                    BitmapFactory.decodeByteArray(bytes, 0, bytes.size, boundsOptions)
+                    val maxDim = maxOf(boundsOptions.outWidth, boundsOptions.outHeight)
+                    var sampleSize = 1
+                    while (maxDim / sampleSize > 2048) {
+                        sampleSize *= 2
                     }
-                    applyPalette(colors, context.getString(R.string.extracted_colors_count, colors.size))
-                    scope.launch {
-                        val markers = withContext(Dispatchers.Default) {
-                            estimateInitialMarkerPositions(bitmap, colors)
+                    val decodeOptions = BitmapFactory.Options().apply { inSampleSize = sampleSize }
+                    BitmapFactory.decodeByteArray(bytes, 0, bytes.size, decodeOptions)
+                }
+                if (bitmap == null) {
+                    isBusy = false
+                    localError = context.getString(R.string.read_image_failed)
+                    return@launch
+                }
+                val compressedBytes = withContext(Dispatchers.Default) {
+                    val stream = java.io.ByteArrayOutputStream()
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 80, stream)
+                    stream.toByteArray()
+                }
+                lastImageStorage.save(compressedBytes)
+
+                imageBitmap = bitmap
+                val fileName = resolveFileName(context, uri)
+                paletteViewModel.generateFromImage(
+                    fileName = fileName,
+                    imageBytes = compressedBytes,
+                    colorCount = paletteSize(),
+                    onDone = { colors ->
+                        isBusy = false
+                        if (colors.isEmpty()) {
+                            localError = context.getString(R.string.extract_colors_failed)
+                            return@generateFromImage
                         }
-                        markerPositions = markers
-                    }
-                },
-                onError = { error ->
-                    isBusy = false
-                    localError = error
-                },
-            )
+                        applyPalette(colors, context.getString(R.string.extracted_colors_count, colors.size))
+                        scope.launch {
+                            val markers = withContext(Dispatchers.Default) {
+                                estimateInitialMarkerPositions(bitmap, colors)
+                            }
+                            markerPositions = markers
+                        }
+                    },
+                    onError = { error ->
+                        isBusy = false
+                        localError = error
+                    },
+                )
+            } catch (_: Exception) {
+                isBusy = false
+                localError = context.getString(R.string.read_image_failed)
+            }
         }
     }
 

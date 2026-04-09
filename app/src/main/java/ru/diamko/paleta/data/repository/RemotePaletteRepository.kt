@@ -81,17 +81,17 @@ class RemotePaletteRepository(
         imageBytes: ByteArray,
         colorCount: Int,
     ): List<String> = withContext(Dispatchers.IO) {
-        val imagePart = MultipartBody.Part.createFormData(
+        fun createImagePart() = MultipartBody.Part.createFormData(
             name = "image",
             filename = fileName.ifBlank { "upload.jpg" },
             body = imageBytes.toRequestBody("application/octet-stream".toMediaType()),
         )
-        val colorCountBody = colorCount.toString().toRequestBody("text/plain".toMediaType())
+        fun createColorCountBody() = colorCount.toString().toRequestBody("text/plain".toMediaType())
 
         try {
             val envelope = paletteApi.uploadImage(
-                image = imagePart,
-                colorCount = colorCountBody,
+                image = createImagePart(),
+                colorCount = createColorCountBody(),
             )
             return@withContext envelope.unwrapUpload("Не удалось извлечь палитру из изображения").palette
         } catch (error: HttpException) {
@@ -101,8 +101,8 @@ class RemotePaletteRepository(
         }
 
         val legacy = paletteApi.uploadImageLegacy(
-            image = imagePart,
-            colorCount = colorCountBody,
+            image = createImagePart(),
+            colorCount = createColorCountBody(),
         )
         legacy.unwrapLegacyUpload("Не удалось извлечь палитру из изображения")
     }
